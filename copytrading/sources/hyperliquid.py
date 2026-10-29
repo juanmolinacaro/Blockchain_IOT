@@ -114,6 +114,7 @@ def parse_clearinghouse_state(address: str, raw: dict) -> AccountState:
             entry_px=float(p.get("entryPx") or 0.0),
             unrealized_pnl=float(p.get("unrealizedPnl") or 0.0),
             leverage=float(lev.get("value", 1.0)) if isinstance(lev, dict) else float(lev),
+            liquidation_px=float(p["liquidationPx"]) if p.get("liquidationPx") else None,
         )
     equity = float(raw.get("marginSummary", {}).get("accountValue", 0.0))
     return AccountState(address=address, equity=equity, positions=positions)

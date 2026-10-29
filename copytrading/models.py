@@ -39,6 +39,7 @@ class Position:
     entry_px: float
     unrealized_pnl: float = 0.0
     leverage: float = 1.0
+    liquidation_px: float | None = None
 
     @property
     def notional(self) -> float:

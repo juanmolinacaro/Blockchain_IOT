@@ -129,3 +129,35 @@ dejen de cumplir los filtros (la rentabilidad pasada se degrada).
 
 Este código es una herramienta de investigación y no es asesoramiento financiero.
 No garantiza ganancias.
+
+## 8. Mapa de liquidez (`liquidity.py`)
+
+Mapa de calor de **liquidaciones** construido con posiciones reales: Hyperliquid
+publica el precio de liquidación exacto de cada posición, así que no hace falta
+estimarlo con modelos como hacen la mayoría de mapas.
+
+* Se leen las posiciones de las `--wallets` cuentas con más capital del leaderboard.
+* Se suma el tamaño en USD de las posiciones que se liquidan en cada franja de precio
+  (`--band`, 0.5 % por defecto) dentro de `--range` (±15 %).
+* Por **debajo** del precio están las liquidaciones de **longs**; por **encima**, las de **shorts**.
+* Colores: 🟥 rojo = franjas más cargadas (percentil ≥ 80), 🟨 amarillo (≥ 50), 🟩 verde (resto).
+
+```bash
+python -m copytrading liquidity --coin BTC,ETH,SOL --html-dir reportes
+```
+
+Cómo usarlo para decidir:
+
+| Situación | Lectura habitual |
+|---|---|
+| Zona roja cercana por debajo | El precio puede bajar a "barrer" esos longs; cuidado al abrir long justo encima |
+| Zona roja cercana por encima | Posible subida a por los shorts (squeeze) |
+| Mucha más liquidez de un lado | Sesgo de "imán" hacia ese lado |
+| Stop-loss | No colocarlo dentro de una zona roja: es donde el precio suele llegar |
+| Toma de ganancias | Las zonas rojas son buenos objetivos |
+
+Para tenerlo cada día, prográmalo en tu ordenador o servidor (cron):
+`0 8 * * * cd /ruta/Blockchain_IOT && python -m copytrading liquidity --coin BTC,ETH --html-dir reportes`
+
+Limitaciones: solo ve Hyperliquid (no Binance/Bybit), solo las cuentas escaneadas,
+y las posiciones cambian todo el tiempo. Es una ayuda para decidir, no una señal garantizada.

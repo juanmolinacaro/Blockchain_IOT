@@ -3,16 +3,20 @@
     python -m copytrading discover  --config config.toml
     python -m copytrading backtest  --config config.toml --address 0x...
     python -m copytrading run       --config config.toml [--live]
+    python -m copytrading liquidity --coin BTC [--html-dir reportes]
 """
 from __future__ import annotations
 
 import argparse
 import logging
 import time
+from datetime import datetime, timezone
+from pathlib import Path
 
 from .backtest import run_backtest
 from .config import Config
 from .execution.paper import PaperExecutor
+from .liquidity import build_heatmap, collect_liquidations, render_html, render_text, wallets_to_scan
 from .runner import run
 from .scoring import MS_PER_DAY, apply_filters, compute_stats, prefilter_leaderboard, score
 from .sources.hyperliquid import HyperliquidSource
@@ -82,6 +86,29 @@ def cmd_run(cfg: Config, args) -> None:
     run(cfg, src, executor, max_iterations=args.iterations)
 
 
+def cmd_liquidity(cfg: Config, args) -> None:
+    src = HyperliquidSource(cfg.network)
+    coins = [c.strip().upper() for c in args.coin.split(",")]
+    wallets = wallets_to_scan(src, args.wallets)
+    print(f"Leyendo posiciones de {len(wallets)} wallets...")
+    points = collect_liquidations(src, wallets,
+                                  on_progress=lambda i: print(f"  {i}/{len(wallets)}", end="\r"))
+    print()
+    mids = src.mid_prices()
+    now = datetime.now(timezone.utc)
+    for coin in coins:
+        if coin not in mids:
+            print(f"{coin}: moneda no encontrada en Hyperliquid")
+            continue
+        hm = build_heatmap(points, coin, mids[coin], range_pct=args.range / 100, band_pct=args.band / 100)
+        print(render_text(hm) + "\n")
+        if args.html_dir:
+            out = Path(args.html_dir) / f"liquidez_{coin}_{now:%Y-%m-%d}.html"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(render_html(hm, f"{now:%Y-%m-%d %H:%M} UTC"), encoding="utf-8")
+            print(f"Guardado {out}\n")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="copytrading", description="Copy trading on-chain")
     parser.add_argument("--config", default="config.toml")
@@ -102,11 +129,19 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--live", action="store_true", help="enviar órdenes reales")
     r.add_argument("--iterations", type=int, default=None)
 
+    q = sub.add_parser("liquidity", help="mapa de liquidaciones (zonas roja/amarilla/verde)")
+    q.add_argument("--coin", default="BTC", help="una o varias, separadas por coma: BTC,ETH,SOL")
+    q.add_argument("--wallets", type=int, default=500, help="cuentas más grandes a escanear")
+    q.add_argument("--range", type=float, default=15.0, help="rango alrededor del precio, en %%")
+    q.add_argument("--band", type=float, default=0.5, help="ancho de cada franja, en %%")
+    q.add_argument("--html-dir", help="carpeta donde guardar el reporte HTML del día")
+
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     cfg = Config.load(args.config)
-    {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run}[args.cmd](cfg, args)
+    {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
+     "liquidity": cmd_liquidity}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
