@@ -224,6 +224,23 @@ def cmd_diario(cfg: Config, args) -> None:
         print(line)
 
 
+def cmd_pools(cfg: Config, args) -> None:
+    from .method.pools import config_for, merge, report, study
+
+    src = HyperliquidSource(cfg.network)
+    end = int(time.time() * 1000)
+    hours = {"1h": 1, "4h": 4}[args.interval]
+    sc = config_for(hours)
+    results = []
+    for coin in [c.strip().upper() for c in args.coins.split(",")]:
+        candles = src.candles(coin, args.interval, end - args.days * MS_PER_DAY, end)
+        res = study(candles, sc)
+        results.append(res)
+        print("\n".join(report(f"{coin} {args.interval}", res, sc)) + "\n")
+    if len(results) > 1:
+        print("\n".join(report(f"TOTAL {args.interval}", merge(results), sc)))
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="copytrading", description="Copy trading on-chain")
     parser.add_argument("--config", default="config.toml")
@@ -267,6 +284,11 @@ def main(argv: list[str] | None = None) -> None:
                    help="filter: largos sobre la 1ª EMA, cortos bajo ella; confluence: tocar una EMA")
     m.add_argument("--last", type=int, default=10, help="últimas operaciones a mostrar")
 
+    po = sub.add_parser("pools", help="estudio de pools: carga, liquidación, rebotes, trampas, imán")
+    po.add_argument("--coins", default="BTC,ETH,SOL")
+    po.add_argument("--interval", choices=["1h", "4h"], default="1h")
+    po.add_argument("--days", type=int, default=830)
+
     mo = sub.add_parser("monitor", help="revisar el método en vivo y actualizar el diario")
     mo.add_argument("--coins", default="BTC,ETH,SOL")
     mo.add_argument("--journal", default="data/diario.jsonl")
@@ -291,7 +313,7 @@ def main(argv: list[str] | None = None) -> None:
     cfg = Config.load(args.config) if Path(args.config).exists() else Config()
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
-     "monitor": cmd_monitor, "diario": cmd_diario}[args.cmd](cfg, args)
+     "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

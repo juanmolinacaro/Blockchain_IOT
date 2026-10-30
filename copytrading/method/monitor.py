@@ -19,6 +19,8 @@ from pathlib import Path
 from ..models import Candle
 from .backtest import MethodConfig, Trade, compute_channels, compute_liquidity, find_signal, manage
 from .emas import compute_emas, ema_series, parse_spec
+from .liqmodel import LiquidationModel
+from .pools import _zones, config_for
 
 BAR_MS = {"1h": 3_600_000, "4h": 14_400_000, "1d": 86_400_000}
 
@@ -92,6 +94,7 @@ def analyze(coin: str, candles: list[Candle], watch_pct: float = 0.015,
             st.notes.append(f"{name}: {e:,.1f} ({px / e - 1:+.1%})")
     st.notes.append(f"Liquidez estimada: más cargado abajo {s.best_long_px:,.1f}, arriba {s.best_short_px:,.1f} "
                     f"(longs/shorts {s.long_below:.0f}/{s.short_above:.0f})")
+    st.notes.extend(magnet_notes(candles))
     if st.status == "SEÑAL":
         return st
 
@@ -106,6 +109,46 @@ def analyze(coin: str, candles: list[Candle], watch_pct: float = 0.015,
             st.notes.append(f"Precio a {abs(px - border) / px:.1%} del borde {side} ({border:,.1f}) "
                             f"con confluencia: {', '.join(reasons)}")
     return st
+
+
+def magnet_notes(candles: list[Candle]) -> list[str]:
+    """Pools (picos del mapa) más cercanos arriba y abajo, y cuál domina como imán.
+
+    Estudio histórico (BTC+ETH+SOL, 30 oct 2026): el precio toca antes el pool más cercano ~75 %
+    de las veces; cuando un pool es >=2x mayor que el del otro lado, va primero al grande el 66 %
+    (1H) - 88 % (4H) de las veces.
+    """
+    bar_h = (candles[1].t - candles[0].t) / 3_600_000
+    sc = config_for(bar_h)
+    model = LiquidationModel(decay_per_bar=0.5 ** (1 / sc.half_life_bars))
+    usd = []
+    for c in candles:
+        model.update(c)
+        usd.append(c.v * c.c)
+    win = usd[-sc.vol_window:]
+    avg = sum(win) / len(win) or 1.0
+    px = candles[-1].c
+    below = [z for z in _zones(model, "long", px, avg, sc) if z.center < px]
+    above = [z for z in _zones(model, "short", px, avg, sc) if z.center > px]
+    if not below and not above:
+        return ["Pools: ninguno relevante a ±10 %"]
+    if not below or not above:
+        where = "abajo" if below else "arriba"
+        z = max(below, key=lambda q: q.center) if below else min(above, key=lambda q: q.center)
+        return [f"Pools: solo hay pool relevante {where}, en {z.center:,.1f} ({abs(z.center / px - 1):.1%}, "
+                f"tamaño {z.size:.0f}) → imán de un solo lado"]
+    b = max(below, key=lambda z: z.center)
+    a = min(above, key=lambda z: z.center)
+    out = [f"Pools: abajo {b.center:,.1f} ({px / b.center - 1:.1%}, tamaño {b.size:.0f}) · "
+           f"arriba {a.center:,.1f} ({a.center / px - 1:.1%}, tamaño {a.size:.0f})"]
+    big, small, where = (b, a, "abajo") if b.size >= a.size else (a, b, "arriba")
+    if big.size >= 2 * small.size:
+        out.append(f"Imán dominante {where}: pool {big.size / small.size:.1f}x mayor "
+                   "(histórico: va primero al grande ~2 de cada 3 veces en 1H, ~9 de cada 10 en 4H)")
+    else:
+        closer = "abajo" if px / b.center - 1 < a.center / px - 1 else "arriba"
+        out.append(f"Sin imán dominante: lo más probable es tocar antes el más cercano ({closer}, ~75 % histórico)")
+    return out
 
 
 # ------------------------------------------------------------------- diario

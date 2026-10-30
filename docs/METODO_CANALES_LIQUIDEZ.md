@@ -145,3 +145,46 @@ python -m copytrading diario report            # resultados: sistema-A, sistema-
   actualiza solo en cada ejecución, con la misma gestión que el backtest (TP1 en el centro del
   canal con stop a la entrada, TP2, stop por cierre). Así, con las semanas, se compara el
   porcentaje de aciertos del sistema con el de las lecturas de Juan.
+
+## Estudio de pools: carga, liquidación, rebote, trampas e imán (30 oct 2026)
+
+Comando: `python -m copytrading pools --coins BTC,ETH,SOL --interval 1h` (o `4h`).
+
+Pool = pico de concentración del mapa estimado (una "franja roja"): ≥ 2,5x la densidad mediana,
+ancho máximo ±0,75 %, tamaño ≥ 5 velas de volumen. Liquidado = el precio llega a su centro.
+Datos: BTC + ETH + SOL, 1H (7 meses, 399 pools) y 4H (2,3 años, 597 pools).
+
+| Pregunta | 1H | 4H |
+|---|---|---|
+| Tiempo de carga (edad media de la liquidez al volverse relevante) | mediana 62 h (27–167) | mediana 120 h (83–170) |
+| Tiempo hasta la liquidación (mediana) | 62 h | 152 h |
+| Pools a < 2 % del precio que se liquidan | 74 % | 87 % |
+| Pools a > 4 % que se liquidan | 31 % | 63 % |
+| Rebote mediano tras el barrido (24 h / 72 h) | 2,2 % / 3,2 % | 2,2 % / 3,4 % |
+| Rebote ≥ 2 % en 24 h | 55 % | 55 % |
+| Cuánto se pasa del centro antes de girar (mediana, 24 h) | 2,1 % | 2,4 % |
+| Rebote si la vela del barrido **cierra de vuelta** (rechazo) | 2,5 % (59 % ≥ 2 %) | **2,9 % (67 % ≥ 2 %)** |
+| Rebote si cierra más allá | 2,0 % (49 %) | 1,2 % (41 %) |
+| Toca antes el pool más cercano | 78 % | 74 % |
+| Toca antes el pool más grande | 60 % | 61 % |
+| **Con un pool ≥ 2x mayor que el otro, va primero al grande** | **66 %** | **88 %** |
+| Si el grande está más lejos (sin exigir 2x), va primero al grande | 26 % | 35 % |
+
+Reglas que salen de los datos:
+
+1. **Confirmación por cierre**: el rebote es mucho mejor cuando la vela que barre el pool cierra de
+   vuelta (4H: 2,9 % frente a 1,2 %). Entrar solo tras ese cierre.
+2. **Stop fuera del pool, no dentro**: el precio se pasa de mediana un 2–2,5 % del centro del pool
+   antes de girar. Un stop ajustado dentro de esa distancia se lo lleva el barrido.
+3. **El imán funciona cuando un lado domina claramente**: con un pool ≥ 2x mayor, el precio va
+   primero a él 2 de cada 3 veces (1H) y 9 de cada 10 (4H). Si los pools son parecidos, manda la
+   distancia: va antes al más cercano (~75 %).
+4. **Paciencia medida**: un pool tarda de mediana 2,5–5 días en cargarse y otros 2,5–6 días en
+   liquidarse. Los cercanos (< 2 %) casi siempre se liquidan; los lejanos (> 4 %), menos de la mitad.
+5. **Trampas**: en 1H, el 72 % de los barridos tuvo antes una absorción fuerte al lado contrario y
+   esos barridos rebotan algo mejor (2,5 % frente a 2,0 %). Pero la trampa así definida (una vela
+   que absorbe liquidez contraria y cierra en contra) **todavía no sirve para anticipar** el barrido:
+   pocos casos (7) y no mejora a la base. Falta definirla como la ve Juan: dos o más empujes fuertes
+   al lado contrario que fallan (máximos que no continúan) justo antes de ir a por el pool grande.
+
+El monitor ahora indica en cada aviso los pools más cercanos y si hay un imán dominante.
