@@ -10,7 +10,7 @@ import time
 
 import requests
 
-from ..models import AccountState, Fill, LeaderboardEntry, Position
+from ..models import AccountState, Candle, Fill, LeaderboardEntry, Position
 
 API_URLS = {
     "mainnet": "https://api.hyperliquid.xyz",
@@ -78,6 +78,22 @@ class HyperliquidSource:
     def mid_prices(self) -> dict[str, float]:
         return {coin: float(px) for coin, px in self._info({"type": "allMids"}).items()}
 
+    def candles(self, coin: str, interval: str, start_ms: int, end_ms: int) -> list[Candle]:
+        """Velas OHLCV. Hyperliquid solo conserva las ~5000 más recientes por intervalo."""
+        out: dict[int, Candle] = {}
+        cursor = start_ms
+        while cursor < end_ms:
+            page = self._info({"type": "candleSnapshot",
+                               "req": {"coin": coin, "interval": interval,
+                                       "startTime": cursor, "endTime": end_ms}}) or []
+            for raw in page:
+                c = parse_candle(raw)
+                out[c.t] = c
+            if len(page) < 5000:
+                break
+            cursor = int(page[-1]["t"]) + 1
+        return [out[t] for t in sorted(out)]
+
     def size_decimals(self) -> dict[str, int]:
         if self._sz_decimals is None:
             meta = self._info({"type": "meta"})
@@ -98,6 +114,11 @@ def parse_fill(raw: dict) -> Fill:
         fee=float(raw.get("fee", 0.0)),
         direction=raw.get("dir", ""),
     )
+
+
+def parse_candle(raw: dict) -> Candle:
+    return Candle(t=int(raw["t"]), o=float(raw["o"]), h=float(raw["h"]), l=float(raw["l"]),
+                  c=float(raw["c"]), v=float(raw["v"]))
 
 
 def parse_clearinghouse_state(address: str, raw: dict) -> AccountState:

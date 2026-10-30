@@ -33,6 +33,16 @@ class Fill:
 
 
 @dataclass(frozen=True)
+class Candle:
+    t: int        # apertura, en ms
+    o: float
+    h: float
+    l: float
+    c: float
+    v: float      # volumen en monedas
+
+
+@dataclass(frozen=True)
 class Position:
     coin: str
     size: float          # firmada: >0 long, <0 short

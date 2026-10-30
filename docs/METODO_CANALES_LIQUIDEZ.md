@@ -52,3 +52,42 @@ con el imán de 75.514 del mapa de TradingDifferent) y shorts nuevos en 78.000�
 Programar el método (detección de canales + mapa de liquidez + confirmación) y
 medir con el histórico qué porcentaje de veces funciona y con qué
 relación beneficio/riesgo.
+
+## Backtest (primera versión automática, 30 oct 2026)
+
+Código: `copytrading/method/` · Comando: `python -m copytrading metodo --coin BTC --interval 4h`
+
+Cómo se automatizó:
+
+* **Canal**: regresión lineal de las últimas 60 velas de 4H; bordes donde quedan el 90 % de máximos/mínimos.
+* **Liquidez**: mapa estimado (apalancamientos 10/25/50/100x proporcionales al volumen), porque
+  no existe un histórico de posiciones reales. Un nivel cruzado por el precio cuenta como absorbido.
+* **Entrada larga**: el mínimo toca el borde inferior + se absorbe liquidez de longs (≥ 1,5 velas
+  de volumen) + la vela cierra dentro del canal. Corto simétrico. Filtro: largos solo con canal
+  alcista, cortos solo con canal bajista.
+* **Gestión**: stop por **cierre** bajo el mínimo de la vela (emergencia a 2R), mitad en el centro del
+  canal y stop a la entrada, resto en el borde opuesto. Comisiones y slippage incluidos.
+* Datos: ~2,3 años de velas de 4H de Hyperliquid (jul 2024 – oct 2026). 70 % para ajustar,
+  30 % final para validar.
+
+Resultados (expectativa en R por operación; validación = datos no usados para ajustar):
+
+| Moneda | Canal + liquidez (validación) | Solo canal (validación) |
+|---|---|---|
+| BTC | 18 trades, 44 % aciertos, **−0,51 R** | 73 trades, −0,32 R |
+| ETH | 21 trades, 57 % aciertos, **+0,87 R** | 65 trades, +0,12 R |
+| SOL | 25 trades, 48 % aciertos, **+0,81 R** | 67 trades, +0,14 R |
+
+Conclusiones:
+
+1. **Añadir la liquidez mejora al canal solo** en casi todas las combinaciones: filtra muchas
+   operaciones malas.
+2. **El stop por cierre (regla de Juan) es mejor que el stop por mecha** en la mayoría de casos.
+3. **Todavía no hay una ventaja estable demostrada**: positiva en ETH y SOL, negativa en BTC en el
+   último tramo, y con pocas operaciones (18–25) el resultado tiene mucho ruido.
+4. La versión automática no captura todo el método discrecional: canales trazados a mano desde
+   pivotes, varias temporalidades a la vez y la EMA diaria como confluencia.
+
+Siguientes pasos: canales por pivotes (como se trazan a mano), confluencia con la EMA diaria y
+el mapa real de Hyperliquid, y un diario de las operaciones discrecionales de Juan para medir
+su ventaja real con el tiempo.

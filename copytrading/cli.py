@@ -4,6 +4,7 @@
     python -m copytrading backtest  --config config.toml --address 0x...
     python -m copytrading run       --config config.toml [--live]
     python -m copytrading liquidity --coin BTC [--html-dir reportes]
+    python -m copytrading metodo    --coin BTC --interval 4h [--stop close --trend channel]
 """
 from __future__ import annotations
 
@@ -109,6 +110,47 @@ def cmd_liquidity(cfg: Config, args) -> None:
             print(f"Guardado {out}\n")
 
 
+def cmd_metodo(cfg: Config, args) -> None:
+    import dataclasses
+
+    from .method.backtest import MethodConfig, compute_liquidity, run
+    from .method.channels import regression_channel
+
+    src = HyperliquidSource(cfg.network)
+    end = int(time.time() * 1000)
+    candles = src.candles(args.coin, args.interval, end - args.days * MS_PER_DAY, end)
+    if len(candles) < 200:
+        raise SystemExit(f"Muy pocas velas ({len(candles)}) para {args.coin} {args.interval}")
+    mc = MethodConfig(lookback=args.lookback, entry=args.entry, stop_mode=args.stop,
+                      trend=args.trend, min_sweep=args.sweep)
+    liq = compute_liquidity(candles, mc)
+    cut = int(len(candles) * 0.7)
+    fmt = lambda ts: datetime.fromtimestamp(ts / 1000, timezone.utc).strftime("%Y-%m-%d")
+    print(f"{args.coin} {args.interval}: {len(candles)} velas, {fmt(candles[0].t)} -> {fmt(candles[-1].t)}")
+    print(f"Entrenamiento hasta {fmt(candles[cut].t)}, validación después.\n")
+    print(f"{'variante':16} {'tramo':12} {'trades':>6} {'win':>5} {'expR':>6} {'PF':>5} {'retorno':>8} {'maxDD':>6}")
+    for name, c in (("canal+liquidez", mc), ("solo canal", dataclasses.replace(mc, use_liquidity=False))):
+        for lab, (a, b) in (("entrenam.", (0, cut)), ("validación", (cut, len(candles))),
+                            ("todo", (0, len(candles)))):
+            r = run(candles, c, a, b, liq=liq)
+            print(f"{name:16} {lab:12} {r.n:6} {r.win_rate:5.0%} {r.expectancy:+6.2f} "
+                  f"{min(r.profit_factor, 99):5.2f} {r.total_return:+8.1%} {r.max_drawdown:6.1%}")
+    full = run(candles, mc, liq=liq)
+    if full.trades:
+        print("\nÚltimas operaciones del método:")
+        for t in full.trades[-args.last:]:
+            print(f"  {fmt(candles[t.entry_i].t)} {t.side:5} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
+                  f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f} -> {t.exit_reason} {t.r:+.2f}R")
+    i = len(candles) - 1
+    ch = regression_channel(candles, i, mc.lookback, mc.channel_q)
+    s = liq[i]
+    print(f"\nAhora: precio {candles[i].c:,.1f} | canal {ch.lower(i):,.1f} – {ch.mid(i):,.1f} – {ch.upper(i):,.1f}"
+          f" ({'alcista' if ch.slope > 0 else 'bajista'})")
+    print(f"Liquidez estimada (±{mc.liq_range:.0%}): longs abajo {s.long_below:.1f} / shorts arriba "
+          f"{s.short_above:.1f} (en velas de volumen); nivel más cargado abajo {s.best_long_px:,.1f}, "
+          f"arriba {s.best_short_px:,.1f}")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="copytrading", description="Copy trading on-chain")
     parser.add_argument("--config", default="config.toml")
@@ -136,12 +178,23 @@ def main(argv: list[str] | None = None) -> None:
     q.add_argument("--band", type=float, default=0.5, help="ancho de cada franja, en %%")
     q.add_argument("--html-dir", help="carpeta donde guardar el reporte HTML del día")
 
+    m = sub.add_parser("metodo", help="backtest del método canales + absorción de liquidez")
+    m.add_argument("--coin", default="BTC")
+    m.add_argument("--interval", default="4h", help="1h, 4h, 1d...")
+    m.add_argument("--days", type=int, default=1200)
+    m.add_argument("--lookback", type=int, default=60, help="velas para trazar el canal")
+    m.add_argument("--entry", choices=["sweep", "target"], default="sweep")
+    m.add_argument("--stop", choices=["close", "wick"], default="close")
+    m.add_argument("--trend", choices=["none", "channel"], default="channel")
+    m.add_argument("--sweep", type=float, default=1.5, help="liquidez absorbida mínima")
+    m.add_argument("--last", type=int, default=10, help="últimas operaciones a mostrar")
+
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     cfg = Config.load(args.config)
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
-     "liquidity": cmd_liquidity}[args.cmd](cfg, args)
+     "liquidity": cmd_liquidity, "metodo": cmd_metodo}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
