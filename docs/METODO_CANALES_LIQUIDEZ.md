@@ -295,3 +295,25 @@ solo sirven para ver el movimiento inmediato.
   señales.
 * Sale en cada ejecución del monitor y en cada aviso; `python -m copytrading billeteras` lo muestra
   a demanda.
+
+## Fin de semana en BTC (30 oct 2026)
+
+Intuición de Juan: el fin de semana (mercado tradicional cerrado) BTC hace rango o arma una
+estructura para engañar. Medido con 119 fines de semana (velas de 4H, jul 2024 – oct 2026);
+viernes = 00:00–20:00 UTC, fin de semana = viernes 20:00 – domingo 24:00 UTC.
+
+| Dato | Valor |
+|---|---|
+| Rango mediano del viernes (20 h) | 3,45 % |
+| Rango mediano de todo el fin de semana (52 h) | **2,98 %** (más comprimido) |
+| Fines de semana que se quedan dentro del rango del viernes | 18 % |
+| Rompen solo por arriba / solo por abajo / ambos | 47 / 45 / 6 |
+| Rompe arriba y el lunes cierra de vuelta bajo el máximo del viernes (trampa) | **45 %** |
+| Rompe abajo y el lunes cierra de vuelta sobre el mínimo del viernes (trampa) | **49 %** |
+| El lunes revierte el movimiento del fin de semana | 56 % |
+| Si el fin de semana se movió > 2 %, el lunes lo revierte | **60 %** |
+
+Lectura: el fin de semana se mueve menos (rango), casi siempre rompe un lado del viernes, pero
+**la mitad de esas rupturas son trampas** y los movimientos grandes del fin de semana se revierten
+el lunes 6 de cada 10 veces. Regla: no perseguir rupturas de fin de semana; esperar el lunes o
+operar el regreso al rango del viernes.
