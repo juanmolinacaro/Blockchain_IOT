@@ -98,3 +98,44 @@ def evaluate(address: str, fills: list[Fill], events: list[Event], min_usd: floa
 def rank(fills_by_wallet: dict[str, list[Fill]], events: list[Event], **kw) -> list[WalletScore]:
     scores = [evaluate(a, sorted(fs, key=lambda f: f.time), events, **kw) for a, fs in fills_by_wallet.items()]
     return sorted((s for s in scores if s.bottoms or s.tops), key=lambda s: s.score, reverse=True)
+
+
+def swing_events(candles, coin: str, threshold: float = 0.05, half_window_ms: int = 12 * 3_600_000) -> list[Event]:
+    """Giros automáticos (zigzag): un techo/suelo cuenta cuando el precio se aleja de él más de `threshold`.
+
+    Cada giro genera un evento con ventana de ±`half_window_ms` alrededor del extremo.
+    """
+    events: list[Event] = []
+    if not candles:
+        return events
+    mode = None                       # "up" buscando techo, "down" buscando suelo
+    ext = candles[0]
+    for c in candles[1:]:
+        if mode is None:
+            if c.h >= candles[0].l * (1 + threshold):
+                mode, ext = "up", c
+            elif c.l <= candles[0].h * (1 - threshold):
+                mode, ext = "down", c
+            continue
+        if mode == "up":
+            if c.h > ext.h:
+                ext = c
+            elif c.l <= ext.h * (1 - threshold):
+                events.append(Event("techo", coin, ext.t - half_window_ms, ext.t + half_window_ms, ext.h))
+                mode, ext = "down", c
+        else:
+            if c.l < ext.l:
+                ext = c
+            elif c.h >= ext.l * (1 + threshold):
+                events.append(Event("suelo", coin, ext.t - half_window_ms, ext.t + half_window_ms, ext.l))
+                mode, ext = "up", c
+    return events
+
+
+def hits_minus_errors(address: str, fills: list[Fill], events: list[Event], min_usd: float = 50_000,
+                      tol: float = 0.02) -> tuple[int, int]:
+    """(aciertos, errores): comprar en suelos / vender en techos frente a lo contrario."""
+    inv = [Event("techo" if e.kind == "suelo" else "suelo", e.coin, e.start, e.end, e.ref_price) for e in events]
+    h = evaluate(address, fills, events, min_usd=min_usd, tol=tol)
+    e = evaluate(address, fills, inv, min_usd=min_usd, tol=0.99)
+    return h.bottoms + h.tops, e.bottoms + e.tops

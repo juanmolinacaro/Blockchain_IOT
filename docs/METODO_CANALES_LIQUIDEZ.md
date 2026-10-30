@@ -266,3 +266,17 @@ en ETH desde 3.031).
 
 Conclusión del filtro de billeteras: el núcleo fiable sigue siendo el grupo validado en BTC 2026
 (prueba contra el azar clara); ETH aporta poco por sí solo.
+
+### Giros automáticos en temporalidades bajas (30 oct 2026)
+
+Propuesta de Juan: bajar de temporalidad para tener más giros. `swing_events()` detecta techos y
+suelos con un zigzag en velas de 1H (BTC y ETH, 28 abr–12 oct 2026), ventana ±8 h, precio a menos
+de un 2 % del extremo.
+
+* Giros de 6 % (38 giros): 2 billeteras con aciertos − errores ≥ 5 (`0x585f4f…` 6/1,
+  `0x63d417…` 5/0); desplazando los giros al azar, mediana 0 y máximo 2 → **señal moderada**.
+* Giros de 4 % (130 giros): aparecen más aciertos pero también más errores; nadie supera
+  claramente al azar. **Cuanto más pequeño el giro, más ruido**: el timing fiable está en giros
+  medianos y grandes.
+* Repiten en varios análisis: `0x8f8d2d…` (10/4 en giros de 4 % y acertó el corto ene–feb),
+  `0x0423b4…`, `0x63d417…`.

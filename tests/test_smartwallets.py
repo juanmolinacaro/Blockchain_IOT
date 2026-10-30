@@ -37,3 +37,25 @@ def test_rank_orders_by_events_then_pnl():
     }
     r = rank(data, [BOTTOM, TOP])
     assert [s.address for s in r] == ["0xa", "0xb"]
+
+
+from copytrading.models import Candle  # noqa: E402
+from copytrading.smartwallets import hits_minus_errors, swing_events  # noqa: E402
+
+H = 3_600_000
+
+
+def test_swing_events_zigzag():
+    prices = [100, 104, 108, 110, 104, 99, 97, 100, 104, 108, 103, 100]
+    cs = [Candle(i * H, p, p, p, p, 1) for i, p in enumerate(prices)]
+    ev = swing_events(cs, "BTC", threshold=0.05, half_window_ms=H)
+    assert [(e.kind, e.ref_price) for e in ev] == [("techo", 110), ("suelo", 97), ("techo", 108)]
+    assert ev[0].start == 2 * H and ev[0].end == 4 * H
+
+
+def test_hits_minus_errors_counts_opposite_trades():
+    ev = [Event("suelo", "BTC", 0, 10 * H, 100), Event("techo", "BTC", 20 * H, 30 * H, 120)]
+    good = [Fill("BTC", 100.5, 1000, "B", 5 * H, 0), Fill("BTC", 119, 1000, "A", 25 * H, 1000)]
+    bad = [Fill("BTC", 100.5, 1000, "A", 5 * H, 0), Fill("BTC", 119, 1000, "B", 25 * H, 0)]
+    assert hits_minus_errors("g", good, ev) == (2, 0)
+    assert hits_minus_errors("b", bad, ev) == (0, 2)
