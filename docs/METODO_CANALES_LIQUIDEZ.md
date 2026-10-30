@@ -280,3 +280,18 @@ de un 2 % del extremo.
   medianos y grandes.
 * Repiten en varios análisis: `0x8f8d2d…` (10/4 en giros de 4 % y acertó el corto ene–feb),
   `0x0423b4…`, `0x63d417…`.
+
+## Indicador de billeteras (30 oct 2026)
+
+Regla de Juan: las billeteras de **largo plazo** son un indicador de fondo; las de **corto plazo**
+solo sirven para ver el movimiento inmediato.
+
+* `data/indicador_billeteras.json`: `tendencia` (validadas en 8 giros de BTC, maestras grandes y
+  las mejores en ETH; 17 grupos) y `corto_plazo` (giros del 6 % en 1H).
+* Un voto por grupo (las gemelas cuentan como una). ALCISTA si (largos − cortos)/(con posición)
+  ≥ +0,34; BAJISTA si ≤ −0,34; si no, MIXTO.
+* Uso: **tendencia ALCISTA** → confirma estructura alcista y buscar largos a largo plazo;
+  **BAJISTA** → los rebotes son tácticos; **MIXTO** → sin confirmación. El corto plazo no genera
+  señales.
+* Sale en cada ejecución del monitor y en cada aviso; `python -m copytrading billeteras` lo muestra
+  a demanda.

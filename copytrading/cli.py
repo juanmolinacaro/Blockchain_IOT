@@ -230,6 +230,10 @@ def cmd_monitor(cfg: Config, args) -> None:
                     details.append(msg)
                     levels.add("CERRADA" if e.status == "cerrada" else ("SEÑAL" if e.status == "abierta" else "VIGILAR"))
     save_journal(journal, entries)
+    from .walletbias import report as wallet_report
+    wallet_lines = wallet_report(src)
+    if wallet_lines:
+        print("\n" + "\n".join(wallet_lines))
     print("\nDiario (" + str(journal) + "):")
     for line in summary(entries):
         print("   " + line)
@@ -239,10 +243,16 @@ def cmd_monitor(cfg: Config, args) -> None:
         level = next(lv for lv in ("SEÑAL", "CERRADA", "VIGILAR") if lv in levels)
         icon = {"SEÑAL": "🚨", "CERRADA": "✅", "VIGILAR": "👀"}[level]
         title = f"{icon} {level}: " + "; ".join(alerts)
-        body = "\n".join(details + ["", "Diario:"] + summary(entries)
+        body = "\n".join(details + [""] + wallet_lines + ["", "Diario:"] + summary(entries)
                          + ["", "Información para decidir, no una orden de operar."])
         sent = send_alert(title[:120], body, level, ntfy_topic=args.ntfy_topic)
         print("AVISO: " + (f"enviado por {', '.join(sent)}" if sent else "NO enviado (revisa el canal)"))
+
+
+def cmd_billeteras(cfg: Config, args) -> None:
+    from .walletbias import report as wallet_report
+
+    print("\n".join(wallet_report(HyperliquidSource(cfg.network))) or "Sin lista en data/indicador_billeteras.json")
 
 
 def cmd_aviso_prueba(cfg: Config, args) -> None:
@@ -361,6 +371,8 @@ def main(argv: list[str] | None = None) -> None:
     mo.add_argument("--days", type=int, default=830,
                     help="histórico (la EMA 200 diaria necesita mucho para estabilizarse)")
 
+    sub.add_parser("billeteras", help="indicador de billeteras: tendencia y corto plazo")
+
     ap = sub.add_parser("aviso-prueba", help="enviar una alerta de prueba al móvil")
     ap.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
 
@@ -387,7 +399,7 @@ def main(argv: list[str] | None = None) -> None:
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
-     "aviso-prueba": cmd_aviso_prueba}[args.cmd](cfg, args)
+     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
