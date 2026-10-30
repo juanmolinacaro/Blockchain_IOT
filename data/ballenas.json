@@ -166,5 +166,119 @@
    "address": "0x218a65e21eddeece7a9df38c6bbdd89f692b7da2",
    "nota": "compró 3,1M @60.110, vendió 13,5M @85.318. Ahora BTC SHORT 63M @79.051 y ETH SHORT 11,7M @2.208"
   }
+ ],
+ "eth_6_giros": {
+  "giros": "Compras: 6 jun (1.504), 26 jun (1.511), acumulación 25 jul-18 ago (1.821). Ventas: 21-31 ago (2.566), 3-14 sep (2.666), 18 sep-2 oct (2.810).",
+  "resultado": "Neto >= 3: 2 billeteras; con fechas al azar mediana 0, máximo 3 (26/200 veces el azar iguala). No significativo por sí solo."
+ },
+ "combinado_btc_eth": [
+  {
+   "address": "0x7258d00a24d6829ac4bf355127bfbc9e2303aed4",
+   "btc_aciertos": 2,
+   "btc_errores": 0,
+   "eth_aciertos": 3,
+   "eth_errores": 0,
+   "cuenta_usd": 0,
+   "ahora": "sin BTC/ETH"
+  },
+  {
+   "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
+   "btc_aciertos": 4,
+   "btc_errores": 1,
+   "eth_aciertos": 2,
+   "eth_errores": 1,
+   "cuenta_usd": 200844,
+   "ahora": "BTC SHORT $0.16M @80,195; ETH SHORT $0.28M @2,325"
+  },
+  {
+   "address": "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
+   "btc_aciertos": 4,
+   "btc_errores": 0,
+   "eth_aciertos": 0,
+   "eth_errores": 0,
+   "cuenta_usd": 32051,
+   "ahora": "BTC LONG $0.30M @80,985"
+  },
+  {
+   "address": "0x6ea486a3426563e23023125f18867117878f0ea7",
+   "btc_aciertos": 0,
+   "btc_errores": 0,
+   "eth_aciertos": 4,
+   "eth_errores": 0,
+   "cuenta_usd": 1040708,
+   "ahora": "ETH SHORT $9.40M @2,602"
+  },
+  {
+   "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98",
+   "btc_aciertos": 4,
+   "btc_errores": 0,
+   "eth_aciertos": 1,
+   "eth_errores": 1,
+   "cuenta_usd": 247883,
+   "ahora": "BTC SHORT $3.15M @83,654"
+  },
+  {
+   "address": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
+   "btc_aciertos": 3,
+   "btc_errores": 0,
+   "eth_aciertos": 0,
+   "eth_errores": 0,
+   "cuenta_usd": 0,
+   "ahora": "sin BTC/ETH"
+  },
+  {
+   "address": "0x0ce048fe42c170e41740ee392e187f19515f339d",
+   "btc_aciertos": 3,
+   "btc_errores": 1,
+   "eth_aciertos": 2,
+   "eth_errores": 1,
+   "cuenta_usd": 62637,
+   "ahora": "ETH SHORT $0.09M @2,368"
+  },
+  {
+   "address": "0x9b864dde6ed1c21608b1665a0ac0faa4f7e36e6e",
+   "btc_aciertos": 2,
+   "btc_errores": 0,
+   "eth_aciertos": 1,
+   "eth_errores": 0,
+   "cuenta_usd": 1595422,
+   "ahora": "sin BTC/ETH"
+  },
+  {
+   "address": "0xbbcb0c0aef0b28125af2f719f81d6a5b76f56f30",
+   "btc_aciertos": 1,
+   "btc_errores": 0,
+   "eth_aciertos": 2,
+   "eth_errores": 0,
+   "cuenta_usd": 280214,
+   "ahora": "sin BTC/ETH"
+  },
+  {
+   "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db",
+   "btc_aciertos": 4,
+   "btc_errores": 1,
+   "eth_aciertos": 1,
+   "eth_errores": 1,
+   "cuenta_usd": 435510,
+   "ahora": "BTC SHORT $1.02M @77,566; ETH SHORT $0.61M @2,278"
+  },
+  {
+   "address": "0x643430283b19fa5bd70a1138b495c2b43523cdd5",
+   "btc_aciertos": 2,
+   "btc_errores": 0,
+   "eth_aciertos": 1,
+   "eth_errores": 0,
+   "cuenta_usd": 287124,
+   "ahora": "ETH LONG $0.16M @2,278"
+  },
+  {
+   "address": "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
+   "btc_aciertos": 4,
+   "btc_errores": 1,
+   "eth_aciertos": 2,
+   "eth_errores": 2,
+   "cuenta_usd": 549630,
+   "ahora": "sin BTC/ETH"
+  }
  ]
 }

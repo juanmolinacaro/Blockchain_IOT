@@ -241,3 +241,16 @@ BTC (4 techos y 4 suelos, mayo–octubre) y 211 billeteras de swing (75 con hist
 
 Lista en `data/ballenas.json` → `nivel_1_validadas_8_giros` (las del timing) y
 `nivel_2_maestras_grandes` (las que compraron el suelo de julio y vendieron el techo con tamaño).
+
+### ETH: 6 giros marcados por Juan (30 oct 2026)
+
+Compras: 6 jun (1.504), 26 jun (1.511), acumulación 25 jul–18 ago (1.821). Ventas: 21–31 ago
+(2.566), 3–14 sep (2.666), 18 sep–2 oct (2.810).
+
+* 2 billeteras con neto ≥ 3 en ETH; con fechas al azar, mediana 0 y máximo 3 (26 de 200 veces el
+  azar iguala o supera) → en ETH **la evidencia es débil** (pocos giros y pocas billeteras con
+  historial suficiente). En BTC sí fue clara.
+* Destaca `0x6ea486…`: 4 aciertos y 0 errores en ETH; hoy **corto en ETH 9,4M desde 2.602**
+  (vendió cerca del techo y mantiene).
+* Combinando BTC + ETH se repiten `0x92ae42…`, `0x6041f8…`, `0xbe4e91…`, `0xf89993…`,
+  `0x9a9917…`: la mayoría hoy cortas (en BTC y ETH) o sin posición.
