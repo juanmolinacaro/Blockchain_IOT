@@ -62,3 +62,53 @@ def test_journal_roundtrip_and_summary(tmp_path):
     assert [e.coin for e in loaded] == ["BTC", "ETH"]
     line = summary(loaded)[0]
     assert "cerradas   1" in line and "abiertas 1" in line and "+1.50R" in line
+
+
+# --------------------------------------------------------- planes condicionados
+from copytrading.method.monitor import manual_plan  # noqa: E402
+
+H1 = 3_600_000
+
+
+def c1(i, o, h, l, cl):
+    return Candle(i * H1, o, h, l, cl, 1.0)
+
+
+def short_plan(hours=48):
+    return manual_plan("ETH", "short", 2223, "below", 2265, 2175, 2137, hours=hours, now_ms=0)
+
+
+def test_plan_stays_pending_until_close_beyond_trigger():
+    e = short_plan()
+    cs = [c1(0, 2230, 2240, 2220, 2228), c1(1, 2228, 2236, 2215, 2226)]   # mechas por debajo, cierres por encima
+    update_outcome(e, cs)
+    assert e.status == "pendiente"
+
+
+def test_plan_activates_on_close_and_then_hits_targets():
+    e = short_plan()
+    cs = [c1(0, 2230, 2240, 2220, 2228), c1(1, 2226, 2230, 2210, 2215),     # cierra por debajo: se activa
+          c1(2, 2215, 2220, 2170, 2172), c1(3, 2172, 2175, 2130, 2135)]
+    update_outcome(e, cs)
+    assert e.entry == 2215 and e.time == 1 * H1
+    assert e.status == "cerrada" and e.exit_reason == "tp2" and e.r > 1
+
+
+def test_plan_expires():
+    e = short_plan(hours=2)
+    cs = [c1(k, 2230, 2240, 2225, 2230) for k in range(5)]
+    update_outcome(e, cs)
+    assert e.status == "caducada"
+
+
+def test_plan_annulled_if_activation_close_beyond_target():
+    e = short_plan()
+    update_outcome(e, [c1(0, 2230, 2232, 2160, 2165)])     # cierra ya por debajo del TP1
+    assert e.status == "anulada"
+
+
+def test_long_plan_validation():
+    with pytest.raises(ValueError):
+        manual_plan("ETH", "long", 2242, "above", 2250, 2280, 2317)
+    p = manual_plan("ETH", "long", 2242, "above", 2190, 2280, 2317, now_ms=0)
+    assert p.status == "pendiente" and p.interval == "1h"

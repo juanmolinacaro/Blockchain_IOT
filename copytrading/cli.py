@@ -202,13 +202,30 @@ def cmd_monitor(cfg: Config, args) -> None:
             details.extend(f"  {src_}: {t.side.upper()} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
                            f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}" for src_, t in st.signals.items())
         for e in entries:
-            if e.coin == coin:
+            if e.coin == coin and e.interval == "4h":
                 before = e.status
                 update_outcome(e, candles)
                 if before == "abierta" and e.status == "cerrada":
                     alerts.append(f"{e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
                     details.append(f"✅ {e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
                     levels.add("CERRADA")
+    # planes y operaciones en 1H (lecturas de Juan): se siguen con velas de 1H
+    for coin in sorted({e.coin for e in entries if e.interval == "1h" and e.status in ("pendiente", "abierta")}):
+        c1 = closed_candles(src.candles(coin, "1h", now - 30 * MS_PER_DAY, now), "1h", now)
+        for e in entries:
+            if e.coin != coin or e.interval != "1h" or e.status not in ("pendiente", "abierta"):
+                continue
+            before = e.status
+            update_outcome(e, c1)
+            if before != e.status:
+                msg = {"abierta": f"🎯 {e.coin} plan {e.side} ACTIVADO en {e.entry:,.1f} ({e.note})",
+                       "cerrada": f"✅ {e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})",
+                       "caducada": f"⌛ {e.coin} plan {e.side} caducó sin activarse ({e.note})",
+                       "anulada": f"✖ {e.coin} plan {e.side} anulado: {e.exit_reason}"}.get(e.status)
+                if msg:
+                    alerts.append(msg)
+                    details.append(msg)
+                    levels.add("CERRADA" if e.status == "cerrada" else ("SEÑAL" if e.status == "abierta" else "VIGILAR"))
     save_journal(journal, entries)
     print("\nDiario (" + str(journal) + "):")
     for line in summary(entries):
@@ -241,6 +258,16 @@ def cmd_diario(cfg: Config, args) -> None:
 
     journal = Path(args.journal)
     entries = load_journal(journal)
+    if args.accion == "plan":
+        from .method.monitor import manual_plan
+        e = manual_plan(args.coin.upper(), args.side, args.trigger, args.trigger_dir, args.stop,
+                        args.tp1, args.tp2, args.horas, args.nota)
+        entries.append(e)
+        save_journal(journal, entries)
+        cond = "cierre 1H por debajo de" if e.trigger_dir == "below" else "cierre 1H por encima de"
+        print(f"Plan apuntado: {e.coin} {e.side} si {cond} {e.trigger} | stop {e.stop} TP1 {e.tp1} TP2 {e.tp2} "
+              f"| caduca en {args.horas} h")
+        return
     if args.accion == "add":
         e = manual_entry(args.coin.upper(), args.side, args.entry, args.stop, args.tp1, args.tp2, args.nota)
         entries.append(e)
@@ -332,7 +359,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
 
     di = sub.add_parser("diario", help="apuntar lecturas manuales y ver resultados")
-    di.add_argument("accion", choices=["add", "report"])
+    di.add_argument("accion", choices=["add", "plan", "report"])
     di.add_argument("--journal", default="data/diario.jsonl")
     di.add_argument("--coin", default="BTC")
     di.add_argument("--side", choices=["long", "short"])
@@ -341,6 +368,9 @@ def main(argv: list[str] | None = None) -> None:
     di.add_argument("--tp1", type=float)
     di.add_argument("--tp2", type=float)
     di.add_argument("--nota", default="")
+    di.add_argument("--trigger", type=float, help="plan: nivel de activación")
+    di.add_argument("--trigger-dir", choices=["below", "above"], help="plan: cierre por debajo/encima")
+    di.add_argument("--horas", type=float, default=48, help="plan: caduca tras estas horas")
     di.add_argument("--last", type=int, default=20)
 
     args = parser.parse_args(argv)

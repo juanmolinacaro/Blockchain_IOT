@@ -53,10 +53,14 @@ class JournalEntry:
     tp1: float
     tp2: float
     note: str = ""
-    status: str = "abierta"  # "abierta" | "cerrada"
+    status: str = "abierta"  # "pendiente" | "abierta" | "cerrada" | "caducada" | "anulada"
     r: float = 0.0           # resultado (o resultado latente si sigue abierta)
     exit_reason: str = ""
     exit_time: int = 0
+    # planes condicionados: se activan cuando una vela CIERRA más allá de `trigger`
+    trigger: float = 0.0
+    trigger_dir: str = ""    # "below" (cierre por debajo) | "above" (cierre por encima)
+    expires: int = 0         # ms; si no se activa antes, caduca
 
 
 def closed_candles(candles: list[Candle], interval: str, now_ms: int | None = None) -> list[Candle]:
@@ -175,9 +179,32 @@ def record_signals(entries: list[JournalEntry], st: CoinStatus, interval: str) -
     return new
 
 
+def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
+    """Un plan pendiente se abre al cierre de la primera vela que cruza su nivel de activación."""
+    for c in candles:
+        if c.t < e.time:
+            continue
+        if e.expires and c.t >= e.expires:
+            e.status = "caducada"
+            return e
+        crossed = c.c < e.trigger if e.trigger_dir == "below" else c.c > e.trigger
+        if crossed:
+            e.time, e.entry = c.t, c.c
+            valid = (e.stop > e.entry > e.tp1 >= e.tp2) if e.side == "short" else (e.stop < e.entry < e.tp1 <= e.tp2)
+            e.status = "abierta" if valid else "anulada"
+            if not valid:
+                e.exit_reason = "el cierre de activación quedó más allá del stop o del objetivo"
+            return e
+    if e.expires and candles and candles[-1].t + (candles[-1].t - candles[-2].t if len(candles) > 1 else 0) >= e.expires:
+        e.status = "caducada"
+    return e
+
+
 def update_outcome(e: JournalEntry, candles: list[Candle], cfg: MethodConfig = VARIANTS["sistema-A"]) -> JournalEntry:
     """Sigue la operación con las velas posteriores a la señal (misma gestión que el backtest)."""
-    if e.status == "cerrada":
+    if e.status == "pendiente":
+        activate_plan(e, candles)
+    if e.status != "abierta":
         return e
     idx = next((k for k, c in enumerate(candles) if c.t >= e.time), None)
     if idx is None:
@@ -199,8 +226,11 @@ def summary(entries: list[JournalEntry]) -> list[str]:
         closed = [e for e in es if e.status == "cerrada"]
         wins = sum(e.r > 0 for e in closed)
         avg = sum(e.r for e in closed) / len(closed) if closed else 0.0
+        opened = sum(e.status == "abierta" for e in es)
+        pending = sum(e.status == "pendiente" for e in es)
         lines.append(f"{source:10} cerradas {len(closed):3} | aciertos {wins / len(closed) if closed else 0:4.0%} "
-                     f"| media {avg:+.2f}R | total {sum(e.r for e in closed):+.2f}R | abiertas {len(es) - len(closed)}")
+                     f"| media {avg:+.2f}R | total {sum(e.r for e in closed):+.2f}R | abiertas {opened}"
+                     + (f" | planes pendientes {pending}" if pending else ""))
     return lines or ["Diario vacío."]
 
 
@@ -213,3 +243,19 @@ def manual_entry(coin: str, side: str, entry: float, stop: float, tp1: float, tp
         raise ValueError("Para un corto: stop > entrada > TP1 >= TP2")
     return JournalEntry(f"juan-{coin}-{now_ms}", "juan", coin, interval, side, now_ms,
                         entry, stop, tp1, tp2, note)
+
+
+def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: float, tp1: float, tp2: float,
+                hours: float = 48, note: str = "", interval: str = "1h",
+                now_ms: int | None = None) -> JournalEntry:
+    """Plan condicionado: se abre solo si una vela de `interval` cierra más allá de `trigger`."""
+    now_ms = int(time.time() * 1000) if now_ms is None else now_ms
+    if trigger_dir not in ("below", "above"):
+        raise ValueError("trigger_dir debe ser 'below' o 'above'")
+    if side == "short" and not stop > trigger > tp1 >= tp2:
+        raise ValueError("Para un corto: stop > activación > TP1 >= TP2")
+    if side == "long" and not stop < trigger < tp1 <= tp2:
+        raise ValueError("Para un largo: stop < activación < TP1 <= TP2")
+    return JournalEntry(f"juan-{coin}-{side}-{now_ms}", "juan", coin, interval, side, now_ms,
+                        trigger, stop, tp1, tp2, note, status="pendiente", trigger=trigger,
+                        trigger_dir=trigger_dir, expires=now_ms + int(hours * 3_600_000))
