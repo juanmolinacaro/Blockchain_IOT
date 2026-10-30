@@ -188,3 +188,16 @@ Reglas que salen de los datos:
    al lado contrario que fallan (máximos que no continúan) justo antes de ir a por el pool grande.
 
 El monitor ahora indica en cada aviso los pools más cercanos y si hay un imán dominante.
+
+## Alertas al móvil
+
+Las notificaciones de la plataforma (push/correo de las tareas programadas) no llegaban, así que
+el monitor envía sus propias alertas con **ntfy** (app gratuita, sin cuenta):
+
+* App ntfy (Philipp Heckel) suscrita al tema privado de Juan (no se publica aquí).
+* `python -m copytrading monitor --notify --ntfy-topic <tema>` avisa solo si hay novedades:
+  🚨 SEÑAL (prioridad urgente), ✅ operación cerrada, 👀 VIGILAR.
+* `python -m copytrading aviso-prueba --ntfy-topic <tema>` envía una prueba.
+* La tarea programada corre cada 4 h (00:05, 04:05, … UTC) y requiere `ntfy.sh` en los dominios
+  permitidos del entorno. Alternativa: Telegram (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+* Verificado el 30 oct 2026: la alerta llegó al móvil.
