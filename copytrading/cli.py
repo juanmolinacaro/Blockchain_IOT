@@ -175,6 +175,8 @@ def cmd_monitor(cfg: Config, args) -> None:
     entries = load_journal(journal)
     now = int(time.time() * 1000)
     alerts = []
+    details: list[str] = []
+    levels: set[str] = set()
     for coin in [c.strip().upper() for c in args.coins.split(",")]:
         candles = closed_candles(src.candles(coin, "4h", now - args.days * MS_PER_DAY, now), "4h", now)
         if len(candles) < 300:
@@ -190,19 +192,48 @@ def cmd_monitor(cfg: Config, args) -> None:
                   f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}")
         for e in record_signals(entries, st, "4h"):
             alerts.append(f"{e.coin} {e.side} ({e.source})")
+            levels.add("SEÑAL")
         if st.status == "VIGILAR":
             alerts.append(f"{coin} vigilar")
+            levels.add("VIGILAR")
+        if st.status != "-":
+            details.append(f"{icon} {coin} {st.status} {st.price:,.1f}")
+            details.extend(f"  {n}" for n in st.notes)
+            details.extend(f"  {src_}: {t.side.upper()} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
+                           f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}" for src_, t in st.signals.items())
         for e in entries:
             if e.coin == coin:
                 before = e.status
                 update_outcome(e, candles)
                 if before == "abierta" and e.status == "cerrada":
                     alerts.append(f"{e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
+                    details.append(f"✅ {e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
+                    levels.add("CERRADA")
     save_journal(journal, entries)
     print("\nDiario (" + str(journal) + "):")
     for line in summary(entries):
         print("   " + line)
     print("\nRESUMEN: " + ("; ".join(alerts) if alerts else "sin novedades"))
+    if args.notify and alerts:
+        from .notify import send_alert
+        level = next(lv for lv in ("SEÑAL", "CERRADA", "VIGILAR") if lv in levels)
+        icon = {"SEÑAL": "🚨", "CERRADA": "✅", "VIGILAR": "👀"}[level]
+        title = f"{icon} {level}: " + "; ".join(alerts)
+        body = "\n".join(details + ["", "Diario:"] + summary(entries)
+                         + ["", "Información para decidir, no una orden de operar."])
+        sent = send_alert(title[:120], body, level, ntfy_topic=args.ntfy_topic)
+        print("AVISO: " + (f"enviado por {', '.join(sent)}" if sent else "NO enviado (revisa el canal)"))
+
+
+def cmd_aviso_prueba(cfg: Config, args) -> None:
+    from .notify import send_alert
+
+    sent = send_alert("🧪 Prueba del monitor de trading",
+                      "Si ves esto en el móvil, las alertas de BTC, ETH y SOL te llegarán aquí.",
+                      "PRUEBA", ntfy_topic=args.ntfy_topic)
+    print(f"Enviado por: {', '.join(sent)}" if sent else "No se pudo enviar por ningún canal")
+    if not sent:
+        raise SystemExit(1)
 
 
 def cmd_diario(cfg: Config, args) -> None:
@@ -292,8 +323,13 @@ def main(argv: list[str] | None = None) -> None:
     mo = sub.add_parser("monitor", help="revisar el método en vivo y actualizar el diario")
     mo.add_argument("--coins", default="BTC,ETH,SOL")
     mo.add_argument("--journal", default="data/diario.jsonl")
+    mo.add_argument("--notify", action="store_true", help="enviar aviso al móvil si hay novedades")
+    mo.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
     mo.add_argument("--days", type=int, default=830,
                     help="histórico (la EMA 200 diaria necesita mucho para estabilizarse)")
+
+    ap = sub.add_parser("aviso-prueba", help="enviar una alerta de prueba al móvil")
+    ap.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
 
     di = sub.add_parser("diario", help="apuntar lecturas manuales y ver resultados")
     di.add_argument("accion", choices=["add", "report"])
@@ -313,7 +349,8 @@ def main(argv: list[str] | None = None) -> None:
     cfg = Config.load(args.config) if Path(args.config).exists() else Config()
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
-     "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools}[args.cmd](cfg, args)
+     "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
+     "aviso-prueba": cmd_aviso_prueba}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
