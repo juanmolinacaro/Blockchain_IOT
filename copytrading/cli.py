@@ -264,7 +264,8 @@ def cmd_diario(cfg: Config, args) -> None:
                         args.tp1, args.tp2, args.horas, args.nota)
         entries.append(e)
         save_journal(journal, entries)
-        cond = "cierre 1H por debajo de" if e.trigger_dir == "below" else "cierre 1H por encima de"
+        cond = {"below": "cierre 1H por debajo de", "above": "cierre 1H por encima de",
+                "touch_below": "el precio baja a", "touch_above": "el precio sube a"}[e.trigger_dir]
         print(f"Plan apuntado: {e.coin} {e.side} si {cond} {e.trigger} | stop {e.stop} TP1 {e.tp1} TP2 {e.tp2} "
               f"| caduca en {args.horas} h")
         return
@@ -369,7 +370,8 @@ def main(argv: list[str] | None = None) -> None:
     di.add_argument("--tp2", type=float)
     di.add_argument("--nota", default="")
     di.add_argument("--trigger", type=float, help="plan: nivel de activación")
-    di.add_argument("--trigger-dir", choices=["below", "above"], help="plan: cierre por debajo/encima")
+    di.add_argument("--trigger-dir", choices=["below", "above", "touch_below", "touch_above"],
+                    help="plan: cierre por debajo/encima, o toque (orden límite)")
     di.add_argument("--horas", type=float, default=48, help="plan: caduca tras estas horas")
     di.add_argument("--last", type=int, default=20)
 

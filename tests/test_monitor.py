@@ -112,3 +112,18 @@ def test_long_plan_validation():
         manual_plan("ETH", "long", 2242, "above", 2250, 2280, 2317)
     p = manual_plan("ETH", "long", 2242, "above", 2190, 2280, 2317, now_ms=0)
     assert p.status == "pendiente" and p.interval == "1h"
+
+
+def test_limit_plan_fills_on_touch_at_trigger_price():
+    e = manual_plan("BTC", "long", 77500, "touch_below", 76400, 79150, 80200, now_ms=0)
+    cs = [c1(0, 78100, 78300, 77800, 78000), c1(1, 78000, 78050, 77450, 77700),   # toca 77.500
+          c1(2, 77700, 79300, 77600, 79200), c1(3, 79200, 80300, 79000, 80250)]
+    update_outcome(e, cs)
+    assert e.entry == 77500 and e.time == 1 * H1
+    assert e.status == "cerrada" and e.exit_reason == "tp2"
+
+
+def test_limit_plan_annulled_if_price_runs_without_pullback():
+    e = manual_plan("BTC", "long", 77500, "touch_below", 76400, 79150, 80200, now_ms=0)
+    update_outcome(e, [c1(0, 78100, 78600, 77900, 78500), c1(1, 78500, 79200, 78400, 79100)])
+    assert e.status == "anulada" and "sin retroceder" in e.exit_reason

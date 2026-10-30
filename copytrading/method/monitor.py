@@ -59,7 +59,7 @@ class JournalEntry:
     exit_time: int = 0
     # planes condicionados: se activan cuando una vela CIERRA más allá de `trigger`
     trigger: float = 0.0
-    trigger_dir: str = ""    # "below" (cierre por debajo) | "above" (cierre por encima)
+    trigger_dir: str = ""    # "below"/"above": cierre más allá | "touch_below"/"touch_above": orden límite
     expires: int = 0         # ms; si no se activa antes, caduca
 
 
@@ -187,9 +187,18 @@ def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
         if e.expires and c.t >= e.expires:
             e.status = "caducada"
             return e
-        crossed = c.c < e.trigger if e.trigger_dir == "below" else c.c > e.trigger
+        if e.trigger_dir.startswith("touch"):
+            filled = c.l <= e.trigger if e.trigger_dir == "touch_below" else c.h >= e.trigger
+            ran_away = c.h >= e.tp1 if e.side == "long" else c.l <= e.tp1
+            if not filled and ran_away:   # se fue al objetivo sin retroceder: no se habría entrado
+                e.status, e.exit_reason = "anulada", "llegó al TP1 sin retroceder a la entrada"
+                return e
+            crossed, fill_px = filled, e.trigger
+        else:
+            crossed = c.c < e.trigger if e.trigger_dir == "below" else c.c > e.trigger
+            fill_px = c.c
         if crossed:
-            e.time, e.entry = c.t, c.c
+            e.time, e.entry = c.t, fill_px
             valid = (e.stop > e.entry > e.tp1 >= e.tp2) if e.side == "short" else (e.stop < e.entry < e.tp1 <= e.tp2)
             e.status = "abierta" if valid else "anulada"
             if not valid:
@@ -250,8 +259,8 @@ def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: fl
                 now_ms: int | None = None) -> JournalEntry:
     """Plan condicionado: se abre solo si una vela de `interval` cierra más allá de `trigger`."""
     now_ms = int(time.time() * 1000) if now_ms is None else now_ms
-    if trigger_dir not in ("below", "above"):
-        raise ValueError("trigger_dir debe ser 'below' o 'above'")
+    if trigger_dir not in ("below", "above", "touch_below", "touch_above"):
+        raise ValueError("trigger_dir debe ser below, above, touch_below o touch_above")
     if side == "short" and not stop > trigger > tp1 >= tp2:
         raise ValueError("Para un corto: stop > activación > TP1 >= TP2")
     if side == "long" and not stop < trigger < tp1 <= tp2:
