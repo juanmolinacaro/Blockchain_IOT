@@ -91,3 +91,38 @@ Conclusiones:
 Siguientes pasos: canales por pivotes (como se trazan a mano), confluencia con la EMA diaria y
 el mapa real de Hyperliquid, y un diario de las operaciones discrecionales de Juan para medir
 su ventaja real con el tiempo.
+
+## Versión 2: canales por pivotes + EMA diaria (30 oct 2026)
+
+* **Las EMAs de Juan**: su línea roja diaria (76.438) es la **EMA 200 diaria** (calculada: 76.437)
+  y la verde (~80.400) es la **EMA 50 diaria**.
+* **Canales por pivotes** (`--channel pivots`): línea superior por los dos últimos máximos
+  confirmados y línea inferior por los dos últimos mínimos (salen canales, triángulos y cuñas);
+  un canal deja de valer cuando un cierre queda claramente fuera.
+* **EMA**: `confluence` = la vela de entrada además toca la EMA y cierra del lado correcto;
+  `filter` = largos solo por encima de la EMA y cortos solo por debajo.
+
+Resultado agregado (BTC + ETH + SOL, entrenamiento + validación = 6 tramos, 4H, stop por cierre):
+
+| Variante | Trades | Expectativa | Tramos positivos |
+|---|---|---|---|
+| Regresión + liquidez + **confluencia EMA 50d** | 27 | **+0,68 R** | 5/6 |
+| Regresión + liquidez + **filtro EMA 200d** | 74 | **+0,33 R** | 4/6 |
+| Regresión + liquidez (sin EMA) | 173 | +0,15 R | 4/6 |
+| Regresión sin liquidez ni EMA | 618 | −0,14 R | 2/6 |
+| Pivotes k3 + liquidez (sin EMA) | 89 | −0,12 R | 2/6 |
+| Pivotes k5 sin liquidez | 323 | −0,24 R | 0/6 |
+
+Conclusiones:
+
+1. **La EMA diaria suma**: con liquidez, la confluencia con la EMA 50d o el filtro de la EMA 200d
+   mejoran a la versión sin EMA. Las tres capas juntas (canal + liquidez + EMA) dan lo mejor.
+2. **Los toques de la EMA 200 diaria son raros**: en 2,3 años de 4H casi no hay casos con canal +
+   liquidez + EMA 200 a la vez (2–4), así que el setup actual de BTC no se puede validar con
+   estadística; habrá que seguirlo en vivo.
+3. **Los pivotes automáticos funcionan peor que la regresión**: los canales que traza Juan a mano
+   eligen los giros relevantes en varias temporalidades, y eso el algoritmo aún no lo replica.
+4. **Cuidado con el sobreajuste**: se probaron 36 combinaciones; la mejor puede serlo en parte por
+   suerte. Las muestras son pequeñas (27–74 trades). El siguiente paso es validarla hacia delante
+   (paper trading / diario de señales) antes de usar dinero.
+5. BTC sigue siendo la moneda más débil en todas las variantes.

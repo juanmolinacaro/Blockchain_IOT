@@ -16,6 +16,11 @@ Variante "objetivo" (entry="target"): rechazo en el borde del canal (toca y cier
 dentro) cuando hay más liquidez al otro lado; TP2 = la zona de liquidez más cargada
 en esa dirección ("el precio va a buscar la liquidez").
 
+Canales: por regresión o por pivotes (channel="pivots", como se trazan a mano).
+EMA (ema_mode="confluence"): la vela también tiene que tocar una EMA (p. ej. la
+diaria) y cerrar del lado correcto; "filter": largos solo sobre la EMA y cortos
+solo bajo ella.
+
 Stop: por mecha ("wick") o por cierre ("close", como pide el método: solo se sale
 si una vela CIERRA más allá del stop; con un stop de emergencia a `hard_stop_r` R).
 
@@ -28,13 +33,20 @@ import math
 from dataclasses import dataclass, field
 
 from ..models import Candle
-from .channels import regression_channel
+from .channels import Channel, pivot_channels, regression_channel
+from .emas import compute_emas
 from .liqmodel import LiquidationModel
 
 
 @dataclass
 class MethodConfig:
-    lookback: int = 60              # velas para trazar el canal
+    channel: str = "regression"     # "regression" | "pivots"
+    lookback: int = 60              # velas para trazar el canal (regresión)
+    pivot_k: int = 5                # pivote = extremo de k velas a cada lado
+    pivot_max_age: int = 150        # antigüedad máxima del pivote más viejo, en velas
+    ema: str = ""                   # p. ej. "1d:200" o "1d:50,1d:200"
+    ema_mode: str = "none"          # "none" | "confluence" | "filter"
+    ema_tol: float = 0.01           # cercanía a la EMA para contar como toque (1 %)
     channel_q: float = 0.9
     touch_tol: float = 0.002        # el mínimo puede quedarse a 0.2 % del borde
     min_sweep: float = 1.5          # liquidez absorbida / volumen medio por vela
@@ -135,9 +147,28 @@ def compute_liquidity(candles: list[Candle], cfg: MethodConfig) -> list[LiqSnaps
     return out
 
 
-def find_signal(candles: list[Candle], i: int, cfg: MethodConfig,
-                liq: list[LiqSnapshot]) -> Trade | None:
-    ch = regression_channel(candles, i, cfg.lookback, cfg.channel_q)
+def compute_channels(candles: list[Candle], cfg: MethodConfig) -> list[Channel | None]:
+    if cfg.channel == "pivots":
+        return pivot_channels(candles, cfg.pivot_k, cfg.pivot_max_age)
+    return [regression_channel(candles, i, cfg.lookback, cfg.channel_q) for i in range(len(candles))]
+
+
+def _ema_ok(c: Candle, emas: list[float], long: bool, cfg: MethodConfig) -> bool:
+    if cfg.ema_mode == "none":
+        return True
+    if not emas:
+        return False
+    if cfg.ema_mode == "filter":
+        return c.c > emas[0] if long else c.c < emas[0]
+    tol = cfg.ema_tol
+    if long:  # la vela llega a la EMA y cierra por encima: la EMA actúa de soporte
+        return any(c.l <= e * (1 + tol) and c.c >= e * (1 - tol) for e in emas)
+    return any(c.h >= e * (1 - tol) and c.c <= e * (1 + tol) for e in emas)
+
+
+def find_signal(candles: list[Candle], i: int, cfg: MethodConfig, liq: list[LiqSnapshot],
+                channels: list[Channel | None], emas: list[list[float]]) -> Trade | None:
+    ch = channels[i]
     if ch is None:
         return None
     c = candles[i]
@@ -154,7 +185,7 @@ def find_signal(candles: list[Candle], i: int, cfg: MethodConfig,
             ok = not cfg.use_liquidity or (s.short_above >= cfg.imbalance * s.long_below
                                            and s.best_short_px > mid)
             tp2 = s.best_short_px if cfg.use_liquidity else upper
-        if touched and ok and c.c > lower:
+        if touched and ok and c.c > lower and _ema_ok(c, emas[i], True, cfg):
             entry = c.c * (1 + cfg.slippage)
             stop = c.l * (1 - cfg.stop_buffer)
             if mid > entry and (tp2 - entry) >= cfg.min_rr * (entry - stop) > 0:
@@ -169,7 +200,7 @@ def find_signal(candles: list[Candle], i: int, cfg: MethodConfig,
             ok = not cfg.use_liquidity or (s.long_below >= cfg.imbalance * s.short_above
                                            and 0 < s.best_long_px < mid)
             tp2 = s.best_long_px if cfg.use_liquidity else lower
-        if touched and ok and c.c < upper:
+        if touched and ok and c.c < upper and _ema_ok(c, emas[i], False, cfg):
             entry = c.c * (1 - cfg.slippage)
             stop = c.h * (1 + cfg.stop_buffer)
             if mid < entry and (entry - tp2) >= cfg.min_rr * (stop - entry) > 0:
@@ -220,14 +251,17 @@ def manage(trade: Trade, candles: list[Candle], cfg: MethodConfig) -> Trade:
 
 
 def run(candles: list[Candle], cfg: MethodConfig, start: int = 0, end: int | None = None,
-        liq: list[LiqSnapshot] | None = None) -> Result:
+        liq: list[LiqSnapshot] | None = None, channels: list[Channel | None] | None = None,
+        emas: list[list[float]] | None = None) -> Result:
     """Una sola operación abierta a la vez; riesgo fijo por operación con interés compuesto."""
     end = len(candles) if end is None else end
     liq = liq or compute_liquidity(candles, cfg)
+    channels = channels or compute_channels(candles, cfg)
+    emas = emas or compute_emas(candles, cfg.ema)
     res = Result(equity=[1.0])
-    i = max(start, cfg.lookback)
+    i = max(start, cfg.lookback if cfg.channel == "regression" else 2 * cfg.pivot_k)
     while i < end - 1:
-        trade = find_signal(candles, i, cfg, liq)
+        trade = find_signal(candles, i, cfg, liq, channels, emas)
         if trade is None:
             i += 1
             continue

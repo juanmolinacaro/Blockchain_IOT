@@ -113,8 +113,8 @@ def cmd_liquidity(cfg: Config, args) -> None:
 def cmd_metodo(cfg: Config, args) -> None:
     import dataclasses
 
-    from .method.backtest import MethodConfig, compute_liquidity, run
-    from .method.channels import regression_channel
+    from .method.backtest import MethodConfig, compute_channels, compute_liquidity, run
+    from .method.emas import ema_series, parse_spec
 
     src = HyperliquidSource(cfg.network)
     end = int(time.time() * 1000)
@@ -122,8 +122,11 @@ def cmd_metodo(cfg: Config, args) -> None:
     if len(candles) < 200:
         raise SystemExit(f"Muy pocas velas ({len(candles)}) para {args.coin} {args.interval}")
     mc = MethodConfig(lookback=args.lookback, entry=args.entry, stop_mode=args.stop,
-                      trend=args.trend, min_sweep=args.sweep)
+                      trend=args.trend, min_sweep=args.sweep, channel=args.channel,
+                      pivot_k=args.pivot_k, ema=args.ema if args.ema_mode != "none" else "",
+                      ema_mode=args.ema_mode)
     liq = compute_liquidity(candles, mc)
+    channels = compute_channels(candles, mc)
     cut = int(len(candles) * 0.7)
     fmt = lambda ts: datetime.fromtimestamp(ts / 1000, timezone.utc).strftime("%Y-%m-%d")
     print(f"{args.coin} {args.interval}: {len(candles)} velas, {fmt(candles[0].t)} -> {fmt(candles[-1].t)}")
@@ -132,20 +135,25 @@ def cmd_metodo(cfg: Config, args) -> None:
     for name, c in (("canal+liquidez", mc), ("solo canal", dataclasses.replace(mc, use_liquidity=False))):
         for lab, (a, b) in (("entrenam.", (0, cut)), ("validación", (cut, len(candles))),
                             ("todo", (0, len(candles)))):
-            r = run(candles, c, a, b, liq=liq)
+            r = run(candles, c, a, b, liq=liq, channels=channels)
             print(f"{name:16} {lab:12} {r.n:6} {r.win_rate:5.0%} {r.expectancy:+6.2f} "
                   f"{min(r.profit_factor, 99):5.2f} {r.total_return:+8.1%} {r.max_drawdown:6.1%}")
-    full = run(candles, mc, liq=liq)
+    full = run(candles, mc, liq=liq, channels=channels)
     if full.trades:
         print("\nÚltimas operaciones del método:")
         for t in full.trades[-args.last:]:
             print(f"  {fmt(candles[t.entry_i].t)} {t.side:5} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
                   f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f} -> {t.exit_reason} {t.r:+.2f}R")
     i = len(candles) - 1
-    ch = regression_channel(candles, i, mc.lookback, mc.channel_q)
+    ch = channels[i]
     s = liq[i]
-    print(f"\nAhora: precio {candles[i].c:,.1f} | canal {ch.lower(i):,.1f} – {ch.mid(i):,.1f} – {ch.upper(i):,.1f}"
-          f" ({'alcista' if ch.slope > 0 else 'bajista'})")
+    canal = (f"canal {ch.lower(i):,.1f} – {ch.mid(i):,.1f} – {ch.upper(i):,.1f} ({ch.shape()})"
+             if ch else "sin canal vigente (líneas rotas)")
+    print(f"\nAhora: precio {candles[i].c:,.1f} | {canal}")
+    for tf, n in parse_spec(args.ema):
+        e = ema_series(candles, tf, n)[i]
+        if e:
+            print(f"EMA {n} ({tf}): {e:,.1f} ({(candles[i].c / e - 1):+.1%} del precio)")
     print(f"Liquidez estimada (±{mc.liq_range:.0%}): longs abajo {s.long_below:.1f} / shorts arriba "
           f"{s.short_above:.1f} (en velas de volumen); nivel más cargado abajo {s.best_long_px:,.1f}, "
           f"arriba {s.best_short_px:,.1f}")
@@ -187,6 +195,11 @@ def main(argv: list[str] | None = None) -> None:
     m.add_argument("--stop", choices=["close", "wick"], default="close")
     m.add_argument("--trend", choices=["none", "channel"], default="channel")
     m.add_argument("--sweep", type=float, default=1.5, help="liquidez absorbida mínima")
+    m.add_argument("--channel", choices=["regression", "pivots"], default="regression")
+    m.add_argument("--pivot-k", type=int, default=3, help="velas a cada lado para un pivote")
+    m.add_argument("--ema", default="1d:50,1d:200", help="EMAs, p. ej. 1d:50,1d:200")
+    m.add_argument("--ema-mode", choices=["none", "confluence", "filter"], default="filter",
+                   help="filter: largos sobre la 1ª EMA, cortos bajo ella; confluence: tocar una EMA")
     m.add_argument("--last", type=int, default=10, help="últimas operaciones a mostrar")
 
     args = parser.parse_args(argv)
