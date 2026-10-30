@@ -42,6 +42,13 @@ class Band:
     long_usd: float = 0.0   # longs que se liquidan en esta franja
     short_usd: float = 0.0  # shorts que se liquidan en esta franja
     level: str = ""
+    n: int = 0              # número de posiciones
+    largest_usd: float = 0.0
+
+    @property
+    def whale_share(self) -> float:
+        """Fracción de la franja que corresponde a una sola posición."""
+        return self.largest_usd / self.total if self.total else 0.0
 
     @property
     def total(self) -> float:
@@ -116,6 +123,8 @@ def build_heatmap(points: list[LiqPoint], coin: str, price: float,
             continue
         b = bands[min(int((p.liquidation_px - lo) / width), n - 1)]
         usd = p.size * price
+        b.n += 1
+        b.largest_usd = max(b.largest_usd, usd)
         if p.is_long:
             b.long_usd += usd
         else:
@@ -166,15 +175,21 @@ def insights(hm: Heatmap) -> list[str]:
             etiqueta = f"Zona más cargada ({b.level.upper()})"
         dist = (b.mid - hm.price) / hm.price
         quien = "shorts" if above else "longs"
+        whale = (f" Ojo: el {b.whale_share:.0%} es UNA sola posición (ballena)."
+                 if b.whale_share >= 0.6 else "")
         out.append(f"{etiqueta} {lado}: {_fmt(b.low)}–{_fmt(b.high)} "
-                   f"({dist:+.1%}), ${b.total:,.0f} en liquidaciones de {quien}.")
+                   f"({dist:+.1%}), ${b.total:,.0f} en liquidaciones de {quien} "
+                   f"({b.n} posiciones).{whale}")
     up, down = hm.usd_above, hm.usd_below
     if up or down:
-        ratio = up / down if down else float("inf")
-        if ratio > 1.5:
-            out.append(f"Hay {ratio:.1f}x más liquidez arriba (shorts): sesgo de 'imán' alcista.")
-        elif ratio < 1 / 1.5:
-            out.append(f"Hay {1 / ratio:.1f}x más liquidez abajo (longs): sesgo de 'imán' bajista.")
+        if not down:
+            out.append("Toda la liquidez del rango está arriba (shorts): sesgo de 'imán' alcista.")
+        elif not up:
+            out.append("Toda la liquidez del rango está abajo (longs): sesgo de 'imán' bajista.")
+        elif up / down > 1.5:
+            out.append(f"Hay {up / down:.1f}x más liquidez arriba (shorts): sesgo de 'imán' alcista.")
+        elif down / up > 1.5:
+            out.append(f"Hay {down / up:.1f}x más liquidez abajo (longs): sesgo de 'imán' bajista.")
         else:
             out.append("Liquidez equilibrada arriba y abajo: sin sesgo claro.")
     out.append("Uso sugerido: zonas rojas como objetivos de toma de ganancias y para no poner el stop "
@@ -199,7 +214,9 @@ def render_text(hm: Heatmap, width: int = 40) -> str:
         if b.total <= 0:
             continue
         bar = "█" * max(1, round(b.total / peak * width))
-        lines.append(f"{icons[b.level]} {_fmt(b.low):>12} – {_fmt(b.high):<12} {bar} ${b.total:,.0f}")
+        whale = " 🐋" if b.whale_share >= 0.6 else ""
+        lines.append(f"{icons[b.level]} {_fmt(b.low):>12} – {_fmt(b.high):<12} {bar} ${b.total:,.0f}"
+                     f" ({b.n}){whale}")
     return "\n".join(lines + [""] + ["• " + s for s in insights(hm)])
 
 

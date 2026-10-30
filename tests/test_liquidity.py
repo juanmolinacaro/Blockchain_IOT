@@ -90,3 +90,20 @@ def test_parse_liquidation_px():
     st = parse_clearinghouse_state("x", raw)
     assert st.positions["BTC"].liquidation_px == 85000.5
     assert st.positions["ETH"].liquidation_px is None
+
+
+def test_one_sided_liquidity_does_not_crash():
+    only_longs = [LiqPoint("BTC", True, 95_100, 1.0)]
+    assert "Toda la liquidez del rango está abajo" in " ".join(
+        insights(build_heatmap(only_longs, "BTC", PRICE)))
+    only_shorts = [LiqPoint("BTC", False, 105_100, 1.0)]
+    assert "Toda la liquidez del rango está arriba" in " ".join(
+        insights(build_heatmap(only_shorts, "BTC", PRICE)))
+
+
+def test_whale_concentration_is_flagged():
+    hm = build_heatmap(pts(), "BTC", PRICE, range_pct=0.10, band_pct=0.01)
+    big = max(hm.bands, key=lambda b: b.total)
+    assert big.n == 1 and big.whale_share == 1.0
+    assert "ballena" in " ".join(insights(hm))
+    assert "🐋" in render_text(hm)
