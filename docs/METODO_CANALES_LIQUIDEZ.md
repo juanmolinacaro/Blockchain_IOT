@@ -126,3 +126,22 @@ Conclusiones:
    suerte. Las muestras son pequeñas (27–74 trades). El siguiente paso es validarla hacia delante
    (paper trading / diario de señales) antes de usar dinero.
 5. BTC sigue siendo la moneda más débil en todas las variantes.
+
+## Monitor en vivo y diario de señales
+
+```bash
+python -m copytrading monitor                  # revisa BTC, ETH y SOL con la última vela de 4H cerrada
+python -m copytrading diario add --coin BTC --side long --entry 77000 --stop 75800 \
+       --tp1 79100 --tp2 80400 --nota "EMA 200 diaria + parte baja del canal"
+python -m copytrading diario report            # resultados: sistema-A, sistema-B y juan
+```
+
+* **SEÑAL** 🚨: se cumplen todas las reglas en la última vela cerrada.
+  * `sistema-A` = canal + liquidez + confluencia con la EMA 50/200 diaria.
+  * `sistema-B` = canal + liquidez + filtro de la EMA 200 diaria.
+* **VIGILAR** 👀: el precio está a menos de 1,5 % de un borde del canal que coincide con una EMA
+  diaria o con liquidez fuerte justo detrás.
+* Cada señal (y cada lectura manual de Juan) se guarda en `data/diario.jsonl` y su resultado se
+  actualiza solo en cada ejecución, con la misma gestión que el backtest (TP1 en el centro del
+  canal con stop a la entrada, TP2, stop por cierre). Así, con las semanas, se compara el
+  porcentaje de aciertos del sistema con el de las lecturas de Juan.

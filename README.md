@@ -11,6 +11,7 @@ de forma automática. La primera fuente de datos es Hyperliquid.
 * **backtest**: simula cuánto habrías ganado copiándolas (con latencia y comisiones).
 * **run**: replica sus posiciones en tiempo real (paper trading por defecto).
 * **liquidity**: mapa de liquidaciones real (zonas roja/amarilla/verde) para decidir entradas, stops y objetivos.
+* **metodo / monitor / diario**: el método de canales + liquidez + EMA diaria: backtest, monitor en vivo y diario de señales ([docs/METODO_CANALES_LIQUIDEZ.md](docs/METODO_CANALES_LIQUIDEZ.md)).
 
 ```bash
 pip install -r requirements.txt

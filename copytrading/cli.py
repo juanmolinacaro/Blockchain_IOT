@@ -5,6 +5,9 @@
     python -m copytrading run       --config config.toml [--live]
     python -m copytrading liquidity --coin BTC [--html-dir reportes]
     python -m copytrading metodo    --coin BTC --interval 4h [--stop close --trend channel]
+    python -m copytrading monitor   --coins BTC,ETH,SOL [--journal data/diario.jsonl]
+    python -m copytrading diario    add --coin BTC --side long --entry 77000 --stop 75800 --tp1 79100 --tp2 80400
+    python -m copytrading diario    report
 """
 from __future__ import annotations
 
@@ -159,6 +162,68 @@ def cmd_metodo(cfg: Config, args) -> None:
           f"arriba {s.best_short_px:,.1f}")
 
 
+def _fmt_time(ms: int) -> str:
+    return datetime.fromtimestamp(ms / 1000, timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def cmd_monitor(cfg: Config, args) -> None:
+    from .method.monitor import analyze, closed_candles, load_journal, record_signals, save_journal, summary
+    from .method.monitor import update_outcome
+
+    src = HyperliquidSource(cfg.network)
+    journal = Path(args.journal)
+    entries = load_journal(journal)
+    now = int(time.time() * 1000)
+    alerts = []
+    for coin in [c.strip().upper() for c in args.coins.split(",")]:
+        candles = closed_candles(src.candles(coin, "4h", now - args.days * MS_PER_DAY, now), "4h", now)
+        if len(candles) < 300:
+            print(f"{coin}: pocas velas ({len(candles)})")
+            continue
+        st = analyze(coin, candles)
+        icon = {"SEÑAL": "🚨", "VIGILAR": "👀"}.get(st.status, "·")
+        print(f"\n{icon} {coin} {st.status} — {st.price:,.1f} (vela {_fmt_time(st.time)})")
+        for n in st.notes:
+            print(f"   {n}")
+        for source, t in st.signals.items():
+            print(f"   {source}: {t.side.upper()} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
+                  f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}")
+        for e in record_signals(entries, st, "4h"):
+            alerts.append(f"{e.coin} {e.side} ({e.source})")
+        if st.status == "VIGILAR":
+            alerts.append(f"{coin} vigilar")
+        for e in entries:
+            if e.coin == coin:
+                before = e.status
+                update_outcome(e, candles)
+                if before == "abierta" and e.status == "cerrada":
+                    alerts.append(f"{e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
+    save_journal(journal, entries)
+    print("\nDiario (" + str(journal) + "):")
+    for line in summary(entries):
+        print("   " + line)
+    print("\nRESUMEN: " + ("; ".join(alerts) if alerts else "sin novedades"))
+
+
+def cmd_diario(cfg: Config, args) -> None:
+    from .method.monitor import load_journal, manual_entry, save_journal, summary
+
+    journal = Path(args.journal)
+    entries = load_journal(journal)
+    if args.accion == "add":
+        e = manual_entry(args.coin.upper(), args.side, args.entry, args.stop, args.tp1, args.tp2, args.nota)
+        entries.append(e)
+        save_journal(journal, entries)
+        print(f"Apuntada: {e.coin} {e.side} entrada {e.entry} stop {e.stop} TP1 {e.tp1} TP2 {e.tp2}")
+        return
+    for e in entries[-args.last:]:
+        print(f"{_fmt_time(e.time)} {e.source:10} {e.coin:4} {e.side:5} {e.entry:>10,.1f} stop {e.stop:>10,.1f} "
+              f"-> {e.status} {e.r:+.2f}R {e.exit_reason} {e.note}")
+    print()
+    for line in summary(entries):
+        print(line)
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="copytrading", description="Copy trading on-chain")
     parser.add_argument("--config", default="config.toml")
@@ -202,12 +267,31 @@ def main(argv: list[str] | None = None) -> None:
                    help="filter: largos sobre la 1ª EMA, cortos bajo ella; confluence: tocar una EMA")
     m.add_argument("--last", type=int, default=10, help="últimas operaciones a mostrar")
 
+    mo = sub.add_parser("monitor", help="revisar el método en vivo y actualizar el diario")
+    mo.add_argument("--coins", default="BTC,ETH,SOL")
+    mo.add_argument("--journal", default="data/diario.jsonl")
+    mo.add_argument("--days", type=int, default=830,
+                    help="histórico (la EMA 200 diaria necesita mucho para estabilizarse)")
+
+    di = sub.add_parser("diario", help="apuntar lecturas manuales y ver resultados")
+    di.add_argument("accion", choices=["add", "report"])
+    di.add_argument("--journal", default="data/diario.jsonl")
+    di.add_argument("--coin", default="BTC")
+    di.add_argument("--side", choices=["long", "short"])
+    di.add_argument("--entry", type=float)
+    di.add_argument("--stop", type=float)
+    di.add_argument("--tp1", type=float)
+    di.add_argument("--tp2", type=float)
+    di.add_argument("--nota", default="")
+    di.add_argument("--last", type=int, default=20)
+
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-    cfg = Config.load(args.config)
+    cfg = Config.load(args.config) if Path(args.config).exists() else Config()
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
-     "liquidity": cmd_liquidity, "metodo": cmd_metodo}[args.cmd](cfg, args)
+     "liquidity": cmd_liquidity, "metodo": cmd_metodo,
+     "monitor": cmd_monitor, "diario": cmd_diario}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
