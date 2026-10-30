@@ -254,3 +254,15 @@ Compras: 6 jun (1.504), 26 jun (1.511), acumulación 25 jul–18 ago (1.821). Ve
   (vendió cerca del techo y mantiene).
 * Combinando BTC + ETH se repiten `0x92ae42…`, `0x6041f8…`, `0xbe4e91…`, `0xf89993…`,
   `0x9a9917…`: la mayoría hoy cortas (en BTC y ETH) o sin posición.
+
+### ETH 2025: 5 giros más (30 oct 2026)
+
+Compras: 9 abr 2025 (1.382), may–jun 2025 (2.317), 22 jun 2025 (2.113). Ventas: 28 jul 2025
+(3.946), ago–sep 2025 (4.960). 77 de las billeteras actuales tienen historial de 2025, pero **no hay
+evidencia de habilidad** en esos giros (1 billetera con neto ≥ 2, igual que con fechas al azar): la
+mayoría de las validadas en 2026 no operaba ETH entonces. Ranking total de 19 giros en
+`data/ballenas.json` → `ranking_19_giros`. Destaca `0xdbd1ba…` (acierta en 2025 y 2026; hoy corto
+en ETH desde 3.031).
+
+Conclusión del filtro de billeteras: el núcleo fiable sigue siendo el grupo validado en BTC 2026
+(prueba contra el azar clara); ETH aporta poco por sí solo.
