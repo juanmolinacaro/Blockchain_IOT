@@ -201,3 +201,25 @@ el monitor envía sus propias alertas con **ntfy** (app gratuita, sin cuenta):
 * La tarea programada corre cada 4 h (00:05, 04:05, … UTC) y requiere `ntfy.sh` en los dominios
   permitidos del entorno. Alternativa: Telegram (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
 * Verificado el 30 oct 2026: la alerta llegó al móvil.
+
+## Billeteras validadas: quién compró el suelo y vendió el techo (30 oct 2026)
+
+Idea de Juan: en vez de fiarse del PnL del mes (en un mes bajista premia a cualquiera que estuviera
+corto), marcar suelos y techos reales y buscar las billeteras que compraron en unos y vendieron en
+otros. Código: `copytrading/smartwallets.py`. Lista: `data/ballenas.json`.
+
+* Candidatos: 1.500 traders de swing (ganancias históricas, poco volumen respecto a su capital) +
+  1.200 de mayor PnL. Hyperliquid solo guarda las 10.000 operaciones más recientes de cada cuenta,
+  así que los bots/market makers no tienen historial hasta julio (de todos modos no interesan).
+* 281 billeteras operaron BTC/ETH en el periodo; 115 con historial hasta el suelo de julio.
+* Suelo 1 jul (57.768) + techo 21 sep–6 oct (87.471): **11 "maestras"** (compraron y vendieron).
+  Las 4 más grandes compraron ~11,8M cada una a 58.600–59.600, mantuvieron y vendieron 19–35M a
+  86.900–87.400. Dos de ellas son gemelas (mismo operador probable).
+* Con 6 giros (3 suelos, 3 techos): nadie acierta más de 3; 11 billeteras aciertan 3, casi todas
+  pequeñas. Las grandes aciertan el giro principal (2/6): son de mantener posición, no de cazar
+  cada giro.
+
+Posición actual de las maestras grandes: **largos** (BTC 47M @82.098; ETH ~76M @2.420–2.719, en
+pérdidas) frente a un **corto** grande (BTC 63M @79.051). Es decir, **no hay consenso bajista**
+entre las validadas, al contrario que el "dinero inteligente por PnL del mes" (12:1 corto): el
+filtro de Juan elimina ese sesgo.

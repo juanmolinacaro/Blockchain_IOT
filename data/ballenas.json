@@ -1,0 +1,40 @@
+{
+ "actualizado": "2026-10-30",
+ "criterio": "Compraron en el suelo de BTC (24 jun - 3 jul 2026, mín 57.768) y vendieron en el techo (21 sep - 6 oct, máx 87.471); compras/ventas netas >= 50k USD a menos de un 6 % del extremo.",
+ "nivel_1_maestras_grandes": [
+  {
+   "address": "0x93ab7dbdeb996806454de19c35c8247f4b2511f8",
+   "nota": "compró 11,7M @58.585, mantuvo, vendió 19,1M @86.945 (+4,5M). Ahora BTC LONG 47M @82.098"
+  },
+  {
+   "address": "0x237152b038d88f4156a0cd71090462de7e3f0883",
+   "nota": "compró 11,8M @59.606, vendió 34,9M @87.142 (+3,4M). Ahora ETH LONG 26,9M @2.422"
+  },
+  {
+   "address": "0xbd1c84113c6deb5044be0c2221f9e9403811ff0e",
+   "nota": "compró 11,9M @59.328, vendió 26,2M @87.248 (+2,5M). Ahora ETH LONG 26,9M @2.420 (gemela de 0x237152: probablemente el mismo operador)"
+  },
+  {
+   "address": "0xec7f9f5b31b8f5da6ac6c0973bbd496e16f9df39",
+   "nota": "compró 11,9M @59.253, vendió 26,2M @87.405 (+2,6M). Ahora ETH LONG 22,4M @2.719"
+  },
+  {
+   "address": "0x218a65e21eddeece7a9df38c6bbdd89f692b7da2",
+   "nota": "compró 3,1M @60.110, vendió 13,5M @85.318. Ahora BTC SHORT 63M @79.051 y ETH SHORT 11,7M @2.208"
+  }
+ ],
+ "nivel_2_aciertan_3_de_6_giros": [
+  "0xda744273f80b22412417f7cfe0503f3d721f987d",
+  "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
+  "0xaac091f502a773498fb9336f41500fd13098245b",
+  "0x9237794d8e5c6eb247b20f2e5edd9ad5f530d8ec",
+  "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
+  "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f",
+  "0x3c516f085e94177eaf0bdfb5b5eb1ab71052d064",
+  "0x183d0567c33e7591c22540e45d2f74730b42a0ca",
+  "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
+  "0xf899937184168b1d9dee75acbaa3fef0f52888db",
+  "0x92ae4209e3a5760903aff0c423312392eb3f86a8"
+ ],
+ "aviso": "Validado con pocos giros: revisar con más eventos antes de darles mucho peso."
+}
