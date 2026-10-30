@@ -502,5 +502,50 @@
    "cuenta_usd": 245195,
    "ahora": "BTC SHORT $3.15M @83,654"
   }
- ]
+ ],
+ "eth_cortos_ene_feb_2026": {
+  "giro": "Corto en techo 12-18 ene 2026 (máx 3.403) y cierre en suelo 3-10 feb (mín 1.741)",
+  "acertaron_ambos": [
+   {
+    "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344",
+    "corto_abierto_usd": 331890,
+    "precio_corto": 3319,
+    "cierre_usd": 286785,
+    "precio_cierre": 1912,
+    "ahora": "sin ETH"
+   },
+   {
+    "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
+    "corto_abierto_usd": 179045,
+    "precio_corto": 3289,
+    "cierre_usd": 3198501,
+    "precio_cierre": 2125,
+    "ahora": "ETH SHORT 0.28M @2,325"
+   },
+   {
+    "address": "0x2fcb6898d5a0623de19c3691904927685014c4d8",
+    "corto_abierto_usd": 332690,
+    "precio_corto": 3330,
+    "cierre_usd": 87055,
+    "precio_cierre": 1777,
+    "ahora": "sin ETH"
+   },
+   {
+    "address": "0x95fde6cf0d305078b7eeac44182a931c169dd947",
+    "corto_abierto_usd": 399945,
+    "precio_corto": 3331,
+    "cierre_usd": 1912201,
+    "precio_cierre": 2036,
+    "ahora": "ETH SHORT 0.00M @2,584"
+   },
+   {
+    "address": "0x939f95036d2e7b6d7419ec072bf9d967352204d2",
+    "corto_abierto_usd": 362630,
+    "precio_corto": 3209,
+    "cierre_usd": 423450,
+    "precio_cierre": 2117,
+    "ahora": "ETH LONG 22.08M @2,427"
+   }
+  ]
+ }
 }
