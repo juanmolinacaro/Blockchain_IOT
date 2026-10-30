@@ -317,3 +317,15 @@ Lectura: el fin de semana se mueve menos (rango), casi siempre rompe un lado del
 **la mitad de esas rupturas son trampas** y los movimientos grandes del fin de semana se revierten
 el lunes 6 de cada 10 veces. Regla: no perseguir rupturas de fin de semana; esperar el lunes o
 operar el regreso al rango del viernes.
+
+### Regla: BTC primero · horario del fin de semana (30 oct 2026)
+
+* **Revisar siempre BTC antes que cualquier altcoin**: BTC mueve el mercado cripto (regla de Juan).
+* Rango mediano de una vela de 4H de BTC (2,3 años): media 1,09 %. **Sábado: 0,54–0,68 %**
+  (acumulación). **Domingo 20–24 h UTC (15–19 h Colombia): 1,42 %**, el tramo más volátil del fin
+  de semana, seguido de lunes 00–04 h UTC (1,55 %).
+* El pequeño rango del sábado se rompe ya el domingo antes de las 16 h UTC en el 85 % de los casos;
+  el movimiento fuerte llega el domingo por la tarde/noche (apertura de los mercados tradicionales).
+* Regla: no operar el ruido del sábado; esperar el cierre de la vela de 4H del domingo
+  (00 h UTC, 19 h Colombia) para confirmar dirección, recordando que el lunes revierte el 60 % de
+  los movimientos de fin de semana > 2 %.
