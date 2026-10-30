@@ -217,7 +217,10 @@ def cmd_monitor(cfg: Config, args) -> None:
                 continue
             before = e.status
             update_outcome(e, c1)
-            if before != e.status:
+            # solo avisar de cambios recientes: si el diario no se pudo guardar en la ejecución anterior,
+            # el cambio se recalcula igual pero no se repite el aviso
+            changed_at = {"abierta": e.time, "cerrada": e.exit_time}.get(e.status, now)
+            if before != e.status and changed_at >= now - args.alert_hours * 3_600_000:
                 msg = {"abierta": f"🎯 {e.coin} plan {e.side} ACTIVADO en {e.entry:,.1f} ({e.note})",
                        "cerrada": f"✅ {e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})",
                        "caducada": f"⌛ {e.coin} plan {e.side} caducó sin activarse ({e.note})",
@@ -352,6 +355,8 @@ def main(argv: list[str] | None = None) -> None:
     mo.add_argument("--coins", default="BTC,ETH,SOL")
     mo.add_argument("--journal", default="data/diario.jsonl")
     mo.add_argument("--notify", action="store_true", help="enviar aviso al móvil si hay novedades")
+    mo.add_argument("--alert-hours", type=float, default=4.5,
+                    help="avisar solo de cambios de planes ocurridos en estas últimas horas")
     mo.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
     mo.add_argument("--days", type=int, default=830,
                     help="histórico (la EMA 200 diaria necesita mucho para estabilizarse)")
