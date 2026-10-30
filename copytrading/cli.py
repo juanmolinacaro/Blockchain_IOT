@@ -238,11 +238,17 @@ def cmd_monitor(cfg: Config, args) -> None:
     for line in summary(entries):
         print("   " + line)
     print("\nRESUMEN: " + ("; ".join(alerts) if alerts else "sin novedades"))
+    from .method.monitor import trading_allowed
+    allowed = trading_allowed(now)
+    if not allowed:
+        print("📵 Viernes/sábado (o domingo antes de las 13 h Colombia): solo contexto, no se opera")
     if args.notify and alerts:
         from .notify import send_alert
         level = next(lv for lv in ("SEÑAL", "CERRADA", "VIGILAR") if lv in levels)
         icon = {"SEÑAL": "🚨", "CERRADA": "✅", "VIGILAR": "👀"}[level]
-        title = f"{icon} {level}: " + "; ".join(alerts)
+        if not allowed and level == "SEÑAL":   # fin de semana: la señal es solo contexto
+            level, icon = "VIGILAR", "📵"
+        title = f"{icon} {level}{'' if allowed else ' (fin de semana, solo contexto)'}: " + "; ".join(alerts)
         body = "\n".join(details + [""] + wallet_lines + ["", "Diario:"] + summary(entries)
                          + ["", "Información para decidir, no una orden de operar."])
         sent = send_alert(title[:120], body, level, ntfy_topic=args.ntfy_topic)

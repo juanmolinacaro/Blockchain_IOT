@@ -329,3 +329,15 @@ operar el regreso al rango del viernes.
 * Regla: no operar el ruido del sábado; esperar el cierre de la vela de 4H del domingo
   (00 h UTC, 19 h Colombia) para confirmar dirección, recordando que el lunes revierte el 60 % de
   los movimientos de fin de semana > 2 %.
+
+## Reglas operativas (30 oct 2026)
+
+1. **No perseguir el precio.** Se entra solo en las zonas preparadas (canal + liquidez + EMA) y con
+   confirmación por cierre.
+2. **BTC primero**: se revisa BTC antes que cualquier altcoin.
+3. **Viernes y sábado no se opera.** Se sigue el mercado para tener contexto de cómo abrirá la
+   semana. El monitor marca sus avisos como "📵 solo contexto".
+4. **Domingo desde las 13:00 (Colombia)** se buscan operaciones: el tramo más volátil del fin de
+   semana es de 15 a 19 h, cuando se mueve el precio antes de abrir los mercados tradicionales.
+5. Las billeteras de tendencia confirman la dirección de fondo; las de corto plazo solo dan contexto.
+6. Toda idea se apunta en el diario **antes** de que ocurra (nivel, dirección, stop, objetivos).

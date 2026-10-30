@@ -127,3 +127,16 @@ def test_limit_plan_annulled_if_price_runs_without_pullback():
     e = manual_plan("BTC", "long", 77500, "touch_below", 76400, 79150, 80200, now_ms=0)
     update_outcome(e, [c1(0, 78100, 78600, 77900, 78500), c1(1, 78500, 79200, 78400, 79100)])
     assert e.status == "anulada" and "sin retroceder" in e.exit_reason
+
+
+def test_weekend_rule_colombia_time():
+    from datetime import datetime, timezone
+
+    from copytrading.method.monitor import trading_allowed
+    ms = lambda y, mo, d, h: int(datetime(y, mo, d, h, tzinfo=timezone.utc).timestamp() * 1000)
+    assert trading_allowed(ms(2026, 10, 29, 20))          # jueves
+    assert not trading_allowed(ms(2026, 10, 30, 12))      # viernes 7 h Colombia
+    assert not trading_allowed(ms(2026, 10, 31, 20))      # sábado
+    assert not trading_allowed(ms(2026, 11, 1, 17))       # domingo 12 h Colombia
+    assert trading_allowed(ms(2026, 11, 1, 18))           # domingo 13 h Colombia
+    assert trading_allowed(ms(2026, 11, 2, 3))            # domingo 22 h Colombia

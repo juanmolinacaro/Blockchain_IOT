@@ -155,6 +155,20 @@ def magnet_notes(candles: list[Candle]) -> list[str]:
     return out
 
 
+COLOMBIA_OFFSET_MS = -5 * 3_600_000
+
+
+def trading_allowed(now_ms: int) -> bool:
+    """Regla de Juan: viernes y sábado no se opera; se vuelve a operar el domingo desde las 13:00
+    (hora de Colombia, UTC-5), antes del tramo más volátil del fin de semana (15-19 h)."""
+    local = (now_ms + COLOMBIA_OFFSET_MS) // 1000
+    weekday = (local // 86_400 + 3) % 7          # 0 = lunes (el 1-1-1970 fue jueves)
+    hour = (local % 86_400) // 3_600
+    if weekday in (4, 5):
+        return False
+    return not (weekday == 6 and hour < 13)
+
+
 # ------------------------------------------------------------------- diario
 def load_journal(path: Path) -> list[JournalEntry]:
     if not path.exists():
