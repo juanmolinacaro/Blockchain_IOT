@@ -1,0 +1,118 @@
+{
+ "actualizado": "2026-10-30",
+ "tendencia": [
+  {
+   "address": "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
+   "grupo": "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98",
+   "grupo": "0x6041f881358c71d64bc9253c9ba0391df69f7d98",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
+   "grupo": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db",
+   "grupo": "0xf899937184168b1d9dee75acbaa3fef0f52888db",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
+   "grupo": "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f",
+   "grupo": "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
+   "grupo": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623",
+   "grupo": "0x42fd5648cf21c158d15e4f58785760755b3f6623",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x413c2724b62975c18b1415650f998a8f0a67886c",
+   "grupo": "0x413c2724b62975c18b1415650f998a8f0a67886c",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x3c516f085e94177eaf0bdfb5b5eb1ab71052d064",
+   "grupo": "0x3c516f085e94177eaf0bdfb5b5eb1ab71052d064",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x9237794d8e5c6eb247b20f2e5edd9ad5f530d8ec",
+   "grupo": "0x9237794d8e5c6eb247b20f2e5edd9ad5f530d8ec",
+   "origen": "validada BTC 8 giros"
+  },
+  {
+   "address": "0x93ab7dbdeb996806454de19c35c8247f4b2511f8",
+   "grupo": "0x93ab7dbdeb996806454de19c35c8247f4b2511f8",
+   "origen": "maestra grande (suelo jul / techo sep-oct)"
+  },
+  {
+   "address": "0x237152b038d88f4156a0cd71090462de7e3f0883",
+   "grupo": "gemelas-eth",
+   "origen": "maestra grande (suelo jul / techo sep-oct)"
+  },
+  {
+   "address": "0xbd1c84113c6deb5044be0c2221f9e9403811ff0e",
+   "grupo": "gemelas-eth",
+   "origen": "maestra grande (suelo jul / techo sep-oct)"
+  },
+  {
+   "address": "0xec7f9f5b31b8f5da6ac6c0973bbd496e16f9df39",
+   "grupo": "0xec7f9f5b31b8f5da6ac6c0973bbd496e16f9df39",
+   "origen": "maestra grande (suelo jul / techo sep-oct)"
+  },
+  {
+   "address": "0x218a65e21eddeece7a9df38c6bbdd89f692b7da2",
+   "grupo": "0x218a65e21eddeece7a9df38c6bbdd89f692b7da2",
+   "origen": "maestra grande (suelo jul / techo sep-oct)"
+  },
+  {
+   "address": "0x6ea486a3426563e23023125f18867117878f0ea7",
+   "grupo": "0x6ea486a3426563e23023125f18867117878f0ea7",
+   "origen": "mejor timing en ETH"
+  },
+  {
+   "address": "0xdbd1bac81ad581c7198c9d155ca468f32a0c29dd",
+   "grupo": "0xdbd1bac81ad581c7198c9d155ca468f32a0c29dd",
+   "origen": "mejor timing en ETH"
+  }
+ ],
+ "corto_plazo": [
+  {
+   "address": "0x585f4fbe2d2a889c286fa71fb81d01f30773f4b1",
+   "grupo": "0x585f4fbe2d2a889c286fa71fb81d01f30773f4b1",
+   "origen": "6%: 6 aciertos/1 error"
+  },
+  {
+   "address": "0x63d417a577b50c96f4f09148d4e4d70950db0522",
+   "grupo": "0x63d417a577b50c96f4f09148d4e4d70950db0522",
+   "origen": "6%: 5/0 · 4%: 10/4"
+  },
+  {
+   "address": "0x0423b4b2acb4f219ae4a270abd5dde2360e455bb",
+   "grupo": "0x0423b4b2acb4f219ae4a270abd5dde2360e455bb",
+   "origen": "6%: 3/0 · 4%: 6/1"
+  },
+  {
+   "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344",
+   "grupo": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344",
+   "origen": "4%: 10/4 · cortó techo ene y cerró en feb"
+  }
+ ],
+ "nota": "Tendencia = indicador de fondo (confirma estructura / buscar largos a largo plazo). Corto plazo = solo informativo. Un voto por grupo (las gemelas cuentan como una)."
+}
