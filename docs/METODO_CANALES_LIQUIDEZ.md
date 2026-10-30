@@ -223,3 +223,21 @@ Posición actual de las maestras grandes: **largos** (BTC 47M @82.098; ETH ~76M 
 pérdidas) frente a un **corto** grande (BTC 63M @79.051). Es decir, **no hay consenso bajista**
 entre las validadas, al contrario que el "dinero inteligente por PnL del mes" (12:1 corto): el
 filtro de Juan elimina ese sesgo.
+
+### Validación con 8 giros y prueba contra el azar (30 oct 2026)
+
+Juan añadió el techo de mayo (6 may, 82.799) y el suelo de junio (5 jun, 59.100). Con 8 giros de
+BTC (4 techos y 4 suelos, mayo–octubre) y 211 billeteras de swing (75 con historial hasta mayo):
+
+* **Acierto** = compra neta en suelo / venta neta en techo (≥ 50k USD, cerca del extremo).
+  **Error** = lo contrario (vender en suelo o comprar en techo).
+* Nadie acierta más de 4 de 8. **11 billeteras** tienen aciertos − errores ≥ 3.
+* **Prueba contra el azar**: con 8 fechas aleatorias (200 repeticiones), la mediana es 1 billetera
+  con neto ≥ 3 y el máximo 6. Con los giros reales salen 11 → **0 de 200** veces el azar iguala lo
+  real: hay habilidad real de timing en este grupo, no solo suerte.
+* Son cuentas pequeñas o medianas (30k–1,1M USD): traders de swing con buen timing, no ballenas.
+* Posición al 30 oct (BTC 78.300): 4 cortos (5,4M) frente a 3 largos (2,5M), 4 sin posición.
+  Los largos entraron cerca del suelo de ayer (76.939 y 78.114, EMA 200 diaria).
+
+Lista en `data/ballenas.json` → `nivel_1_validadas_8_giros` (las del timing) y
+`nivel_2_maestras_grandes` (las que compraron el suelo de julio y vendieron el techo con tamaño).

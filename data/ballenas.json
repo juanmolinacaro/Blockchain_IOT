@@ -1,7 +1,151 @@
 {
  "actualizado": "2026-10-30",
  "criterio": "Compraron en el suelo de BTC (24 jun - 3 jul 2026, mín 57.768) y vendieron en el techo (21 sep - 6 oct, máx 87.471); compras/ventas netas >= 50k USD a menos de un 6 % del extremo.",
- "nivel_1_maestras_grandes": [
+ "aviso": "Validado con pocos giros: revisar con más eventos antes de darles mucho peso.",
+ "nivel_1_validadas_8_giros": [
+  {
+   "address": "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
+   "aciertos": 4,
+   "errores": 0,
+   "marcas": "·S···TST",
+   "cuenta_usd": 31743,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "long",
+     "usd": 301954,
+     "entrada": 80985.2
+    }
+   }
+  },
+  {
+   "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98",
+   "aciertos": 4,
+   "errores": 0,
+   "marcas": "TS···T·T",
+   "cuenta_usd": 258513,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "short",
+     "usd": 3137908,
+     "entrada": 83654.4
+    }
+   }
+  },
+  {
+   "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
+   "aciertos": 4,
+   "errores": 1,
+   "marcas": "T·S·S··T",
+   "cuenta_usd": 199645,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "short",
+     "usd": 156451,
+     "entrada": 80194.7
+    },
+    "ETH": {
+     "lado": "short",
+     "usd": 281041,
+     "entrada": 2324.84
+    }
+   }
+  },
+  {
+   "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db",
+   "aciertos": 4,
+   "errores": 1,
+   "marcas": "T·S··T·T",
+   "cuenta_usd": 460814,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "short",
+     "usd": 1016936,
+     "entrada": 77566.2
+    },
+    "ETH": {
+     "lado": "short",
+     "usd": 606608,
+     "entrada": 2277.55
+    }
+   }
+  },
+  {
+   "address": "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
+   "aciertos": 4,
+   "errores": 1,
+   "marcas": "T·S··TS·",
+   "cuenta_usd": 529390,
+   "posicion_30oct": {}
+  },
+  {
+   "address": "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f",
+   "aciertos": 4,
+   "errores": 1,
+   "marcas": "T·ST···T",
+   "cuenta_usd": 116557,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "short",
+     "usd": 1095157,
+     "entrada": 79202.4
+    }
+   }
+  },
+  {
+   "address": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
+   "aciertos": 3,
+   "errores": 0,
+   "marcas": "··ST···T",
+   "cuenta_usd": 0,
+   "posicion_30oct": {}
+  },
+  {
+   "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623",
+   "aciertos": 3,
+   "errores": 0,
+   "marcas": "T····TS·",
+   "cuenta_usd": 735344,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "long",
+     "usd": 1373261,
+     "entrada": 76938.8
+    }
+   }
+  },
+  {
+   "address": "0x413c2724b62975c18b1415650f998a8f0a67886c",
+   "aciertos": 3,
+   "errores": 0,
+   "marcas": "T·····ST",
+   "cuenta_usd": 1093775,
+   "posicion_30oct": {}
+  },
+  {
+   "address": "0x3c516f085e94177eaf0bdfb5b5eb1ab71052d064",
+   "aciertos": 3,
+   "errores": 0,
+   "marcas": "····ST·T",
+   "cuenta_usd": 514686,
+   "posicion_30oct": {
+    "BTC": {
+     "lado": "long",
+     "usd": 782255,
+     "entrada": 78114.5
+    }
+   }
+  },
+  {
+   "address": "0x9237794d8e5c6eb247b20f2e5edd9ad5f530d8ec",
+   "aciertos": 3,
+   "errores": 0,
+   "marcas": "·····TST",
+   "cuenta_usd": 121755,
+   "posicion_30oct": {}
+  }
+ ],
+ "criterio_8_giros": "8 giros de BTC (techos 6 may, 21 jul, 3 sep, 21 sep-6 oct; suelos 5 jun, 1 jul, 1 ago, 15 sep). Acierto = compra neta en suelo / venta neta en techo >= 50k USD cerca del extremo; error = lo contrario. Seleccion: aciertos - errores >= 3. Prueba con fechas al azar (200 veces): mediana 1 billetera con >=3, maximo 6; con giros reales, 11.",
+ "nivel_2_maestras_grandes": [
   {
    "address": "0x93ab7dbdeb996806454de19c35c8247f4b2511f8",
    "nota": "compró 11,7M @58.585, mantuvo, vendió 19,1M @86.945 (+4,5M). Ahora BTC LONG 47M @82.098"
@@ -22,19 +166,5 @@
    "address": "0x218a65e21eddeece7a9df38c6bbdd89f692b7da2",
    "nota": "compró 3,1M @60.110, vendió 13,5M @85.318. Ahora BTC SHORT 63M @79.051 y ETH SHORT 11,7M @2.208"
   }
- ],
- "nivel_2_aciertan_3_de_6_giros": [
-  "0xda744273f80b22412417f7cfe0503f3d721f987d",
-  "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
-  "0xaac091f502a773498fb9336f41500fd13098245b",
-  "0x9237794d8e5c6eb247b20f2e5edd9ad5f530d8ec",
-  "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
-  "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f",
-  "0x3c516f085e94177eaf0bdfb5b5eb1ab71052d064",
-  "0x183d0567c33e7591c22540e45d2f74730b42a0ca",
-  "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
-  "0xf899937184168b1d9dee75acbaa3fef0f52888db",
-  "0x92ae4209e3a5760903aff0c423312392eb3f86a8"
- ],
- "aviso": "Validado con pocos giros: revisar con más eventos antes de darles mucho peso."
+ ]
 }
