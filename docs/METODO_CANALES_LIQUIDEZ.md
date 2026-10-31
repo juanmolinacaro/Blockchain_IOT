@@ -361,3 +361,38 @@ ruptura = primer cierre de 4H fuera de ese rango en las 72 h siguientes.
 Lectura: cuando tras un impulso el precio consolida en vez de devolverlo, lo más probable es que
 siga en la dirección del impulso (continuación). El objetivo típico tras la ruptura es ~40 % del
 impulso. Muestras pequeñas en triángulos y en caídas: tomarlo como inclinación, no como certeza.
+
+## Trampas: rupturas falsas frente a reales (31 oct 2026)
+
+Objetivo de Juan: descubrir las trampas del precio. Ruptura = cierre fuera del rango de las últimas
+24 h; trampa = vuelve a cerrar dentro en las 6 h (1H) / 12 h (4H) siguientes. BTC + ETH + SOL.
+Comando: `python -m copytrading trampas --interval 1h` (o `4h`).
+
+| Rasgo de la vela de ruptura | 1H (679 rupturas) | 4H (1.874 rupturas) |
+|---|---|---|
+| **Todas** | 56 % trampas | 47 % trampas |
+| Cierra **apenas fuera** (< 0,2 % del nivel) | **76 %** | **69 %** |
+| Cierra **claramente fuera** (> 0,6 %) | **29 %** | **33 %** |
+| Volumen bajo (tercio inferior) | 68 % | 55 % |
+| Volumen alto (tercio superior) | 43 % | 33 % |
+| Mecha larga en contra (> 40 % de la vela) | 66 % | 56 % |
+| Cierre en el extremo de la vela (mecha < 15 %) | 47 % | 40 % |
+| Fin de semana / entre semana | 50 % / 59 % | 51 % / 45 % |
+| **Combinación trampa**: volumen bajo + mecha en contra > 30 % | **74 %** | **59 %** |
+| **Combinación real**: volumen alto + cierre en el extremo + a favor de la EMA 50d | **32 %** | **27 %** |
+| Tras una trampa, llega al otro extremo del rango | 20 % (24 h) | 44 % (4 días) |
+| Recorrido mediano de una ruptura real | 2,0 % (24 h) | 3,8 % (4 días) |
+
+Reglas para detectar trampas:
+
+1. **La señal más fuerte es cuánto cierra fuera**: si la vela cierra apenas por encima/debajo del
+   nivel (< 0,2 %), es trampa 7 de cada 10 veces. Exigir un cierre claro (≥ 0,5–0,6 %) más allá.
+2. **Volumen**: ruptura con volumen bajo → sospechosa; con volumen alto → mucho más fiable.
+3. **Mecha en contra**: si la vela de ruptura deja mecha larga de vuelta hacia el rango, es rechazo.
+4. Con las tres señales malas a la vez, 3 de cada 4 rupturas fallan; con las buenas, 3 de cada 4
+   aguantan.
+5. **Operar la trampa**: cuando una ruptura de 4H falla y vuelve dentro, el precio cruza hasta el
+   otro extremo del rango el 44 % de las veces: es una operación en sí misma.
+
+Aplicación: los niveles de activación de los planes ya se colocan claramente fuera del rango (p. ej.
+78.000 frente al techo del triángulo en ~77.300, +0,9 %), lo que filtra las rupturas débiles.

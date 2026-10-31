@@ -255,6 +255,19 @@ def cmd_monitor(cfg: Config, args) -> None:
         print("AVISO: " + (f"enviado por {', '.join(sent)}" if sent else "NO enviado (revisa el canal)"))
 
 
+def cmd_trampas(cfg: Config, args) -> None:
+    from .method.traps import find_breakouts, report
+
+    src = HyperliquidSource(cfg.network)
+    end = int(time.time() * 1000)
+    hours = {"1h": 1, "4h": 4}[args.interval]
+    allb = []
+    for coin in [c.strip().upper() for c in args.coins.split(",")]:
+        cs = src.candles(coin, args.interval, end - args.days * MS_PER_DAY, end)
+        allb += find_breakouts(cs, lookback=24 // hours, hold=max(1, 6 // hours), after=24)
+    print("\n".join(report(f"{args.coins} {args.interval}", allb)))
+
+
 def cmd_billeteras(cfg: Config, args) -> None:
     from .walletbias import report as wallet_report
 
@@ -377,6 +390,11 @@ def main(argv: list[str] | None = None) -> None:
     mo.add_argument("--days", type=int, default=830,
                     help="histórico (la EMA 200 diaria necesita mucho para estabilizarse)")
 
+    tr = sub.add_parser("trampas", help="estudio de rupturas falsas frente a reales")
+    tr.add_argument("--coins", default="BTC,ETH,SOL")
+    tr.add_argument("--interval", choices=["1h", "4h"], default="1h")
+    tr.add_argument("--days", type=int, default=830)
+
     sub.add_parser("billeteras", help="indicador de billeteras: tendencia y corto plazo")
 
     ap = sub.add_parser("aviso-prueba", help="enviar una alerta de prueba al móvil")
@@ -405,7 +423,8 @@ def main(argv: list[str] | None = None) -> None:
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
-     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras}[args.cmd](cfg, args)
+     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras,
+     "trampas": cmd_trampas}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
