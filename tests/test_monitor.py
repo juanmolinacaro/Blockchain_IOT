@@ -140,3 +140,10 @@ def test_weekend_rule_colombia_time():
     assert not trading_allowed(ms(2026, 11, 1, 17))       # domingo 12 h Colombia
     assert trading_allowed(ms(2026, 11, 1, 18))           # domingo 13 h Colombia
     assert trading_allowed(ms(2026, 11, 2, 3))            # domingo 22 h Colombia
+
+
+def test_hourly_plans_get_five_days_before_time_exit():
+    e = manual_entry("BTC", "long", 100, 90, 120, 130, interval="1h", now_ms=0)
+    cs = [c1(k, 100, 101, 99, 100) for k in range(60)]      # 60 h sin tocar stop ni objetivos
+    update_outcome(e, cs)
+    assert e.status == "abierta"                              # antes se cerraba "por tiempo" a las 30 h

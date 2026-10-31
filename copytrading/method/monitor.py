@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 
 from ..models import Candle
@@ -229,6 +229,9 @@ def update_outcome(e: JournalEntry, candles: list[Candle], cfg: MethodConfig = V
         activate_plan(e, candles)
     if e.status != "abierta":
         return e
+    if e.interval == "1h":
+        # el límite de tiempo del método es ~5 días: 30 velas de 4H equivalen a 120 de 1H
+        cfg = replace(cfg, max_bars=cfg.max_bars * 4)
     idx = next((k for k, c in enumerate(candles) if c.t >= e.time), None)
     if idx is None:
         return e
