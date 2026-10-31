@@ -341,3 +341,23 @@ operar el regreso al rango del viernes.
    semana es de 15 a 19 h, cuando se mueve el precio antes de abrir los mercados tradicionales.
 5. Las billeteras de tendencia confirman la dirección de fondo; las de corto plazo solo dan contexto.
 6. Toda idea se apunta en el diario **antes** de que ocurra (nivel, dirección, stop, objetivos).
+
+## Consolidación tras un movimiento fuerte (31 oct 2026)
+
+Enseñanza de Juan: tras una caída o subida grande, el precio a veces consolida, en triángulo
+(se comprime) o en canal. Medido en BTC + ETH + SOL (4H, 2,3 años): impulso = movimiento ≥ 6 % en
+24 h; consolidación = las 36 h siguientes en un rango ≤ 60 % del impulso sin devolver más del 61,8 %;
+ruptura = primer cierre de 4H fuera de ese rango en las 72 h siguientes.
+
+| Dato | Valor |
+|---|---|
+| Impulsos ≥ 6 % en 24 h | 264 |
+| Seguidos de consolidación estrecha | 42 (16 %): "no siempre, pero algunas veces" |
+| La consolidación rompe **a favor del impulso** | **61 %** (sin consolidación, solo 43 %) |
+| Triángulo (se comprime) | 83 % a favor (solo 6 casos) |
+| Canal / rango | 57 % a favor (36 casos) |
+| Recorrido mediano tras la ruptura (48 h) | 2,9 % ≈ 39 % del impulso |
+
+Lectura: cuando tras un impulso el precio consolida en vez de devolverlo, lo más probable es que
+siga en la dirección del impulso (continuación). El objetivo típico tras la ruptura es ~40 % del
+impulso. Muestras pequeñas en triángulos y en caídas: tomarlo como inclinación, no como certeza.
