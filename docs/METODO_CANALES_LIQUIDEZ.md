@@ -413,3 +413,18 @@ las califica con las señales del estudio (validado sobre el histórico):
 Volumen relativo de la vela de ruptura frente a la media de las 24 h previas: bajo < 1,73x,
 alto > 3,13x (tercios del estudio). Los avisos entran en la notificación de ntfy; el fin de semana
 llegan como "solo contexto".
+
+### Hueco del CME el fin de semana (1 nov 2026)
+
+El CME cierra el viernes (17:00 hora de Nueva York) y reabre el domingo (18:00 hora de Nueva York;
+en invierno, 18:00 en Colombia). Si cripto se movió durante el fin de semana, queda un "hueco" entre
+el cierre del viernes y la apertura. Medición en BTC 1H (Hyperliquid como referencia, últimos ~7
+meses, fines de semana con hueco > 0,3 %; 23 casos):
+
+| Se cierra el hueco (el precio vuelve al cierre del viernes) | BTC | Base: cualquier nivel a ~1,1 % |
+|---|---|---|
+| En 24 h | 61 % (hueco al alza: 65 %) | 48 % |
+| En 3 días | 87 % (hueco al alza: 88 %) | 73 % |
+
+Hay algo de ventaja sobre lo normal, pero con pocos casos: sirve como imán de contexto, no como
+señal sola. En ETH el efecto es más débil (54 % en 24 h, 71 % en 3 días).
