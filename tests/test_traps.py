@@ -25,3 +25,21 @@ def test_real_breakout_holds_and_follows_through():
     cs += [c(25 + k, 103 + k, 104 + k, 102.5 + k, 103.5 + k) for k in range(30)]
     b = find_breakouts(cs, lookback=24, hold=6, after=24)[0]
     assert not b.trap and b.follow > 0.1 and b.wick < 0.05 and b.excess > 0.01
+
+
+from copytrading.method.traps import classify, recent_breakouts  # noqa: E402
+
+
+def test_classify_profiles():
+    cs = flat(24) + [c(24, 100, 101.5, 100, 101.1, v=0.5)]
+    weak = recent_breakouts(cs, window=1)[0]
+    assert weak.profile == "trampa" and "cierra apenas fuera" in weak.reasons
+    cs = flat(24) + [c(24, 100, 103, 100, 102.95, v=4)]
+    strong = recent_breakouts(cs, window=1)[0]
+    assert strong.profile in ("real", "dudosa") and "volumen alto" in strong.reasons
+
+
+def test_recent_breakout_marks_confirmed_trap():
+    cs = flat(24) + [c(24, 100, 101.5, 100, 101.2, v=0.5), c(25, 101, 101, 99.5, 100.2)]
+    lb = recent_breakouts(cs, window=3)[0]
+    assert lb.failed_at == 25 * H

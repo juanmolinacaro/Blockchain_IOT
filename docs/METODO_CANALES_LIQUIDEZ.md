@@ -396,3 +396,20 @@ Reglas para detectar trampas:
 
 Aplicación: los niveles de activación de los planes ya se colocan claramente fuera del rango (p. ej.
 78.000 frente al techo del triángulo en ~77.300, +0,9 %), lo que filtra las rupturas débiles.
+
+### Calificación de rupturas en vivo (1 nov 2026)
+
+El monitor revisa en cada ejecución las rupturas del rango de 24 h (velas de 1H) de BTC, ETH y SOL y
+las califica con las señales del estudio (validado sobre el histórico):
+
+* 🪤 **Perfil de trampa** (cierre apenas fuera — señal doble —, volumen bajo, mecha en contra):
+  76 % de las históricas fallaron.
+* ✅ **Perfil real** (cierre claro fuera, volumen alto, cierre en el extremo, a favor de la EMA 50d,
+  sin señales de trampa): 26 % fallaron.
+* ⚖️ **Dudosa** (el resto): 52 % fallaron.
+* 🪤 **Falló**: una ruptura reciente volvió a cerrar dentro del rango. No implica giro inmediato
+  (solo ~20 % llega al otro extremo en 24 h en 1H; 44 % en 4H).
+
+Volumen relativo de la vela de ruptura frente a la media de las 24 h previas: bajo < 1,73x,
+alto > 3,13x (tercios del estudio). Los avisos entran en la notificación de ntfy; el fin de semana
+llegan como "solo contexto".

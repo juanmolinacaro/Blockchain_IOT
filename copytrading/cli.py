@@ -209,6 +209,25 @@ def cmd_monitor(cfg: Config, args) -> None:
                     alerts.append(f"{e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
                     details.append(f"✅ {e.coin} {e.source} cerrada {e.r:+.2f}R ({e.exit_reason})")
                     levels.add("CERRADA")
+    # rupturas recientes en 1H: ¿perfil de trampa o real? (estudio docs/METODO: trampas)
+    from .method.traps import describe, recent_breakouts
+    window_ms = args.alert_hours * 3_600_000
+    print("\nRupturas recientes (1H):")
+    any_brk = False
+    for coin in [c.strip().upper() for c in args.coins.split(",")]:
+        c1h = closed_candles(src.candles(coin, "1h", now - 4 * MS_PER_DAY, now), "1h", now)
+        for lb in recent_breakouts(c1h, window=int(args.alert_hours) + 1):
+            msg = describe(coin, lb)
+            print("   " + msg)
+            any_brk = True
+            when = lb.failed_at or lb.t
+            if when >= now - window_ms:
+                alerts.append(msg.split(" — ")[0] + " — falló" if lb.failed_at else msg.split(" (")[0])
+                details.append(msg)
+                levels.add("VIGILAR")
+    if not any_brk:
+        print("   ninguna")
+
     # planes y operaciones en 1H (lecturas de Juan): se siguen con velas de 1H
     for coin in sorted({e.coin for e in entries if e.interval == "1h" and e.status in ("pendiente", "abierta")}):
         c1 = closed_candles(src.candles(coin, "1h", now - 30 * MS_PER_DAY, now), "1h", now)
