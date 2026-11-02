@@ -453,3 +453,20 @@ Conclusiones:
   48 h), entrar en ese cierre, stop por debajo del mínimo del barrido (−0,3 %) y objetivo 2R.
   Ventaja modesta (+0,13R por operación, ~3 al mes entre las tres monedas), no un sistema solo.
 * En 1H el ruido se come la ventaja: mejor como alerta temprana que como gatillo.
+
+### Aviso con imagen (2 nov 2026)
+
+Pedido de Juan: el aviso de texto traía demasiados datos y porcentajes; sin ver el gráfico confunde.
+Ahora, cuando hay novedades, llega **un aviso por moneda (BTC primero) con una imagen**:
+
+* Arriba, un **semáforo**: ENTRADA (azul), VIGILAR (amarillo), CALMA (gris) o FIN DE SEMANA.
+* **Qué pasó** (1–2 frases): "Rompió hacia abajo (77.231): parece TRAMPA", "Plan D ACTIVADO: venta
+  en 77.077".
+* **Qué vigilar**: los planes del diario en palabras ("Plan D en curso: stop 78.100 · objetivo
+  74.800") y hacia dónde tira la liquidez.
+* El **gráfico de 4H** (7 días) con el canal, la EMA 50 y 200 diaria, las zonas de más liquidez
+  estimada (morado) y los niveles de los planes (amarillo = entrada, rojo = stop, verde = objetivo).
+
+Canales: ntfy (imagen adjunta) y Telegram (foto con el texto; en iPhone muestra el banner). Si la
+imagen falla, se manda el aviso de texto de antes. El servidor gratuito de ntfy.sh limita los
+mensajes diarios por conexión; Telegram no tiene ese problema.

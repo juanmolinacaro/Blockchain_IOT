@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -273,8 +274,85 @@ def cmd_monitor(cfg: Config, args) -> None:
         title = f"{icon} {level}{'' if allowed else ' (fin de semana, solo contexto)'}: " + "; ".join(alerts)
         body = "\n".join(details + [""] + wallet_lines + ["", "Diario:"] + summary(entries)
                          + ["", "Información para decidir, no una orden de operar."])
-        sent = send_alert(title[:120], body, level, ntfy_topic=args.ntfy_topic)
-        print("AVISO: " + (f"enviado por {', '.join(sent)}" if sent else "NO enviado (revisa el canal)"))
+        topic = args.ntfy_topic or os.environ.get("NTFY_TOPIC")
+        imaged = _send_images(src, entries, alerts, wallet_lines, level, allowed, now, topic)
+        if imaged:
+            print(f"AVISO: enviado con imagen ({'; '.join(imaged)})")
+        else:
+            sent = send_alert(title[:120], body, level, ntfy_topic=args.ntfy_topic)
+            print("AVISO: " + (f"enviado por {', '.join(sent)}" if sent else "NO enviado (revisa el canal)"))
+
+
+COINS_ORDER = ("BTC", "ETH", "SOL")
+
+
+def _send_images(src, entries, alerts: list[str], wallet_lines: list[str], level: str, allowed: bool,
+                 now: int, topic: str | None) -> list[str]:
+    """Un aviso por moneda con novedades (BTC primero): gráfico + 3-5 líneas en lenguaje simple.
+
+    Devuelve las monedas enviadas; lista vacía si no se pudo (entonces se manda el aviso de texto).
+    """
+    import re
+    import tempfile
+
+    from .method.monitor import closed_candles
+    from .notify import send_image_alert
+    try:
+        from .chart import coin_image
+    except Exception:
+        return []
+    by_coin: dict[str, list[str]] = {}
+    for a in alerts:
+        m = re.search(r"\b(BTC|ETH|SOL|[A-Z]{2,6})\b", a)
+        if m:
+            by_coin.setdefault(m.group(1), []).append(a)
+    coins = sorted(by_coin, key=lambda c: COINS_ORDER.index(c) if c in COINS_ORDER else 99)
+    trend = {}
+    section = ""
+    for ln in wallet_lines:
+        if "tendencia" in ln:
+            section = "t"
+        elif "corto plazo" in ln:
+            section = "c"
+        m = re.match(r"\s+([A-Z]+): ([A-ZÁÉÍÓÚ ]+?) \(", ln)
+        if m and section == "t":
+            trend[m.group(1)] = m.group(2).strip()
+    sent = []
+    icon = {"SEÑAL": "🚨", "CERRADA": "✅", "VIGILAR": "👀"}.get(level, "👀")
+    for coin in coins:
+        try:
+            c4 = closed_candles(src.candles(coin, "4h", now - 830 * MS_PER_DAY, now), "4h", now)
+            c1 = src.candles(coin, "1h", now - 4 * MS_PER_DAY, now)
+            events = [_plain_event(a) for a in by_coin[coin] if "ACTIVADO" in a or "cerrada" in a
+                      or "caducó" in a or "anulado" in a]
+            path = os.path.join(tempfile.gettempdir(), f"monitor_{coin.lower()}.png")
+            _, sm = coin_image(path, coin, c4, c1, entries, now, events=events)
+            lines = sm.happened[:2] + ["Vigilar: " + w for w in sm.watch[:2]]
+            if coin in trend:
+                lines.append(f"Billeteras de tendencia: {trend[coin]}")
+            if not allowed:
+                lines.append("Fin de semana: solo contexto, no se opera")
+            title = f"{icon} {coin} {sm.price:,.0f}".replace(",", ".") + f" · {sm.state}"
+            channels = send_image_alert(title, "\n".join(lines), path, level, ntfy_topic=topic)
+            if channels:
+                sent.append(f"{coin}: {', '.join(channels)}")
+        except Exception as exc:          # una moneda que falle no debe tumbar el resto
+            print(f"   imagen {coin}: no se pudo ({exc})")
+    return sent
+
+
+def _plain_event(a: str) -> str:
+    """'🎯 BTC plan short ACTIVADO en 77,077.0 (D: ...)' -> 'Plan D ACTIVADO: venta en 77.077'."""
+    import re
+    m = re.search(r"plan (long|short) ACTIVADO en ([\d,\.]+) \(([A-Z]\d?):", a)
+    if m:
+        verb = "venta" if m.group(1) == "short" else "compra"
+        px = float(m.group(2).replace(",", ""))
+        return f"Plan {m.group(3)} ACTIVADO: {verb} en {px:,.0f}".replace(",", ".")
+    m = re.search(r"cerrada ([+-][\d.]+R) \((.*)\)", a)
+    if m:
+        return f"Operación cerrada: {m.group(1)} ({m.group(2)})"
+    return re.sub(r"^\W+\s*", "", a).split(" (")[0]
 
 
 def cmd_trampas(cfg: Config, args) -> None:

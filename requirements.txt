@@ -1,3 +1,4 @@
 requests>=2.31
+matplotlib>=3.8   # imágenes del monitor para el móvil
 # Solo para operar en real (mode = "live"):
 # hyperliquid-python-sdk>=0.9

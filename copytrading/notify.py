@@ -35,6 +35,21 @@ def send_ntfy(title: str, body: str, level: str, topic: str, server: str | None 
     return True
 
 
+def send_ntfy_image(title: str, body: str, level: str, topic: str, image_path: str, server: str | None = None,
+                    session: requests.Session | None = None) -> bool:
+    """Aviso con imagen adjunta (la app muestra el gráfico). El texto va como parámetro para admitir UTF-8."""
+    server = (server or os.environ.get("NTFY_SERVER") or "https://ntfy.sh").rstrip("/")
+    http = session or requests
+    with open(image_path, "rb") as fh:
+        data = fh.read()
+    resp = http.put(f"{server}/{topic}", data=data, timeout=30,
+                    params={"title": title, "message": body, "priority": PRIORITY.get(level, "default"),
+                            "tags": TAGS.get(level, "chart_with_upwards_trend")},
+                    headers={"Filename": os.path.basename(image_path)})
+    resp.raise_for_status()
+    return True
+
+
 def send_telegram(title: str, body: str, token: str, chat_id: str,
                   session: requests.Session | None = None) -> bool:
     http = session or requests
@@ -64,4 +79,36 @@ def send_alert(title: str, body: str, level: str = "VIGILAR", ntfy_topic: str | 
             log.error("Telegram falló: %s", exc)
     if not topic and not (token and chat):
         log.warning("Sin canal de alertas configurado (NTFY_TOPIC o TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)")
+    return sent
+
+
+def send_telegram_photo(caption: str, image_path: str, token: str, chat_id: str,
+                        session: requests.Session | None = None) -> bool:
+    http = session or requests
+    with open(image_path, "rb") as fh:
+        resp = http.post(f"https://api.telegram.org/bot{token}/sendPhoto", timeout=30,
+                         data={"chat_id": chat_id, "caption": caption[:1024]},
+                         files={"photo": (os.path.basename(image_path), fh, "image/png")})
+    resp.raise_for_status()
+    return True
+
+
+def send_image_alert(title: str, body: str, image_path: str, level: str = "VIGILAR",
+                     ntfy_topic: str | None = None, session: requests.Session | None = None) -> list[str]:
+    """Aviso con gráfico por todos los canales configurados. Devuelve los canales que funcionaron."""
+    sent = []
+    topic = ntfy_topic or os.environ.get("NTFY_TOPIC")
+    if topic:
+        try:
+            send_ntfy_image(title, body, level, topic, image_path, session=session)
+            sent.append("ntfy")
+        except requests.RequestException as exc:
+            log.error("ntfy (imagen) falló: %s", exc)
+    token, chat = os.environ.get("TELEGRAM_BOT_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
+    if token and chat:
+        try:
+            send_telegram_photo(f"{title}\n\n{body}", image_path, token, chat, session=session)
+            sent.append("telegram")
+        except requests.RequestException as exc:
+            log.error("Telegram (imagen) falló: %s", exc)
     return sent
