@@ -202,7 +202,7 @@ def cmd_monitor(cfg: Config, args) -> None:
             details.extend(f"  {src_}: {t.side.upper()} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
                            f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}" for src_, t in st.signals.items())
         for e in entries:
-            if e.coin == coin and e.interval == "4h":
+            if e.coin == coin and e.interval == "4h" and e.source != "juan":
                 before = e.status
                 update_outcome(e, candles)
                 if before == "abierta" and e.status == "cerrada":
@@ -228,11 +228,14 @@ def cmd_monitor(cfg: Config, args) -> None:
     if not any_brk:
         print("   ninguna")
 
-    # planes y operaciones en 1H (lecturas de Juan): se siguen con velas de 1H
-    for coin in sorted({e.coin for e in entries if e.interval == "1h" and e.status in ("pendiente", "abierta")}):
-        c1 = closed_candles(src.candles(coin, "1h", now - 30 * MS_PER_DAY, now), "1h", now)
+    # planes y operaciones de Juan: se siguen con velas de su temporalidad (1H o 4H)
+    for coin, iv in sorted({(e.coin, e.interval) for e in entries if e.status in ("pendiente", "abierta")
+                            and (e.interval == "1h" or e.source == "juan")}):
+        c1 = closed_candles(src.candles(coin, iv, now - 30 * MS_PER_DAY, now), iv, now)
         for e in entries:
-            if e.coin != coin or e.interval != "1h" or e.status not in ("pendiente", "abierta"):
+            if e.coin != coin or e.interval != iv or e.status not in ("pendiente", "abierta"):
+                continue
+            if iv == "4h" and e.source != "juan":
                 continue
             before = e.status
             update_outcome(e, c1)
@@ -312,10 +315,11 @@ def cmd_diario(cfg: Config, args) -> None:
     if args.accion == "plan":
         from .method.monitor import manual_plan
         e = manual_plan(args.coin.upper(), args.side, args.trigger, args.trigger_dir, args.stop,
-                        args.tp1, args.tp2, args.horas, args.nota)
+                        args.tp1, args.tp2, args.horas, args.nota, interval=args.intervalo)
         entries.append(e)
         save_journal(journal, entries)
-        cond = {"below": "cierre 1H por debajo de", "above": "cierre 1H por encima de",
+        tf = args.intervalo.upper()
+        cond = {"below": f"cierre {tf} por debajo de", "above": f"cierre {tf} por encima de",
                 "touch_below": "el precio baja a", "touch_above": "el precio sube a"}[e.trigger_dir]
         print(f"Plan apuntado: {e.coin} {e.side} si {cond} {e.trigger} | stop {e.stop} TP1 {e.tp1} TP2 {e.tp2} "
               f"| caduca en {args.horas} h")
@@ -433,6 +437,7 @@ def main(argv: list[str] | None = None) -> None:
     di.add_argument("--trigger-dir", choices=["below", "above", "touch_below", "touch_above"],
                     help="plan: cierre por debajo/encima, o toque (orden límite)")
     di.add_argument("--horas", type=float, default=48, help="plan: caduca tras estas horas")
+    di.add_argument("--intervalo", choices=["1h", "4h"], default="1h", help="plan: vela que activa el plan")
     di.add_argument("--last", type=int, default=20)
 
     args = parser.parse_args(argv)

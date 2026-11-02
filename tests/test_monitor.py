@@ -147,3 +147,11 @@ def test_hourly_plans_get_five_days_before_time_exit():
     cs = [c1(k, 100, 101, 99, 100) for k in range(60)]      # 60 h sin tocar stop ni objetivos
     update_outcome(e, cs)
     assert e.status == "abierta"                              # antes se cerraba "por tiempo" a las 30 h
+
+
+def test_manual_plan_4h_counts_from_current_candle():
+    from copytrading.method.monitor import manual_plan
+    now = 1_793_648_010_684                     # lun 2 nov 2026 19:33 UTC
+    e = manual_plan("BTC", "short", 77250, "below", 78100, 76470, 74800, interval="4h", now_ms=now)
+    assert e.interval == "4h"
+    assert e.time == 1_793_635_200_000          # vela de 4H que abrió a las 16:00 UTC

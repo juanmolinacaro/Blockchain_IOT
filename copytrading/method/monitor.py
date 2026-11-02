@@ -282,6 +282,8 @@ def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: fl
         raise ValueError("Para un corto: stop > activación > TP1 >= TP2")
     if side == "long" and not stop < trigger < tp1 <= tp2:
         raise ValueError("Para un largo: stop < activación < TP1 <= TP2")
-    return JournalEntry(f"juan-{coin}-{side}-{now_ms}", "juan", coin, interval, side, now_ms,
+    bar_ms = {"1h": 3_600_000, "4h": 4 * 3_600_000}[interval]
+    start = now_ms - now_ms % bar_ms      # cuenta desde la vela en curso (aún sin cerrar)
+    return JournalEntry(f"juan-{coin}-{side}-{now_ms}", "juan", coin, interval, side, start,
                         trigger, stop, tp1, tp2, note, status="pendiente", trigger=trigger,
                         trigger_dir=trigger_dir, expires=now_ms + int(hours * 3_600_000))
