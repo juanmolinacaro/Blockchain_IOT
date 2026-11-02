@@ -428,3 +428,28 @@ meses, fines de semana con hueco > 0,3 %; 23 casos):
 
 Hay algo de ventaja sobre lo normal, pero con pocos casos: sirve como imán de contexto, no como
 señal sola. En ETH el efecto es más débil (54 % en 24 h, 71 % en 3 días).
+
+### ¿Se puede operar el rebote tras liquidar un pool? (2 nov 2026)
+
+Idea de Juan: después de que el precio liquida el pool inferior, rebota más de un 2 % (ejemplo:
+BTC 76.385 → 78.566, +2,86 % en 16 velas de 4H). Se probó como operación con reglas fijas, en BTC,
+ETH y SOL, sin operar de viernes a domingo antes de las 13:00 (COT), comparando cada resultado con
+entradas al azar del mismo tamaño de stop y objetivo.
+
+| Regla | Ops | Aciertos | Media por op. | PF | 1.ª mitad / 2.ª mitad | Azar |
+|---|---|---|---|---|---|---|
+| 1H, entrar al cierre de la vela que barre (con rechazo), stop bajo la mecha, objetivo +2 % | 60 | 40 % | +0,13R | 1,22 | +0,09 / +0,18 | +0,03 |
+| 4H, lo mismo | 144 | 44 % | −0,03R | 0,95 | −0,01 / −0,04 | −0,05 |
+| 1H, esperar cierre por encima del máximo de la vela del barrido (≤ 24 h), objetivo +2 % | 50 | 54 % | −0,03R | 0,94 | −0,22 / +0,17 | −0,02 |
+| **4H, esperar cierre por encima del máximo de la vela del barrido (≤ 48 h), stop bajo el mínimo del barrido, objetivo 2R** | **81** | **52 %** | **+0,13R** | **1,35** | **+0,15 / +0,12** | +0,03 |
+
+Conclusiones:
+
+* El rebote existe (mediana 2,2 % en 24 h), pero **ese 2 % se mide desde el fondo, y el fondo solo
+  se conoce después**: antes de girar, el precio suele pasarse otro ~2 % del centro del pool. Entrar
+  en la misma vela del barrido apenas deja ventaja.
+* La versión que aguanta en las dos mitades del histórico es la **confirmada en 4H**: tras el
+  barrido, esperar a que una vela de 4H cierre por encima del máximo de la vela que barrió (hasta
+  48 h), entrar en ese cierre, stop por debajo del mínimo del barrido (−0,3 %) y objetivo 2R.
+  Ventaja modesta (+0,13R por operación, ~3 al mes entre las tres monedas), no un sistema solo.
+* En 1H el ruido se come la ventaja: mejor como alerta temprana que como gatillo.
