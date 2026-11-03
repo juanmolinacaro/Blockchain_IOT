@@ -167,7 +167,7 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
                           .replace("Thu", "jue").replace("Fri", "vie").replace("Sat", "sáb").replace("Sun", "dom"))
     ax.set_xticks(ticks, labels)
     ax.set_yticks([])
-    fig.text(0.04, 0.018, "Velas de 4H · hora Colombia · líneas blancas: canal · morado: liquidez estimada",
+    fig.text(0.04, 0.018, "Velas 4H · hora Colombia · blanco: canal · morado: liquidez · lila: 100x recientes · naranja: ballenas",
              color=MUTED, fontsize=8)
     fig.savefig(path, facecolor=BG)
     plt.close(fig)
@@ -175,14 +175,15 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
 
 
 def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, now_ms: int,
-          events: list[str] | None = None, recent_hours: float = 8) -> tuple[Summary, list[Level], dict]:
+          events: list[str] | None = None, recent_hours: float = 8, st=None,
+          whales=None) -> tuple[Summary, list[Level], dict]:
     """Resumen en lenguaje simple + niveles para la imagen de una moneda (velas de 4H cerradas)."""
     from .method.backtest import compute_channels, compute_liquidity
     from .method.emas import ema_series
-    from .method.monitor import VARIANTS, analyze, trading_allowed
+    from .method.monitor import VARIANTS, analyze, nearest_pools, trading_allowed
     from .method.traps import recent_breakouts
 
-    st = analyze(coin, candles)
+    analysis = analyze(coin, candles)
     px = candles_1h[-1].c if candles_1h else candles[-1].c
     happened = list(events or [])
     latest = {}
@@ -229,14 +230,32 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
             watch.append(f"Imán: más liquidez arriba, en {_k(liq.best_short_px)}")
         else:
             watch.append(f"Liquidez repartida: {_k(liq.best_long_px)} abajo / {_k(liq.best_short_px)} arriba")
+    # imán fuerte: un pool >= 2x el del otro lado (4H: el precio llegó antes al grande 8 de cada 10 veces)
+    strong = False
+    below, above = nearest_pools(candles)
+    if below and above:
+        big, small, where = (below, above, "abajo") if below.size >= above.size else (above, below, "arriba")
+        if big.size >= 2 * small.size:
+            strong = True
+            levels.append(Level(big.center, f"IMÁN {_k(big.center)}", "#e040fb", band=big.center * 0.004))
+            watch.insert(0, f"IMÁN FUERTE {where} en {_k(big.center)} ({big.size / small.size:.1f}x): operar solo hacia él")
+    # capa de corto plazo (25-100x, últimos días) y liquidaciones reales de ballenas
+    for z in st or []:
+        kind = "cortos" if z.side == "short" else "largos"
+        levels.append(Level(z.center, f"{kind} 100x {_k(z.center)}", "#b39ddb", band=z.center * 0.0015))
+    for z in whales or []:
+        levels.append(Level(z.mid, f"ballena ${z.usd / 1e6:,.0f}M {_k(z.mid)}", "#ff9800", band=(z.high - z.low) / 2))
+        kind = "largos" if z.side == "long" else "cortos"
+        watch.append(f"Ballena: ${z.usd / 1e6:,.0f}M de {kind} se liquidan en {_k(z.mid)}")
 
     activated = any("ACTIVADO" in ev or "SEÑAL" in ev for ev in happened)
     near_trigger = any(e.coin == coin and e.status == "pendiente" and abs(e.trigger / px - 1) < 0.01 for e in entries)
     if not trading_allowed(now_ms):
         state = "FIN DE SEMANA"
-    elif activated or st.status == "SEÑAL":
+    elif activated or analysis.status == "SEÑAL":
         state = "ENTRADA"
-    elif st.status == "VIGILAR" or near_trigger or len(happened) > 1 or "Rompió" in " ".join(happened):
+    elif (analysis.status == "VIGILAR" or near_trigger or strong or len(happened) > 1
+          or "Rompió" in " ".join(happened)):
         state = "VIGILAR"
     else:
         state = "CALMA"
@@ -245,8 +264,8 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
 
 
 def coin_image(path: str, coin: str, candles: list[Candle], candles_1h: list[Candle], entries, now_ms: int,
-               events: list[str] | None = None) -> tuple[str, Summary]:
-    summary, levels, extra = build(coin, candles, candles_1h, entries, now_ms, events)
+               events: list[str] | None = None, st=None, whales=None) -> tuple[str, Summary]:
+    summary, levels, extra = build(coin, candles, candles_1h, entries, now_ms, events, st=st, whales=whales)
     # la última vela de 4H en curso se dibuja con el precio de 1H para que el gráfico esté al día
     view = list(candles)
     if candles_1h and candles_1h[-1].t >= view[-1].t + 4 * 3_600_000:

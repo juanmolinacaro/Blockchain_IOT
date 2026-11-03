@@ -470,3 +470,40 @@ Ahora, cuando hay novedades, llega **un aviso por moneda (BTC primero) con una i
 Canales: ntfy (imagen adjunta) y Telegram (foto con el texto; en iPhone muestra el banner). Si la
 imagen falla, se manda el aviso de texto de antes. El servidor gratuito de ntfy.sh limita los
 mensajes diarios por conexión; Telegram no tiene ese problema.
+
+### El imán de 2x: ¿se puede operar? (3 nov 2026)
+
+Pregunta de Juan: si con un pool ≥ 2 veces mayor que el del otro lado el precio va primero al
+grande, ¿cómo usarlo a favor? Prueba: cada vez que los dos pools más cercanos (uno arriba, uno
+abajo) cumplen la condición, entrar hacia el grande con objetivo en su centro. BTC + ETH + SOL, sin
+solapar operaciones.
+
+| 4H (2,3 años) | Ops | Aciertos | Media por op. | 1.ª mitad / 2.ª mitad |
+|---|---|---|---|---|
+| **Hacia el pool grande (≥ 2x), stop en el pool pequeño** | 25 | **80 %** | +0,27R | +0,30 / +0,25 |
+| Hacia el pool grande (≥ 2x), stop a la mitad de la distancia al objetivo (2R) | 25 | 72 % | **+1,02R** | +1,22 / +0,83 |
+| Hacia el pool pequeño (en contra del imán) | 11 | 36 % | −0,34R | −0,71 / −0,04 |
+| Pools parecidos (< 1,5x), hacia el mayor | 154 | 55–57 % | +0,07 a +0,23R | flojo |
+
+En 1H el efecto es más débil y solo aparece con pools ≥ 3x (20 ops, +0,30R con stop en el pool
+pequeño).
+
+Cómo usarlo:
+
+1. **Filtro de dirección**: con un imán ≥ 2x en 4H, operar solo hacia él. Ir en contra perdió.
+2. **Objetivo natural**: el centro del pool grande es el objetivo (TP).
+3. **Es poco frecuente** (~25 veces en 2,3 años entre las tres monedas, aprox. una al mes): cuando
+   aparece, la imagen del monitor lo marca como "IMÁN FUERTE" y el semáforo pasa a VIGILAR.
+4. Muestra pequeña: 25 casos. Tomarlo como ventaja a confirmar con el diario, no como certeza.
+
+### Capas nuevas del mapa (3 nov 2026)
+
+* **Corto plazo (lila)**: posiciones de 25x–100x abiertas en los últimos días (velas de 1H, vida
+  media de 24 h). Captura los cortos/largos apalancados recientes que el mapa de 4H no ve.
+  Validación: marcó cortos en 78.114 / 78.309 frente a 78.137 / 78.353 de La Ruta del Precio, y
+  largos en 75.431–76.188 frente a su bloque 75.000–76.270.
+* **Ballenas (naranja)**: liquidaciones REALES de las 500 cuentas más grandes de Hyperliquid (cada
+  posición publica su precio de liquidación). El 3 nov: una ballena con $40M de largos que se
+  liquida en ~75.800 (dentro del bloque grande de BTC) y otra con $33M en ~2.149 en ETH (el imán
+  de abajo de ETH). La mayoría de las ballenas opera con poco apalancamiento, así que pocas tienen
+  la liquidación cerca del precio: cuando una aparece, es un nivel a vigilar.

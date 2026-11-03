@@ -178,7 +178,19 @@ def cmd_monitor(cfg: Config, args) -> None:
     alerts = []
     details: list[str] = []
     levels: set[str] = set()
-    for coin in [c.strip().upper() for c in args.coins.split(",")]:
+    from .liquidity import whale_zones
+    from .method.shortliq import describe as st_describe
+    from .method.shortliq import short_term_zones
+    coin_list = [c.strip().upper() for c in args.coins.split(",")]
+    whales = {}
+    if args.whales:
+        try:
+            mids = src.mid_prices()
+            whales = whale_zones(src, coin_list, {c: float(mids.get(c, 0) or 0) for c in coin_list}, top=args.whales)
+        except Exception as exc:
+            print(f"Ballenas: no se pudieron leer ({exc})")
+    layers: dict[str, dict] = {}
+    for coin in coin_list:
         candles = closed_candles(src.candles(coin, "4h", now - args.days * MS_PER_DAY, now), "4h", now)
         if len(candles) < 300:
             print(f"{coin}: pocas velas ({len(candles)})")
@@ -188,6 +200,15 @@ def cmd_monitor(cfg: Config, args) -> None:
         print(f"\n{icon} {coin} {st.status} — {st.price:,.1f} (vela {_fmt_time(st.time)})")
         for n in st.notes:
             print(f"   {n}")
+        c1h_st = closed_candles(src.candles(coin, "1h", now - 8 * MS_PER_DAY, now), "1h", now)
+        st_long, st_short = short_term_zones(c1h_st) if len(c1h_st) > 48 else ([], [])
+        for n in st_describe(st_long, st_short):
+            print(f"   {n}")
+        for z in whales.get(coin, []):
+            kind = "largos" if z.side == "long" else "cortos"
+            print(f"   🐋 Ballenas Hyperliquid: ${z.usd / 1e6:,.0f}M de {kind} se liquidan en {z.low:,.0f}–{z.high:,.0f}"
+                  f" ({z.n} posición{'es' if z.n != 1 else ''})")
+        layers[coin] = {"st": st_long + st_short, "whales": whales.get(coin, [])}
         for source, t in st.signals.items():
             print(f"   {source}: {t.side.upper()} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
                   f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}")
@@ -275,7 +296,7 @@ def cmd_monitor(cfg: Config, args) -> None:
         body = "\n".join(details + [""] + wallet_lines + ["", "Diario:"] + summary(entries)
                          + ["", "Información para decidir, no una orden de operar."])
         topic = args.ntfy_topic or os.environ.get("NTFY_TOPIC")
-        imaged = _send_images(src, entries, alerts, wallet_lines, level, allowed, now, topic)
+        imaged = _send_images(src, entries, alerts, wallet_lines, level, allowed, now, topic, layers)
         if imaged:
             print(f"AVISO: enviado con imagen ({'; '.join(imaged)})")
         else:
@@ -287,7 +308,7 @@ COINS_ORDER = ("BTC", "ETH", "SOL")
 
 
 def _send_images(src, entries, alerts: list[str], wallet_lines: list[str], level: str, allowed: bool,
-                 now: int, topic: str | None) -> list[str]:
+                 now: int, topic: str | None, layers: dict | None = None) -> list[str]:
     """Un aviso por moneda con novedades (BTC primero): gráfico + 3-5 líneas en lenguaje simple.
 
     Devuelve las monedas enviadas; lista vacía si no se pudo (entonces se manda el aviso de texto).
@@ -326,7 +347,7 @@ def _send_images(src, entries, alerts: list[str], wallet_lines: list[str], level
             events = [_plain_event(a) for a in by_coin[coin] if "ACTIVADO" in a or "cerrada" in a
                       or "caducó" in a or "anulado" in a]
             path = os.path.join(tempfile.gettempdir(), f"monitor_{coin.lower()}.png")
-            _, sm = coin_image(path, coin, c4, c1, entries, now, events=events)
+            _, sm = coin_image(path, coin, c4, c1, entries, now, events=events, **(layers or {}).get(coin, {}))
             lines = sm.happened[:2] + ["Vigilar: " + w for w in sm.watch[:2]]
             if coin in trend:
                 lines.append(f"Billeteras de tendencia: {trend[coin]}")
@@ -488,6 +509,8 @@ def main(argv: list[str] | None = None) -> None:
     mo.add_argument("--alert-hours", type=float, default=4.5,
                     help="avisar solo de cambios de planes ocurridos en estas últimas horas")
     mo.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
+    mo.add_argument("--whales", type=int, default=500,
+                    help="cuentas más grandes de Hyperliquid a revisar para liquidaciones reales (0 = no)")
     mo.add_argument("--days", type=int, default=830,
                     help="histórico (la EMA 200 diaria necesita mucho para estabilizarse)")
 

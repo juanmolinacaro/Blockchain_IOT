@@ -261,3 +261,34 @@ arriba del precio = shorts, abajo = longs</p>
 <h2>Lectura</h2><ul>{items}</ul>
 <p class="muted">Información para apoyar decisiones; no garantiza la dirección del precio.</p>
 </body></html>"""
+
+
+# ------------------------------------------------------- ballenas para el monitor
+@dataclass
+class WhaleZone:
+    coin: str
+    side: str          # "long" (se liquidan largos, debajo) | "short" (encima)
+    low: float
+    high: float
+    usd: float
+    n: int
+
+    @property
+    def mid(self) -> float:
+        return (self.low + self.high) / 2
+
+
+def whale_zones(source: DataSource, coins: list[str], prices: dict[str, float], top: int = 200,
+                range_pct: float = 0.08, min_usd: float = 2_000_000) -> dict[str, list[WhaleZone]]:
+    """Liquidaciones REALES de las `top` cuentas más grandes de Hyperliquid cerca del precio."""
+    points = collect_liquidations(source, wallets_to_scan(source, top))
+    out: dict[str, list[WhaleZone]] = {}
+    for coin in coins:
+        px = prices.get(coin)
+        if not px:
+            continue
+        hm = build_heatmap(points, coin, px, range_pct=range_pct, band_pct=0.005)
+        zs = [WhaleZone(coin, "long" if b.long_usd >= b.short_usd else "short", b.low, b.high, b.total, b.n)
+              for b in hm.bands if b.total >= min_usd]
+        out[coin] = sorted(zs, key=lambda z: -z.usd)[:3]
+    return out
