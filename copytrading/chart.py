@@ -50,28 +50,69 @@ def plan_name(note: str) -> str:
     return f"Plan {m.group(1)}" if m else "Plan"
 
 
-def plan_levels(entries, coin: str) -> list[Level]:
+@dataclass
+class Position:
+    """Como la herramienta Posición larga/corta de TradingView: verde = objetivo, rojo = stop."""
+    side: str            # "long" | "short"
+    entry: float
+    stop: float
+    tp1: float
+    tp2: float
+    start_t: int         # vela desde la que se dibuja (entrada o creación del plan)
+    name: str            # "D", "C" o ""
+    pending: bool        # aún no activado: se dibuja más tenue
+    cond: str = ""       # "si cierra 4H < 77.250"
+
+    @property
+    def rr(self) -> float:
+        return abs(self.tp2 - self.entry) / abs(self.entry - self.stop) if self.entry != self.stop else 0.0
+
+
+def plan_positions(entries, coin: str) -> list[Position]:
     out = []
     for e in entries:
         if e.coin != coin or e.status not in ("pendiente", "abierta"):
             continue
-        name = plan_name(e.note)
-        tag = (name[5:] + " ") if name != "Plan" else ""
-        verb = "venta" if e.side == "short" else "compra"
-        if e.status == "pendiente":
-            cond = {"below": "si <", "above": "si >", "touch_below": "en", "touch_above": "en"}.get(
-                e.trigger_dir, "")
-            out.append(Level(e.trigger, f"{tag}{verb} {cond} {_k(e.trigger)}", "#ffeb3b", "--"))
-        else:
-            out.append(Level(e.entry, f"{tag}{verb} en {_k(e.entry)}", "#ffeb3b", "-"))
-        out.append(Level(e.stop, f"{tag}stop {_k(e.stop)}", DOWN, ":"))
-        out.append(Level(e.tp2, f"{tag}obj. {_k(e.tp2)}", UP, ":"))
+        name = plan_name(e.note)[5:]
+        pending = e.status == "pendiente"
+        entry = e.trigger if pending else e.entry
+        cond = ""
+        if pending:
+            tf = e.interval.upper()
+            cond = {"below": f"si cierra {tf} < {_k(e.trigger)}", "above": f"si cierra {tf} > {_k(e.trigger)}",
+                    "touch_below": f"orden en {_k(e.trigger)}", "touch_above": f"orden en {_k(e.trigger)}"
+                    }.get(e.trigger_dir, "")
+        out.append(Position(e.side, entry, e.stop, e.tp1, e.tp2, e.time, name, pending, cond))
     return out
+
+
+def _draw_position(ax, pos: Position, x0: float, x1: float, fs: float = 8.5) -> None:
+    from matplotlib.patches import Rectangle
+    a = 0.13 if pos.pending else 0.26
+    green, red = "#089981", "#f23645"
+    ax.add_patch(Rectangle((x0, min(pos.entry, pos.tp2)), x1 - x0, abs(pos.tp2 - pos.entry),
+                           facecolor=green, alpha=a, edgecolor=green, linewidth=0.8, zorder=1.5))
+    ax.add_patch(Rectangle((x0, min(pos.entry, pos.stop)), x1 - x0, abs(pos.stop - pos.entry),
+                           facecolor=red, alpha=a, edgecolor=red, linewidth=0.8, zorder=1.5))
+    ax.hlines(pos.entry, x0, x1, color="#d1d4dc", linewidth=1.2, linestyles="--" if pos.pending else "-", zorder=2.5)
+    if pos.tp1 != pos.tp2:
+        ax.hlines(pos.tp1, x0, x1, color=green, linewidth=0.9, linestyles=":", zorder=2.5)
+    verb = "Venta" if pos.side == "short" else "Compra"
+    tag = f" {pos.name}" if pos.name else ""
+    pct = lambda p: f"{(p / pos.entry - 1) * 100:+.1f} %".replace(".", ",")
+    box = dict(facecolor="#131722", edgecolor="none", pad=1.0, alpha=0.75)
+    head = f"{verb}{tag} {_k(pos.entry)}" + (f" ({pos.cond})" if pos.pending and pos.cond else "")
+    ax.text(x0 + 0.3, pos.entry, head + f" · R/R {pos.rr:.1f}".replace(".", ","), color="white", fontsize=fs,
+            va="bottom" if pos.side == "long" else "top", fontweight="bold", zorder=7, bbox=box)
+    ax.text(x0 + 0.3, pos.tp2, f"Objetivo {_k(pos.tp2)} ({pct(pos.tp2)})", color="#4caf50", fontsize=fs,
+            va="top" if pos.side == "long" else "bottom", fontweight="bold", zorder=7, bbox=box)
+    ax.text(x0 + 0.3, pos.stop, f"Stop {_k(pos.stop)} ({pct(pos.stop)})", color="#ff6b6b", fontsize=fs,
+            va="bottom" if pos.side == "long" else "top", fontweight="bold", zorder=7, bbox=box)
 
 
 def render(path: str, candles: list[Candle], summary: Summary, levels: list[Level],
            channel=None, ema50: list[float | None] | None = None, ema200: list[float | None] | None = None,
-           bars: int = 42) -> str:
+           bars: int = 42, positions: list[Position] | None = None) -> str:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -80,7 +121,8 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     n0 = max(0, len(candles) - bars)
     view = candles[n0:]
     xs = range(len(view))
-    pad_right = 17                                   # hueco a la derecha para las etiquetas
+    pad_right = 20                                   # hueco a la derecha: cajas de posición + etiquetas
+    label_x = len(view) + 4.2
 
     fig = plt.figure(figsize=(7.2, 9.0), dpi=150, facecolor=BG)
     # --- cabecera: moneda, precio, semáforo y 2 bloques de texto
@@ -113,6 +155,9 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     shown = [lv for lv in levels if abs(lv.price / px - 1) <= 0.07]
     for lv in shown:
         lo, hi = min(lo, lv.price - lv.band), max(hi, lv.price + lv.band)
+    for pos in positions or []:
+        if abs(pos.entry / px - 1) <= 0.07:
+            lo, hi = min(lo, pos.stop, pos.tp2, pos.entry), max(hi, pos.stop, pos.tp2, pos.entry)
     span = hi - lo
     ax.set_ylim(lo - span * 0.04, hi + span * 0.04)
     ax.set_xlim(-1, len(view) + pad_right)
@@ -124,6 +169,15 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
         ax.vlines(x, c.l, c.h, color=colr, linewidth=1.0, zorder=3)
         ax.add_patch(Rectangle((x - w / 2, min(c.o, c.c)), w, max(abs(c.c - c.o), span * 0.002),
                                facecolor=colr, edgecolor=colr, zorder=4))
+    # posiciones del diario (cajas verde/roja como en TradingView)
+    for pos in positions or []:
+        if abs(pos.entry / px - 1) > 0.07:
+            continue
+        if pos.pending:
+            x0 = len(view) - 1.5
+        else:
+            x0 = next((x for x, c in zip(xs, view) if c.t >= pos.start_t), 0) - 0.4
+        _draw_position(ax, pos, max(-0.8, x0), len(view) + 3.6)
     # canal vigente (proyectado sobre la ventana)
     if channel is not None:
         gx = [x for x in xs]
@@ -146,8 +200,10 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     min_gap = (ymax - ymin) * 0.035
     placed: list[float] = []
     for lv in sorted(shown, key=lambda v: -v.price):
+        if not ymin <= lv.price <= ymax:          # fuera del gráfico (p. ej. una EMA lejana): sin etiqueta
+            continue
         if lv.band:
-            ax.axhspan(lv.price - lv.band, lv.price + lv.band, color=lv.color, alpha=0.28, zorder=1, linewidth=0)
+            ax.axhspan(lv.price - lv.band, lv.price + lv.band, color=lv.color, alpha=0.22, zorder=1, linewidth=0)
         elif lv.style != "none":
             ax.axhline(lv.price, color=lv.color, linestyle=lv.style, linewidth=1.4, alpha=0.95, zorder=2)
         ty = lv.price
@@ -155,7 +211,7 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
             if abs(ty - p) < min_gap:
                 ty = p - min_gap
         placed.append(ty)
-        ax.text(len(view) + 0.6, ty, lv.label, color=lv.color, fontsize=9.5, va="center", fontweight="bold",
+        ax.text(label_x, ty, lv.label, color=lv.color, fontsize=9.5, va="center", fontweight="bold",
                 zorder=6, bbox=dict(facecolor=BG, edgecolor="none", pad=1.2, alpha=0.85))
     # eje X: días
     ticks, labels = [], []
@@ -206,7 +262,7 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
                "cerca del piso" if px < lo + (up - lo) * 0.2 else "en medio")
         happened.append(f"Precio {pos} del canal ({_k(lo)} – {_k(up)})")
 
-    watch, levels = [], plan_levels(entries, coin)
+    watch, levels = [], []
     for e in entries:
         if e.coin != coin or e.status not in ("pendiente", "abierta"):
             continue
@@ -259,7 +315,8 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
         state = "VIGILAR"
     else:
         state = "CALMA"
-    extra = dict(channel=ch, ema50=ema_series(candles, "1d", 50), ema200=ema_series(candles, "1d", 200))
+    extra = dict(channel=ch, ema50=ema_series(candles, "1d", 50), ema200=ema_series(candles, "1d", 200),
+                 positions=plan_positions(entries, coin))
     return Summary(coin, px, state, happened, watch), levels, extra
 
 

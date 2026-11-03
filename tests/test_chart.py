@@ -1,4 +1,4 @@
-from copytrading.chart import Level, Summary, _k, plan_levels, plan_name, render
+from copytrading.chart import Level, Summary, _k, plan_name, plan_positions, render
 from copytrading.cli import _plain_event
 from copytrading.method.monitor import manual_plan
 from copytrading.models import Candle
@@ -18,19 +18,23 @@ def test_short_price_format():
     assert _k(93.54) == "93,5"
 
 
-def test_plan_levels_use_plan_letter():
+def test_plan_positions_like_tradingview_tool():
     e = manual_plan("BTC", "short", 77250, "below", 78100, 76470, 74800, interval="4h",
                     note="D: rompe la bandera", now_ms=1_793_648_010_684)
     assert plan_name(e.note) == "Plan D"
-    labels = [lv.label for lv in plan_levels([e], "BTC")]
-    assert labels == ["D venta si < 77.250", "D stop 78.100", "D obj. 74.800"]
-    assert plan_levels([e], "ETH") == []
+    [pos] = plan_positions([e], "BTC")
+    assert (pos.name, pos.side, pos.pending, pos.entry) == ("D", "short", True, 77250)
+    assert pos.cond == "si cierra 4H < 77.250"
+    assert round(pos.rr, 2) == round((77250 - 74800) / (78100 - 77250), 2)
+    assert plan_positions([e], "ETH") == []
 
 
 def test_render_writes_png(tmp_path):
     path = tmp_path / "btc.png"
     s = Summary("BTC", 77000, "VIGILAR", ["Rompió hacia abajo (77.231): parece TRAMPA"], ["Plan D: venta"])
-    render(str(path), _candles(), s, [Level(76000, "liquidez largos 76.000", "#7e57c2", band=200)])
+    e = manual_plan("BTC", "short", 77250, "below", 78100, 76470, 74800, note="D: x", now_ms=10 * 3_600_000)
+    render(str(path), _candles(), s, [Level(76000, "liquidez largos 76.000", "#7e57c2", band=200)],
+           positions=plan_positions([e], "BTC"))
     assert path.read_bytes()[:4] == b"\x89PNG"
 
 

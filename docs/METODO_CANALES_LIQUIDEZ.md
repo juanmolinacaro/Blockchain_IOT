@@ -507,3 +507,7 @@ Cómo usarlo:
   liquida en ~75.800 (dentro del bloque grande de BTC) y otra con $33M en ~2.149 en ETH (el imán
   de abajo de ETH). La mayoría de las ballenas opera con poco apalancamiento, así que pocas tienen
   la liquidación cerca del precio: cuando una aparece, es un nivel a vigilar.
+
+Los planes del diario se dibujan como la herramienta **Posición larga/corta** de TradingView: caja
+verde de la entrada al objetivo, caja roja de la entrada al stop, con el porcentaje de cada lado y el
+R/R. Los planes pendientes salen más tenues, con su condición ("si cierra 4H < 77.250").
