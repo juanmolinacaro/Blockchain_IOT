@@ -82,13 +82,15 @@ def plan_positions(entries, coin: str) -> list[Position]:
             cond = {"below": f"si cierra {tf} < {_k(e.trigger)}", "above": f"si cierra {tf} > {_k(e.trigger)}",
                     "touch_below": f"orden en {_k(e.trigger)}", "touch_above": f"orden en {_k(e.trigger)}"
                     }.get(e.trigger_dir, "")
+            if getattr(e, "sweep", 0):
+                cond = f"tras barrer {_k(e.sweep)}, {cond}"
         out.append(Position(e.side, entry, e.stop, e.tp1, e.tp2, e.time, name, pending, cond))
     return out
 
 
 def _draw_position(ax, pos: Position, x0: float, x1: float, fs: float = 8.5) -> None:
     from matplotlib.patches import Rectangle
-    a = 0.13 if pos.pending else 0.26
+    a = 0.2 if pos.pending else 0.26
     green, red = "#089981", "#f23645"
     ax.add_patch(Rectangle((x0, min(pos.entry, pos.tp2)), x1 - x0, abs(pos.tp2 - pos.entry),
                            facecolor=green, alpha=a, edgecolor=green, linewidth=0.8, zorder=1.5))
@@ -101,7 +103,7 @@ def _draw_position(ax, pos: Position, x0: float, x1: float, fs: float = 8.5) -> 
     tag = f" {pos.name}" if pos.name else ""
     pct = lambda p: f"{(p / pos.entry - 1) * 100:+.1f} %".replace(".", ",")
     box = dict(facecolor="#131722", edgecolor="none", pad=1.0, alpha=0.75)
-    head = f"{verb}{tag} {_k(pos.entry)}" + (f" ({pos.cond})" if pos.pending and pos.cond else "")
+    head = f"{verb}{tag} {_k(pos.entry)}" + (" (pendiente)" if pos.pending else "")
     ax.text(x0 + 0.3, pos.entry, head + f" · R/R {pos.rr:.1f}".replace(".", ","), color="white", fontsize=fs,
             va="bottom" if pos.side == "long" else "top", fontweight="bold", zorder=7, bbox=box)
     ax.text(x0 + 0.3, pos.tp2, f"Objetivo {_k(pos.tp2)} ({pct(pos.tp2)})", color="#4caf50", fontsize=fs,
@@ -121,8 +123,8 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     n0 = max(0, len(candles) - bars)
     view = candles[n0:]
     xs = range(len(view))
-    pad_right = 20                                   # hueco a la derecha: cajas de posición + etiquetas
-    label_x = len(view) + 4.2
+    pad_right = 24                                   # hueco a la derecha: cajas de posición + etiquetas
+    label_x = len(view) + 8.0
 
     fig = plt.figure(figsize=(7.2, 9.0), dpi=150, facecolor=BG)
     # --- cabecera: moneda, precio, semáforo y 2 bloques de texto
@@ -173,11 +175,11 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     for pos in positions or []:
         if abs(pos.entry / px - 1) > 0.07:
             continue
-        if pos.pending:
-            x0 = len(view) - 1.5
+        if pos.pending:                       # aún no activado: caja propia a la derecha de la última vela
+            x0 = len(view) - 0.2
         else:
             x0 = next((x for x, c in zip(xs, view) if c.t >= pos.start_t), 0) - 0.4
-        _draw_position(ax, pos, max(-0.8, x0), len(view) + 3.6)
+        _draw_position(ax, pos, max(-0.8, x0), len(view) + (7.4 if pos.pending else -0.4))
     # canal vigente (proyectado sobre la ventana)
     if channel is not None:
         gx = [x for x in xs]
@@ -273,7 +275,8 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
             tf = e.interval.upper()
             cond = {"below": f"cierre {tf} bajo", "above": f"cierre {tf} sobre", "touch_below": "toque de",
                     "touch_above": "toque de"}.get(e.trigger_dir, "")
-            watch.append(f"{name}: {verb} con {cond} {_k(e.trigger)}")
+            pre = f"tras barrer {_k(e.sweep)}, " if getattr(e, "sweep", 0) else ""
+            watch.append(f"{name}: {verb} {pre}con {cond} {_k(e.trigger)}")
     # zonas con más liquidez estimada (como las franjas del heatmap) y hacia dónde tira el imán
     liq = compute_liquidity(candles, VARIANTS["sistema-A"])[-1]
     for lpx, name in ((liq.best_long_px, "liquidez largos"), (liq.best_short_px, "liquidez cortos")):

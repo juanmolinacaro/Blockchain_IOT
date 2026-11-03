@@ -155,3 +155,15 @@ def test_manual_plan_4h_counts_from_current_candle():
     e = manual_plan("BTC", "short", 77250, "below", 78100, 76470, 74800, interval="4h", now_ms=now)
     assert e.interval == "4h"
     assert e.time == 1_793_635_200_000          # vela de 4H que abrió a las 16:00 UTC
+
+
+def test_sweep_plan_needs_the_sweep_before_the_close_back_inside():
+    from copytrading.method.monitor import activate_plan, manual_plan
+    from copytrading.models import Candle
+    h = 3_600_000
+    e = manual_plan("BTC", "short", 78000, "below", 78900, 76300, 75500, sweep=78150, now_ms=0)
+    candles = [Candle(0, 77900, 77950, 77800, 77850, 1),        # cierra < 78.000 pero sin barrido: nada
+               Candle(h, 77850, 78300, 77850, 78200, 1),        # barre 78.150
+               Candle(2 * h, 78200, 78250, 77700, 77750, 1)]    # vuelve a cerrar dentro: se activa
+    activate_plan(e, candles)
+    assert e.status == "abierta" and e.entry == 77750 and e.time == 2 * h

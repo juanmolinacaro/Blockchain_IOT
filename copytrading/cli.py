@@ -406,6 +406,12 @@ def cmd_aviso_prueba(cfg: Config, args) -> None:
         raise SystemExit(1)
 
 
+def _parse_cot(text: str) -> int:
+    from datetime import timedelta
+    d = datetime.strptime(text, "%Y-%m-%d %H:%M").replace(tzinfo=timezone(timedelta(hours=-5)))
+    return int(d.timestamp() * 1000)
+
+
 def cmd_diario(cfg: Config, args) -> None:
     from .method.monitor import load_journal, manual_entry, save_journal, summary
 
@@ -414,12 +420,16 @@ def cmd_diario(cfg: Config, args) -> None:
     if args.accion == "plan":
         from .method.monitor import manual_plan
         e = manual_plan(args.coin.upper(), args.side, args.trigger, args.trigger_dir, args.stop,
-                        args.tp1, args.tp2, args.horas, args.nota, interval=args.intervalo)
+                        args.tp1, args.tp2, args.horas, args.nota, interval=args.intervalo,
+                        sweep=args.barrido or 0.0,
+                        start_ms=_parse_cot(args.desde) if args.desde else None)
         entries.append(e)
         save_journal(journal, entries)
         tf = args.intervalo.upper()
         cond = {"below": f"cierre {tf} por debajo de", "above": f"cierre {tf} por encima de",
                 "touch_below": "el precio baja a", "touch_above": "el precio sube a"}[e.trigger_dir]
+        if e.sweep:
+            cond = f"barre {e.sweep} y luego {cond}"
         print(f"Plan apuntado: {e.coin} {e.side} si {cond} {e.trigger} | stop {e.stop} TP1 {e.tp1} TP2 {e.tp2} "
               f"| caduca en {args.horas} h")
         return
@@ -539,6 +549,8 @@ def main(argv: list[str] | None = None) -> None:
                     help="plan: cierre por debajo/encima, o toque (orden límite)")
     di.add_argument("--horas", type=float, default=48, help="plan: caduca tras estas horas")
     di.add_argument("--intervalo", choices=["1h", "4h"], default="1h", help="plan: vela que activa el plan")
+    di.add_argument("--barrido", type=float, help="plan: el precio debe tocar antes este nivel (trampa)")
+    di.add_argument("--desde", help="plan: válido desde 'AAAA-MM-DD HH:MM' hora Colombia")
     di.add_argument("--last", type=int, default=20)
 
     args = parser.parse_args(argv)

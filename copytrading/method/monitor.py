@@ -61,6 +61,7 @@ class JournalEntry:
     trigger: float = 0.0
     trigger_dir: str = ""    # "below"/"above": cierre más allá | "touch_below"/"touch_above": orden límite
     expires: int = 0         # ms; si no se activa antes, caduca
+    sweep: float = 0.0       # planes "tras barrido": nivel que el precio debe tocar antes del cierre de activación
 
 
 def closed_candles(candles: list[Candle], interval: str, now_ms: int | None = None) -> list[Candle]:
@@ -202,12 +203,17 @@ def record_signals(entries: list[JournalEntry], st: CoinStatus, interval: str) -
 
 def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
     """Un plan pendiente se abre al cierre de la primera vela que cruza su nivel de activación."""
+    swept = False
     for c in candles:
         if c.t < e.time:
             continue
         if e.expires and c.t >= e.expires:
             e.status = "caducada"
             return e
+        if e.sweep:                      # primero barre el nivel; luego un cierre de vuelta activa el plan
+            swept = swept or (c.h >= e.sweep if e.sweep > e.trigger else c.l <= e.sweep)
+            if not swept:
+                continue
         if e.trigger_dir.startswith("touch"):
             filled = c.l <= e.trigger if e.trigger_dir == "touch_below" else c.h >= e.trigger
             ran_away = c.h >= e.tp1 if e.side == "long" else c.l <= e.tp1
@@ -280,7 +286,7 @@ def manual_entry(coin: str, side: str, entry: float, stop: float, tp1: float, tp
 
 def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: float, tp1: float, tp2: float,
                 hours: float = 48, note: str = "", interval: str = "1h",
-                now_ms: int | None = None) -> JournalEntry:
+                now_ms: int | None = None, sweep: float = 0.0, start_ms: int | None = None) -> JournalEntry:
     """Plan condicionado: se abre solo si una vela de `interval` cierra más allá de `trigger`."""
     now_ms = int(time.time() * 1000) if now_ms is None else now_ms
     if trigger_dir not in ("below", "above", "touch_below", "touch_above"):
@@ -291,6 +297,9 @@ def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: fl
         raise ValueError("Para un largo: stop < activación < TP1 <= TP2")
     bar_ms = {"1h": 3_600_000, "4h": 4 * 3_600_000}[interval]
     start = now_ms - now_ms % bar_ms      # cuenta desde la vela en curso (aún sin cerrar)
+    if start_ms is not None:              # o desde un momento futuro (p. ej. después de un evento)
+        start = start_ms
+        now_ms = max(now_ms, start_ms)
     return JournalEntry(f"juan-{coin}-{side}-{now_ms}", "juan", coin, interval, side, start,
                         trigger, stop, tp1, tp2, note, status="pendiente", trigger=trigger,
-                        trigger_dir=trigger_dir, expires=now_ms + int(hours * 3_600_000))
+                        trigger_dir=trigger_dir, expires=now_ms + int(hours * 3_600_000), sweep=sweep)
