@@ -1,9 +1,9 @@
-"""Seguimiento de ballenas concretas para usarlas como indicador (también al revés).
+"""Seguimiento de ballenas concretas (cada una con su alias), solo como información.
 
-Idea de Juan (4 nov 2026): la ballena de los $40M (0xf081…) promedia a la baja y vende en pérdidas
-cuando el margen aprieta. Si se equivoca de forma repetida, sus movimientos sirven como indicador
-contrario. Aquí se reconstruyen sus "episodios" (rachas de fills en la misma dirección) y qué hizo
-el precio después, y se guarda el historial para medirlo con el tiempo.
+Idea de Juan (4 nov 2026): tener en seguimiento a ballenas como "El Promediador" (0xf081…, la de los
+$40M en BTC y $33M en ETH) y ver con el tiempo si aciertan o fallan. No es una señal para operar.
+Aquí se reconstruyen sus "episodios" (rachas de fills en la misma dirección), qué hizo el precio
+después, y se guarda el historial.
 """
 from __future__ import annotations
 
@@ -111,13 +111,11 @@ def append_history(eps: list[Episode], path: Path = HISTORY) -> int:
 
 
 def describe(alias: str, e: Episode) -> str:
-    """Frase para el aviso, con la lectura contraria."""
+    """Frase para el aviso (informativa)."""
     side = "largo" if e.is_long else "corto"
     usd = f"${e.usd / 1e6:,.0f}M"
     if e.opens:
-        hint = "si sigue fallando, el precio suele ir en contra"
-        return f"🐋 {alias}: abrió/aumentó {side} {usd} a {e.avg_px:,.0f} ({hint})"
+        return f"🐋 {alias}: abrió/aumentó {side} {usd} a {e.avg_px:,.0f}"
     if e.pnl < 0:
-        return (f"🐋 {alias}: cerró {side} {usd} a {e.avg_px:,.0f} con pérdida ${-e.pnl / 1e6:,.1f}M "
-                "(capitulación: suele ocurrir cerca de un suelo/techo)")
+        return (f"🐋 {alias}: cerró {side} {usd} a {e.avg_px:,.0f} con pérdida ${-e.pnl / 1e6:,.1f}M")
     return f"🐋 {alias}: cerró {side} {usd} a {e.avg_px:,.0f} con ganancia ${e.pnl / 1e6:,.1f}M"

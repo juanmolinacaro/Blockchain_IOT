@@ -285,7 +285,7 @@ def cmd_monitor(cfg: Config, args) -> None:
         except Exception as exc:
             print(f"\n🐋 {w['alias']}: no se pudo leer ({exc})")
             continue
-        print(f"\n🐋 {w['alias']} ({w['address'][:8]}…), seguida como posible indicador contrario:")
+        print(f"\n🐋 {w['alias']} ({w['address'][:8]}…), en seguimiento (solo información):")
         for coin_, p_ in pos.items():
             if abs(p_.size * (p_.liquidation_px or 0)) > 1e6:
                 print(f"   {coin_}: {'largo' if p_.size > 0 else 'corto'} {abs(p_.size):,.2f} · liquidación {p_.liquidation_px:,.1f}")

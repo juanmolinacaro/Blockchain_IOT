@@ -512,9 +512,9 @@ Los planes del diario se dibujan como la herramienta **Posición larga/corta** d
 verde de la entrada al objetivo, caja roja de la entrada al stop, con el porcentaje de cada lado y el
 R/R. Los planes pendientes salen más tenues, con su condición ("si cierra 4H < 77.250").
 
-## 4 nov 2026: la ballena contraria y por qué no aflojar las entradas
+## 4 nov 2026: "El Promediador" en seguimiento y por qué no aflojar las entradas
 
-### Ballena seguida como indicador (posible indicador contrario)
+### Ballenas en seguimiento (con alias)
 
 La "ballena de $40M" de BTC y la de $33M de ETH resultaron ser **la misma cuenta**
 (`0xf081…e39e`, margen cruzado). Perfil: solo largos, promedia a la baja y vende en pérdidas
@@ -525,6 +525,10 @@ cuando el margen aprieta. PnL realizado desde el 16 oct: **−$6,3M**.
 * 3 nov 07:16: volvió a comprar $36M a 77.238.
 * 3 nov 22:09: vendió $27,4M a 75.852 con −$0,5M, dentro de su zona de liquidación (mínimo 75.687).
   Le quedan 155 BTC (liquidación 74.685) y 14.583 ETH (liquidación 2.152).
+
+**Solo seguimiento, no se usa como señal para operar** (decisión de Juan). Alias: **El Promediador**.
+Todas las billeteras seguidas tienen ahora un alias (Águila, Lobo, Oso…; corto plazo: Colibrí,
+Liebre…) y el indicador de billeteras dice cuáles están largas y cuáles cortas.
 
 Medición hasta hoy (episodios ≥ $1M, 72 h después): aperturas **8 a favor / 7 en contra** (aún no
 falla de forma clara); capitulaciones (cierres en pérdida) **2 de 2 justo antes de un rebote**.

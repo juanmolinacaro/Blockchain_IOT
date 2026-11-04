@@ -28,6 +28,8 @@ class Bias:
     flat: int = 0
     usd_long: float = 0.0
     usd_short: float = 0.0
+    long_names: list = None
+    short_names: list = None
 
     @property
     def score(self) -> float:
@@ -45,8 +47,13 @@ class Bias:
         return "MIXTO"
 
     def line(self) -> str:
-        return (f"{self.coin}: {self.label} ({self.longs} largos ${self.usd_long / 1e6:.1f}M · "
-                f"{self.shorts} cortos ${self.usd_short / 1e6:.1f}M · {self.flat} sin posición)")
+        out = (f"{self.coin}: {self.label} ({self.longs} largos ${self.usd_long / 1e6:.1f}M · "
+               f"{self.shorts} cortos ${self.usd_short / 1e6:.1f}M · {self.flat} sin posición)")
+        if self.long_names:
+            out += f"\n      largos: {', '.join(self.long_names)}"
+        if self.short_names:
+            out += f"\n      cortos: {', '.join(self.short_names)}"
+        return out
 
 
 def load_lists(path: str | Path = "data/indicador_billeteras.json") -> dict[str, list[dict]]:
@@ -57,28 +64,35 @@ def load_lists(path: str | Path = "data/indicador_billeteras.json") -> dict[str,
 def compute(source: DataSource, wallets: list[dict], coins=("BTC", "ETH"), mids: dict | None = None,
             pause_s: float = 0.05) -> dict[str, Bias]:
     mids = mids or source.mid_prices()
-    out = {c: Bias(c) for c in coins}
+    out = {c: Bias(c, long_names=[], short_names=[]) for c in coins}
     groups: dict[str, dict[str, float]] = {}            # grupo -> moneda -> tamaño firmado (USD)
+    names: dict[str, str] = {}                          # grupo -> alias (las gemelas, uno solo)
     for w in wallets:
         try:
             st = source.account_state(w["address"])
         except Exception:
             continue
-        g = groups.setdefault(w.get("grupo", w["address"]), {})
+        gid = w.get("grupo", w["address"])
+        g = groups.setdefault(gid, {})
+        names.setdefault(gid, (w.get("alias") or w["address"][:8]).rsplit(" ", 1)[0]
+                         if " " in (w.get("alias") or "") and (w.get("alias") or "").split()[-1].isdigit()
+                         else (w.get("alias") or w["address"][:8]))
         for c in coins:
             p = st.positions.get(c)
             if p:
                 g[c] = g.get(c, 0.0) + p.size * mids.get(c, p.entry_px)
         if pause_s:
             time.sleep(pause_s)
-    for g in groups.values():
+    for gid, g in groups.items():
         for c in coins:
             usd = g.get(c, 0.0)
             b = out[c]
             if usd > 0:
                 b.longs, b.usd_long = b.longs + 1, b.usd_long + usd
+                b.long_names.append(names[gid])
             elif usd < 0:
                 b.shorts, b.usd_short = b.shorts + 1, b.usd_short - usd
+                b.short_names.append(names[gid])
             else:
                 b.flat += 1
     return out

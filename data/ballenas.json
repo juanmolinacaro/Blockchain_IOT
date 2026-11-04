@@ -15,7 +15,8 @@
      "usd": 301954,
      "entrada": 80985.2
     }
-   }
+   },
+   "alias": "Águila"
   },
   {
    "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98",
@@ -29,7 +30,8 @@
      "usd": 3137908,
      "entrada": 83654.4
     }
-   }
+   },
+   "alias": "Lobo"
   },
   {
    "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
@@ -48,7 +50,8 @@
      "usd": 281041,
      "entrada": 2324.84
     }
-   }
+   },
+   "alias": "Oso"
   },
   {
    "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db",
@@ -67,7 +70,8 @@
      "usd": 606608,
      "entrada": 2277.55
     }
-   }
+   },
+   "alias": "Tortuga"
   },
   {
    "address": "0x9a991732cd4cf14712b07fbeb8c5d87de90dd21a",
@@ -75,7 +79,8 @@
    "errores": 1,
    "marcas": "T·S··TS·",
    "cuenta_usd": 529390,
-   "posicion_30oct": {}
+   "posicion_30oct": {},
+   "alias": "Búho"
   },
   {
    "address": "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f",
@@ -89,7 +94,8 @@
      "usd": 1095157,
      "entrada": 79202.4
     }
-   }
+   },
+   "alias": "León"
   },
   {
    "address": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
@@ -97,7 +103,8 @@
    "errores": 0,
    "marcas": "··ST···T",
    "cuenta_usd": 0,
-   "posicion_30oct": {}
+   "posicion_30oct": {},
+   "alias": "Halcón"
   },
   {
    "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623",
@@ -111,7 +118,8 @@
      "usd": 1373261,
      "entrada": 76938.8
     }
-   }
+   },
+   "alias": "Cóndor"
   },
   {
    "address": "0x413c2724b62975c18b1415650f998a8f0a67886c",
@@ -119,7 +127,8 @@
    "errores": 0,
    "marcas": "T·····ST",
    "cuenta_usd": 1093775,
-   "posicion_30oct": {}
+   "posicion_30oct": {},
+   "alias": "Tigre"
   },
   {
    "address": "0x3c516f085e94177eaf0bdfb5b5eb1ab71052d064",
@@ -133,7 +142,8 @@
      "usd": 782255,
      "entrada": 78114.5
     }
-   }
+   },
+   "alias": "Jaguar"
   },
   {
    "address": "0x9237794d8e5c6eb247b20f2e5edd9ad5f530d8ec",
@@ -141,30 +151,36 @@
    "errores": 0,
    "marcas": "·····TST",
    "cuenta_usd": 121755,
-   "posicion_30oct": {}
+   "posicion_30oct": {},
+   "alias": "Puma"
   }
  ],
  "criterio_8_giros": "8 giros de BTC (techos 6 may, 21 jul, 3 sep, 21 sep-6 oct; suelos 5 jun, 1 jul, 1 ago, 15 sep). Acierto = compra neta en suelo / venta neta en techo >= 50k USD cerca del extremo; error = lo contrario. Seleccion: aciertos - errores >= 3. Prueba con fechas al azar (200 veces): mediana 1 billetera con >=3, maximo 6; con giros reales, 11.",
  "nivel_2_maestras_grandes": [
   {
    "address": "0x93ab7dbdeb996806454de19c35c8247f4b2511f8",
-   "nota": "compró 11,7M @58.585, mantuvo, vendió 19,1M @86.945 (+4,5M). Ahora BTC LONG 47M @82.098"
+   "nota": "compró 11,7M @58.585, mantuvo, vendió 19,1M @86.945 (+4,5M). Ahora BTC LONG 47M @82.098",
+   "alias": "Bisonte"
   },
   {
    "address": "0x237152b038d88f4156a0cd71090462de7e3f0883",
-   "nota": "compró 11,8M @59.606, vendió 34,9M @87.142 (+3,4M). Ahora ETH LONG 26,9M @2.422"
+   "nota": "compró 11,8M @59.606, vendió 34,9M @87.142 (+3,4M). Ahora ETH LONG 26,9M @2.422",
+   "alias": "Elefante 1"
   },
   {
    "address": "0xbd1c84113c6deb5044be0c2221f9e9403811ff0e",
-   "nota": "compró 11,9M @59.328, vendió 26,2M @87.248 (+2,5M). Ahora ETH LONG 26,9M @2.420 (gemela de 0x237152: probablemente el mismo operador)"
+   "nota": "compró 11,9M @59.328, vendió 26,2M @87.248 (+2,5M). Ahora ETH LONG 26,9M @2.420 (gemela de 0x237152: probablemente el mismo operador)",
+   "alias": "Elefante 2"
   },
   {
    "address": "0xec7f9f5b31b8f5da6ac6c0973bbd496e16f9df39",
-   "nota": "compró 11,9M @59.253, vendió 26,2M @87.405 (+2,6M). Ahora ETH LONG 22,4M @2.719"
+   "nota": "compró 11,9M @59.253, vendió 26,2M @87.405 (+2,6M). Ahora ETH LONG 22,4M @2.719",
+   "alias": "Orca"
   },
   {
    "address": "0x218a65e21eddeece7a9df38c6bbdd89f692b7da2",
-   "nota": "compró 3,1M @60.110, vendió 13,5M @85.318. Ahora BTC SHORT 63M @79.051 y ETH SHORT 11,7M @2.208"
+   "nota": "compró 3,1M @60.110, vendió 13,5M @85.318. Ahora BTC SHORT 63M @79.051 y ETH SHORT 11,7M @2.208",
+   "alias": "Rinoceronte"
   }
  ],
  "eth_6_giros": {
@@ -188,7 +204,8 @@
    "eth_aciertos": 2,
    "eth_errores": 1,
    "cuenta_usd": 200844,
-   "ahora": "BTC SHORT $0.16M @80,195; ETH SHORT $0.28M @2,325"
+   "ahora": "BTC SHORT $0.16M @80,195; ETH SHORT $0.28M @2,325",
+   "alias": "Oso"
   },
   {
    "address": "0xbe4e91ae63090eeb4165dfcfc35db3a4eb76e75e",
@@ -197,7 +214,8 @@
    "eth_aciertos": 0,
    "eth_errores": 0,
    "cuenta_usd": 32051,
-   "ahora": "BTC LONG $0.30M @80,985"
+   "ahora": "BTC LONG $0.30M @80,985",
+   "alias": "Águila"
   },
   {
    "address": "0x6ea486a3426563e23023125f18867117878f0ea7",
@@ -206,7 +224,8 @@
    "eth_aciertos": 4,
    "eth_errores": 0,
    "cuenta_usd": 1040708,
-   "ahora": "ETH SHORT $9.40M @2,602"
+   "ahora": "ETH SHORT $9.40M @2,602",
+   "alias": "Toro"
   },
   {
    "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98",
@@ -215,7 +234,8 @@
    "eth_aciertos": 1,
    "eth_errores": 1,
    "cuenta_usd": 247883,
-   "ahora": "BTC SHORT $3.15M @83,654"
+   "ahora": "BTC SHORT $3.15M @83,654",
+   "alias": "Lobo"
   },
   {
    "address": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
@@ -224,7 +244,8 @@
    "eth_aciertos": 0,
    "eth_errores": 0,
    "cuenta_usd": 0,
-   "ahora": "sin BTC/ETH"
+   "ahora": "sin BTC/ETH",
+   "alias": "Halcón"
   },
   {
    "address": "0x0ce048fe42c170e41740ee392e187f19515f339d",
@@ -260,7 +281,8 @@
    "eth_aciertos": 1,
    "eth_errores": 1,
    "cuenta_usd": 435510,
-   "ahora": "BTC SHORT $1.02M @77,566; ETH SHORT $0.61M @2,278"
+   "ahora": "BTC SHORT $1.02M @77,566; ETH SHORT $0.61M @2,278",
+   "alias": "Tortuga"
   },
   {
    "address": "0x643430283b19fa5bd70a1138b495c2b43523cdd5",
@@ -278,7 +300,8 @@
    "eth_aciertos": 2,
    "eth_errores": 2,
    "cuenta_usd": 549630,
-   "ahora": "sin BTC/ETH"
+   "ahora": "sin BTC/ETH",
+   "alias": "Búho"
   }
  ],
  "eth_2025_5_giros": {
@@ -320,7 +343,8 @@
     1
    ],
    "cuenta_usd": 201923,
-   "ahora": "BTC SHORT $0.16M @80,195; ETH SHORT $0.28M @2,325"
+   "ahora": "BTC SHORT $0.16M @80,195; ETH SHORT $0.28M @2,325",
+   "alias": "Oso"
   },
   {
    "address": "0xbbcb0c0aef0b28125af2f719f81d6a5b76f56f30",
@@ -356,7 +380,8 @@
     0
    ],
    "cuenta_usd": 32039,
-   "ahora": "BTC LONG $0.30M @80,985"
+   "ahora": "BTC LONG $0.30M @80,985",
+   "alias": "Águila"
   },
   {
    "address": "0x6ea486a3426563e23023125f18867117878f0ea7",
@@ -374,7 +399,8 @@
     0
    ],
    "cuenta_usd": 1044056,
-   "ahora": "ETH SHORT $9.39M @2,602"
+   "ahora": "ETH SHORT $9.39M @2,602",
+   "alias": "Toro"
   },
   {
    "address": "0x16bf84af3f85f8c8a97597bf2be549dfe0dee637",
@@ -392,7 +418,8 @@
     0
    ],
    "cuenta_usd": 0,
-   "ahora": "sin BTC/ETH"
+   "ahora": "sin BTC/ETH",
+   "alias": "Halcón"
   },
   {
    "address": "0xdbd1bac81ad581c7198c9d155ca468f32a0c29dd",
@@ -410,7 +437,8 @@
     0
    ],
    "cuenta_usd": 384116,
-   "ahora": "ETH SHORT $1.53M @3,031"
+   "ahora": "ETH SHORT $1.53M @3,031",
+   "alias": "Zorro"
   },
   {
    "address": "0x0ce048fe42c170e41740ee392e187f19515f339d",
@@ -464,7 +492,8 @@
     1
    ],
    "cuenta_usd": 431882,
-   "ahora": "BTC SHORT $1.02M @77,566; ETH SHORT $0.61M @2,278"
+   "ahora": "BTC SHORT $1.02M @77,566; ETH SHORT $0.61M @2,278",
+   "alias": "Tortuga"
   },
   {
    "address": "0x643430283b19fa5bd70a1138b495c2b43523cdd5",
@@ -500,7 +529,8 @@
     0
    ],
    "cuenta_usd": 245195,
-   "ahora": "BTC SHORT $3.15M @83,654"
+   "ahora": "BTC SHORT $3.15M @83,654",
+   "alias": "Lobo"
   }
  ],
  "eth_cortos_ene_feb_2026": {
@@ -512,7 +542,8 @@
     "precio_corto": 3319,
     "cierre_usd": 286785,
     "precio_cierre": 1912,
-    "ahora": "sin ETH"
+    "ahora": "sin ETH",
+    "alias": "Ardilla"
    },
    {
     "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8",
@@ -520,7 +551,8 @@
     "precio_corto": 3289,
     "cierre_usd": 3198501,
     "precio_cierre": 2125,
-    "ahora": "ETH SHORT 0.28M @2,325"
+    "ahora": "ETH SHORT 0.28M @2,325",
+    "alias": "Oso"
    },
    {
     "address": "0x2fcb6898d5a0623de19c3691904927685014c4d8",
@@ -557,25 +589,29 @@
     "address": "0x585f4fbe2d2a889c286fa71fb81d01f30773f4b1",
     "motivo": "6%: 6 aciertos/1 error",
     "cuenta_usd": 163243,
-    "ahora": "ETH LONG $0.47M @2,353"
+    "ahora": "ETH LONG $0.47M @2,353",
+    "alias": "Colibrí"
    },
    {
     "address": "0x63d417a577b50c96f4f09148d4e4d70950db0522",
     "motivo": "6%: 5/0 · 4%: 10/4",
     "cuenta_usd": 1609297,
-    "ahora": "ETH LONG $0.40M @2,477"
+    "ahora": "ETH LONG $0.40M @2,477",
+    "alias": "Liebre"
    },
    {
     "address": "0x0423b4b2acb4f219ae4a270abd5dde2360e455bb",
     "motivo": "6%: 3/0 · 4%: 6/1",
     "cuenta_usd": 282284,
-    "ahora": "sin BTC/ETH"
+    "ahora": "sin BTC/ETH",
+    "alias": "Guepardo"
    },
    {
     "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344",
     "motivo": "4%: 10/4 · cortó techo ene y cerró en feb",
     "cuenta_usd": 0,
-    "ahora": "sin BTC/ETH"
+    "ahora": "sin BTC/ETH",
+    "alias": "Ardilla"
    }
   ]
  }
