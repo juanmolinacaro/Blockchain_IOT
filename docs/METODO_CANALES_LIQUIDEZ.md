@@ -511,3 +511,46 @@ Cómo usarlo:
 Los planes del diario se dibujan como la herramienta **Posición larga/corta** de TradingView: caja
 verde de la entrada al objetivo, caja roja de la entrada al stop, con el porcentaje de cada lado y el
 R/R. Los planes pendientes salen más tenues, con su condición ("si cierra 4H < 77.250").
+
+## 4 nov 2026: la ballena contraria y por qué no aflojar las entradas
+
+### Ballena seguida como indicador (posible indicador contrario)
+
+La "ballena de $40M" de BTC y la de $33M de ETH resultaron ser **la misma cuenta**
+(`0xf081…e39e`, margen cruzado). Perfil: solo largos, promedia a la baja y vende en pérdidas
+cuando el margen aprieta. PnL realizado desde el 16 oct: **−$6,3M**.
+
+* 3 nov 01:07: vendió $74,6M de BTC a 76.489 con −$4,4M (mínimo de la noche: 76.342; después el
+  precio subió a 78.046).
+* 3 nov 07:16: volvió a comprar $36M a 77.238.
+* 3 nov 22:09: vendió $27,4M a 75.852 con −$0,5M, dentro de su zona de liquidación (mínimo 75.687).
+  Le quedan 155 BTC (liquidación 74.685) y 14.583 ETH (liquidación 2.152).
+
+Medición hasta hoy (episodios ≥ $1M, 72 h después): aperturas **8 a favor / 7 en contra** (aún no
+falla de forma clara); capitulaciones (cierres en pérdida) **2 de 2 justo antes de un rebote**.
+Muestra mínima: se sigue midiendo. `python -m copytrading ballena` muestra el historial y lo guarda
+en `data/ballenas_historial.jsonl`; el monitor avisa cuando abre o cierra algo grande.
+
+### ¿Aflojar el barrido para no perder entradas por poco?
+
+El 3 nov el plan E no se activó: el precio llegó a 78.046 y el barrido pedía 78.150 (además, el
+plan empezaba el miércoles por las elecciones). Se probó en BTC + ETH + SOL (1H, 7 meses) vender
+tras barrer los cortos de 25-100x y volver a cerrar dentro, objetivo 2R:
+
+| Barrido exigido | Ops | Media por op. | 1.ª / 2.ª mitad |
+|---|---|---|---|
+| Exacto (tocar la zona) | 282 | +0,07R | +0,12 / +0,02 |
+| A 0,2 % de la zona | 326 | −0,01R | +0,07 / −0,08 |
+| A 0,5 % | 388 | +0,02R | +0,09 / −0,05 |
+| **Exacto + imán a favor (≥ 1,5x más liquidez abajo)** | 115 | **+0,11R** | **+0,12 / +0,11** |
+| Exacto + imán, a 0,2 % | 139 | 0,00R | −0,01 / +0,01 |
+| Acercarse a la zona + cierre bajo la EMA 50 de 1H | 124–180 | −0,14 a −0,18R | negativo |
+
+Lectura: **aflojar el barrido no ayuda**; mete más operaciones malas. Lo que sí mejora es operar
+solo a favor del imán. Comprar tras barrer los largos de 100x (el espejo) fue negativo: cuando se
+barren, el precio suele seguir hacia el pool grande. Ajustes aplicados:
+
+1. Barrido **exacto**, pero solo **a favor del imán**.
+2. La imagen marca **"⚠ CONTRA EL IMÁN"** en cualquier plan que vaya contra la liquidez dominante
+   (el largo del 30 oct salía así y terminó en stop).
+3. Las restricciones de horario (elecciones, fin de semana) cuestan entradas: decidirlas plan por plan.

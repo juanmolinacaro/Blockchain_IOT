@@ -275,6 +275,27 @@ def cmd_monitor(cfg: Config, args) -> None:
                     levels.add("CERRADA" if e.status == "cerrada" else ("SEÑAL" if e.status == "abierta" else "VIGILAR"))
     save_journal(journal, entries)
     from .walletbias import report as wallet_report
+    from .whalewatch import append_history, describe as whale_describe, episodes, load_watchlist
+    for w in load_watchlist():
+        try:
+            wf = src.fills(w["address"], now - 5 * MS_PER_DAY, now)
+            eps = episodes(w["address"], wf)
+            append_history(eps)
+            pos = src.account_state(w["address"]).positions
+        except Exception as exc:
+            print(f"\n🐋 {w['alias']}: no se pudo leer ({exc})")
+            continue
+        print(f"\n🐋 {w['alias']} ({w['address'][:8]}…), seguida como posible indicador contrario:")
+        for coin_, p_ in pos.items():
+            if abs(p_.size * (p_.liquidation_px or 0)) > 1e6:
+                print(f"   {coin_}: {'largo' if p_.size > 0 else 'corto'} {abs(p_.size):,.2f} · liquidación {p_.liquidation_px:,.1f}")
+        for e in eps:
+            if e.end >= now - args.alert_hours * 3_600_000:
+                msg = whale_describe(w["alias"], e)
+                print("   " + msg)
+                alerts.append(f"{e.coin} {msg}")
+                details.append(msg)
+                levels.add("VIGILAR")
     wallet_lines = wallet_report(src)
     if wallet_lines:
         print("\n" + "\n".join(wallet_lines))
@@ -387,6 +408,37 @@ def cmd_trampas(cfg: Config, args) -> None:
         cs = src.candles(coin, args.interval, end - args.days * MS_PER_DAY, end)
         allb += find_breakouts(cs, lookback=24 // hours, hold=max(1, 6 // hours), after=24)
     print("\n".join(report(f"{args.coins} {args.interval}", allb)))
+
+
+def cmd_ballena(cfg: Config, args) -> None:
+    """Historial de una ballena seguida: episodios, qué hizo el precio después y si acierta o falla."""
+    from datetime import timedelta
+    from .whalewatch import append_history, episodes, forward_move, load_watchlist, score
+
+    src = HyperliquidSource(cfg.network)
+    now = int(time.time() * 1000)
+    targets = [{"address": args.address, "alias": args.address[:10]}] if args.address else load_watchlist()
+    cot = timezone(timedelta(hours=-5))
+    for w in targets:
+        fills = src.fills(w["address"], now - args.days * MS_PER_DAY, now)
+        eps = episodes(w["address"], fills)
+        added = append_history(eps)
+        coins = sorted({e.coin for e in eps})
+        cbc = {c: src.candles(c, "1h", now - (args.days + 5) * MS_PER_DAY, now) for c in coins}
+        print(f"\n🐋 {w['alias']} — {w['address']}")
+        print(f"   PnL realizado {args.days} días: ${sum(f.closed_pnl - f.fee for f in fills) / 1e6:+,.2f}M · "
+              f"episodios ≥ $1M: {len(eps)} (nuevos en el historial: {added})")
+        for e in eps:
+            m24 = forward_move(cbc[e.coin], e.end, 24)
+            m72 = forward_move(cbc[e.coin], e.end, 72)
+            fmt = lambda m: "  —  " if m is None else f"{m:+.1%}"
+            when = datetime.fromtimestamp(e.start / 1000, cot).strftime("%d %b %H:%M")
+            print(f"   {when} {e.coin:<5} {e.direction:<11} ${e.usd / 1e6:6.1f}M @ {e.avg_px:>10,.1f} "
+                  f"PnL ${e.pnl / 1e6:+6.2f}M | precio después 24h {fmt(m24)} · 72h {fmt(m72)}")
+        sc = score(eps, cbc)
+        print(f"   Aperturas: {sc['aperturas_acertadas']} a favor / {sc['aperturas_falladas']} en contra (72 h) · "
+              f"capitulaciones (cierres en pérdida): {sc['capitulaciones']}, "
+              f"{sc['capitulaciones_en_suelo']} justo antes de un rebote")
 
 
 def cmd_billeteras(cfg: Config, args) -> None:
@@ -512,6 +564,10 @@ def main(argv: list[str] | None = None) -> None:
     po.add_argument("--interval", choices=["1h", "4h"], default="1h")
     po.add_argument("--days", type=int, default=830)
 
+    bw = sub.add_parser("ballena", help="historial de las ballenas seguidas (indicador contrario)")
+    bw.add_argument("--address", help="otra dirección (por defecto, las de data/ballenas_seguidas.json)")
+    bw.add_argument("--days", type=int, default=60)
+
     mo = sub.add_parser("monitor", help="revisar el método en vivo y actualizar el diario")
     mo.add_argument("--coins", default="BTC,ETH,SOL")
     mo.add_argument("--journal", default="data/diario.jsonl")
@@ -560,7 +616,7 @@ def main(argv: list[str] | None = None) -> None:
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
-     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras,
+     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena,
      "trampas": cmd_trampas}[args.cmd](cfg, args)
 
 

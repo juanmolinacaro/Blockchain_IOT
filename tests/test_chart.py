@@ -84,3 +84,17 @@ def test_send_image_alert_uses_telegram_photo(tmp_path, monkeypatch):
     assert send_image_alert("👀 BTC · VIGILAR", "texto", str(img), session=Session()) == ["telegram"]
     assert calls["url"].endswith("/bottok/sendPhoto") and calls["data"]["chat_id"] == "42"
     assert calls["data"]["caption"].startswith("👀 BTC · VIGILAR\n\ntexto")
+
+
+def test_whale_episodes_and_contrarian_score():
+    from copytrading.models import Fill
+    from copytrading.whalewatch import episodes, score
+    h = 3_600_000
+    f = lambda t, px, sz, d, pnl=0.0: Fill("BTC", px, sz, "B" if "Open" in d else "A", t, 0.0, pnl, 0.0, d)
+    fills = [f(0, 80000, 30, "Open Long"), f(10 * 60_000, 79900, 30, "Open Long"),      # una sola racha
+             f(30 * h, 76000, 60, "Close Long", -240_000)]                             # capitulación
+    eps = episodes("0xabc", fills)
+    assert [e.direction for e in eps] == ["Open Long", "Close Long"] and round(eps[0].size) == 60
+    candles = [Candle(i * h, 0, 0, 0, 80000 - i * 150 if i <= 30 else 75500 + (i - 30) * 100, 1) for i in range(120)]
+    sc = score(eps, {"BTC": candles})
+    assert sc["aperturas_falladas"] == 1 and sc["capitulaciones_en_suelo"] == 1

@@ -265,20 +265,24 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
         happened.append(f"Precio {pos} del canal ({_k(lo)} – {_k(up)})")
 
     watch, levels = [], []
+    liq = compute_liquidity(candles, VARIANTS["sistema-A"])[-1]
+    magnet = ("abajo" if liq.long_below >= 1.5 * liq.short_above else
+              "arriba" if liq.short_above >= 1.5 * liq.long_below else "")
     for e in entries:
         if e.coin != coin or e.status not in ("pendiente", "abierta"):
             continue
         name, verb = plan_name(e.note), ("venta" if e.side == "short" else "compra")
         if e.status == "abierta":
-            watch.append(f"{name} en curso ({verb} {_k(e.entry)}): stop {_k(e.stop)} · objetivo {_k(e.tp2)}")
+            warn = " ⚠ CONTRA EL IMÁN" if (e.side == "long" and magnet == "abajo") or (e.side == "short" and magnet == "arriba") else ""
+            watch.append(f"{name} en curso ({verb} {_k(e.entry)}): stop {_k(e.stop)} · objetivo {_k(e.tp2)}{warn}")
         else:
             tf = e.interval.upper()
             cond = {"below": f"cierre {tf} bajo", "above": f"cierre {tf} sobre", "touch_below": "toque de",
                     "touch_above": "toque de"}.get(e.trigger_dir, "")
             pre = f"tras barrer {_k(e.sweep)}, " if getattr(e, "sweep", 0) else ""
-            watch.append(f"{name}: {verb} {pre}con {cond} {_k(e.trigger)}")
+            warn = " ⚠ CONTRA EL IMÁN" if (e.side == "long" and magnet == "abajo") or (e.side == "short" and magnet == "arriba") else ""
+            watch.append(f"{name}: {verb} {pre}con {cond} {_k(e.trigger)}{warn}")
     # zonas con más liquidez estimada (como las franjas del heatmap) y hacia dónde tira el imán
-    liq = compute_liquidity(candles, VARIANTS["sistema-A"])[-1]
     for lpx, name in ((liq.best_long_px, "liquidez largos"), (liq.best_short_px, "liquidez cortos")):
         if lpx:
             levels.append(Level(lpx, f"{name} {_k(lpx)}", POOL_LONG, band=lpx * 0.003))
