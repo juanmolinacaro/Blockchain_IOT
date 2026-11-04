@@ -200,6 +200,10 @@ def cmd_monitor(cfg: Config, args) -> None:
         print(f"\n{icon} {coin} {st.status} — {st.price:,.1f} (vela {_fmt_time(st.time)})")
         for n in st.notes:
             print(f"   {n}")
+        from .method.monitor import trend_state
+        tr, _, tr_slope = trend_state(candles)
+        print(f"   Tendencia: {tr} (EMA 50 diaria {tr_slope:+.1%} en 6 días) → buscar solo "
+              f"{'largos' if tr == 'ALCISTA' else 'cortos' if tr == 'BAJISTA' else '-'}")
         c1h_st = closed_candles(src.candles(coin, "1h", now - 8 * MS_PER_DAY, now), "1h", now)
         st_long, st_short = short_term_zones(c1h_st) if len(c1h_st) > 48 else ([], [])
         for n in st_describe(st_long, st_short):

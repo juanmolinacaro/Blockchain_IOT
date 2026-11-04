@@ -163,6 +163,21 @@ def nearest_pools(candles: list[Candle]):
             min(above, key=lambda z: z.center) if above else None)
 
 
+def trend_state(candles_4h: list[Candle]) -> tuple[str, float, float]:
+    """Tendencia de corto plazo (regla de Juan: solo cortos en tendencia bajista, solo largos en alcista).
+
+    Se mide con la pendiente de la EMA 50 diaria en los últimos 6 días. Estudio 4 nov 2026 (rebote tras
+    barrer un pool, 4H, objetivo 2R): a favor de esa pendiente +0,43R (68 % aciertos); en contra -0,10R.
+    Devuelve (ALCISTA | BAJISTA, valor de la EMA, cambio de la EMA en 6 días)."""
+    e50 = ema_series(candles_4h, "1d", 50)
+    i = len(candles_4h) - 1
+    back = i - 36                                  # 6 días de velas de 4H
+    if back < 0 or not e50[i] or not e50[back]:
+        return "SIN DATOS", 0.0, 0.0
+    slope = e50[i] / e50[back] - 1
+    return ("ALCISTA" if slope > 0 else "BAJISTA"), e50[i], slope
+
+
 COLOMBIA_OFFSET_MS = -5 * 3_600_000
 
 

@@ -232,10 +232,12 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     return path
 
 
-def _warnings(side: str, magnet: str, bias: str | None) -> str:
+def _warnings(side: str, magnet: str, bias: str | None, trend: str = "") -> str:
     """Avisos de un plan: contra el imán de liquidez y (BTC) contra las billeteras de tendencia.
     Estudio 4 nov 2026 (BTC): operar el imán en contra de las billeteras de tendencia dio -0,32R."""
     out = ""
+    if (side == "long" and trend == "BAJISTA") or (side == "short" and trend == "ALCISTA"):
+        out += " ⚠ CONTRA LA TENDENCIA"
     if (side == "long" and magnet == "abajo") or (side == "short" and magnet == "arriba"):
         out += " ⚠ CONTRA EL IMÁN"
     if (side == "long" and bias == "BAJISTA") or (side == "short" and bias == "ALCISTA"):
@@ -249,7 +251,7 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
     """Resumen en lenguaje simple + niveles para la imagen de una moneda (velas de 4H cerradas)."""
     from .method.backtest import compute_channels, compute_liquidity
     from .method.emas import ema_series
-    from .method.monitor import VARIANTS, analyze, nearest_pools, trading_allowed
+    from .method.monitor import VARIANTS, analyze, nearest_pools, trading_allowed, trend_state
     from .method.traps import recent_breakouts
 
     analysis = analyze(coin, candles)
@@ -276,6 +278,7 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
         happened.append(f"Precio {pos} del canal ({_k(lo)} – {_k(up)})")
 
     watch, levels = [], []
+    trend, _, slope = trend_state(candles)
     liq = compute_liquidity(candles, VARIANTS["sistema-A"])[-1]
     magnet = ("abajo" if liq.long_below >= 1.5 * liq.short_above else
               "arriba" if liq.short_above >= 1.5 * liq.long_below else "")
@@ -284,14 +287,14 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
             continue
         name, verb = plan_name(e.note), ("venta" if e.side == "short" else "compra")
         if e.status == "abierta":
-            warn = _warnings(e.side, magnet, bias if coin == "BTC" else None)
+            warn = _warnings(e.side, magnet, bias if coin == "BTC" else None, trend)
             watch.append(f"{name} en curso ({verb} {_k(e.entry)}): stop {_k(e.stop)} · objetivo {_k(e.tp2)}{warn}")
         else:
             tf = e.interval.upper()
             cond = {"below": f"cierre {tf} bajo", "above": f"cierre {tf} sobre", "touch_below": "toque de",
                     "touch_above": "toque de"}.get(e.trigger_dir, "")
             pre = f"tras barrer {_k(e.sweep)}, " if getattr(e, "sweep", 0) else ""
-            warn = _warnings(e.side, magnet, bias if coin == "BTC" else None)
+            warn = _warnings(e.side, magnet, bias if coin == "BTC" else None, trend)
             watch.append(f"{name}: {verb} {pre}con {cond} {_k(e.trigger)}{warn}")
     # zonas con más liquidez estimada (como las franjas del heatmap) y hacia dónde tira el imán
     for lpx, name in ((liq.best_long_px, "liquidez largos"), (liq.best_short_px, "liquidez cortos")):
@@ -322,6 +325,9 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
         kind = "largos" if z.side == "long" else "cortos"
         watch.append(f"Ballena: ${z.usd / 1e6:,.0f}M de {kind} se liquidan en {_k(z.mid)}")
 
+    if trend in ("ALCISTA", "BAJISTA"):
+        watch.insert(0, f"Tendencia {trend} (EMA 50 diaria {slope:+.1%} en 6 días): "
+                        f"buscar solo {'largos' if trend == 'ALCISTA' else 'cortos'}".replace(".", ",", 1))
     activated = any("ACTIVADO" in ev or "SEÑAL" in ev for ev in happened)
     near_trigger = any(e.coin == coin and e.status == "pendiente" and abs(e.trigger / px - 1) < 0.01 for e in entries)
     if not trading_allowed(now_ms):

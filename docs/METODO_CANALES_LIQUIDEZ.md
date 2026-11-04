@@ -582,3 +582,21 @@ Uso: las billeteras de tendencia funcionan como **veto**, no como gatillo. En BT
 imán o un canal **en contra** de ellas; la imagen lo marca como "⚠ CONTRA LAS BILLETERAS". Los
 nombres de las billeteras no se muestran en el aviso; se guardan sus cambios de posición en
 `data/billeteras_actividad.jsonl` para ver en unos meses cuáles son las más activas.
+
+### Regla de tendencia: solo operar a favor (4 nov 2026)
+
+Regla de Juan: con tendencia de corto plazo bajista, buscar solo cortos; con alcista, solo largos.
+Se probó con la regla de rebote tras barrer un pool (4H, confirmación, objetivo 2R; BTC + ETH +
+SOL, 2,3 años):
+
+| Cómo medir la tendencia | A favor | En contra |
+|---|---|---|
+| **Pendiente de la EMA 50 diaria (6 días)** | **+0,43R (68 %, 38 ops)** | −0,10R (39 %, 76 ops) |
+| Precio por encima/debajo de la EMA 50 diaria | +0,42R (68 %, 28 ops) | −0,04R (43 %, 87 ops) |
+| Precio frente a la EMA 50 y 200 diarias | +0,41R (70 %, 20 ops) | **−0,34R** (30 %, 47 ops) |
+| Estructura de 4H (máximos/mínimos de 5 días) | −0,62R (5 ops) | +0,13R (92 ops) |
+
+La pendiente de la EMA 50 diaria separa mejor: a favor gana, en contra pierde. La estructura de 4H
+de pocos días no sirve (tras un barrido el precio suele ir contra la estructura reciente). El
+monitor muestra la tendencia de cada moneda ("buscar solo cortos/largos") y marca **"⚠ CONTRA LA
+TENDENCIA"** en cualquier plan que vaya en contra. 4 nov: BTC, ETH y SOL en tendencia BAJISTA.
