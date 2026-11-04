@@ -36,3 +36,16 @@ def test_labels():
     assert Bias("BTC", longs=3, shorts=0).label == "ALCISTA"
     assert Bias("BTC", longs=1, shorts=4).label == "BAJISTA"
     assert Bias("BTC").label == "SIN POSICIONES"
+
+
+def test_activity_log_records_only_changes(tmp_path):
+    import json
+    from copytrading.walletbias import log_activity
+    st, log = tmp_path / "estado.json", tmp_path / "actividad.jsonl"
+    snap = {"0xa|BTC": {"alias": "Águila", "size": 1.0, "px": 77000}}
+    assert log_activity(snap, 1, st, log) == 0                       # primera foto: nada que comparar
+    assert log_activity(snap, 2, st, log) == 0                       # sin cambios
+    snap2 = {"0xa|BTC": {"alias": "Águila", "size": -2.0, "px": 76000}}
+    assert log_activity(snap2, 3, st, log) == 1
+    row = json.loads(log.read_text().splitlines()[0])
+    assert (row["alias"], row["antes"], row["despues"]) == ("Águila", 1.0, -2.0)

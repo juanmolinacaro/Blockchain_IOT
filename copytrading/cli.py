@@ -296,7 +296,10 @@ def cmd_monitor(cfg: Config, args) -> None:
                 alerts.append(f"{e.coin} {msg}")
                 details.append(msg)
                 levels.add("VIGILAR")
-    wallet_lines = wallet_report(src)
+    trend_labels: dict = {}
+    wallet_lines = wallet_report(src, labels=trend_labels)
+    for coin_, lab in trend_labels.items():
+        layers.setdefault(coin_, {})["bias"] = lab
     if wallet_lines:
         print("\n" + "\n".join(wallet_lines))
     print("\nDiario (" + str(journal) + "):")

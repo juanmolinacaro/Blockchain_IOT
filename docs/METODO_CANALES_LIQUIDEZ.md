@@ -558,3 +558,27 @@ barren, el precio suele seguir hacia el pool grande. Ajustes aplicados:
 2. La imagen marca **"⚠ CONTRA EL IMÁN"** en cualquier plan que vaya contra la liquidez dominante
    (el largo del 30 oct salía así y terminó en stop).
 3. Las restricciones de horario (elecciones, fin de semana) cuestan entradas: decidirlas plan por plan.
+
+### Billeteras de tendencia + pools y canales (4 nov 2026)
+
+Se reconstruyó la posición histórica de las billeteras de tendencia a partir de sus fills (≈ 12
+meses; se pierde lo anterior a sus 10.000 fills más recientes) y se cruzó con la estrategia:
+
+| BTC | Resultado |
+|---|---|
+| Rendimiento de las 72 h siguientes con billeteras **BAJISTA** | −0,79 % (sube 43 % de las veces) |
+| … con billeteras **ALCISTA** / **MIXTO** | −0,16 % / +0,02 % |
+| Imán de pools (≥ 1,5x, objetivo 2R) **a favor** de las billeteras | +0,07R (23 ops) |
+| Imán de pools **en contra** de las billeteras | **−0,32R** (12 ops) |
+| Imán de pools con billeteras MIXTO | +0,13R (39 ops) |
+
+En ETH no hay señal útil (las billeteras se validaron con giros de BTC y casi siempre salen
+BAJISTA). En el método de canales hay muy pocas operaciones para concluir.
+
+Cuidado: las billeteras se eligieron con giros de este mismo periodo (sesgo de selección); la
+prueba real será su comportamiento de aquí en adelante.
+
+Uso: las billeteras de tendencia funcionan como **veto**, no como gatillo. En BTC, evitar operar el
+imán o un canal **en contra** de ellas; la imagen lo marca como "⚠ CONTRA LAS BILLETERAS". Los
+nombres de las billeteras no se muestran en el aviso; se guardan sus cambios de posición en
+`data/billeteras_actividad.jsonl` para ver en unos meses cuáles son las más activas.

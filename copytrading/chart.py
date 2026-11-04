@@ -232,9 +232,20 @@ def render(path: str, candles: list[Candle], summary: Summary, levels: list[Leve
     return path
 
 
+def _warnings(side: str, magnet: str, bias: str | None) -> str:
+    """Avisos de un plan: contra el imán de liquidez y (BTC) contra las billeteras de tendencia.
+    Estudio 4 nov 2026 (BTC): operar el imán en contra de las billeteras de tendencia dio -0,32R."""
+    out = ""
+    if (side == "long" and magnet == "abajo") or (side == "short" and magnet == "arriba"):
+        out += " ⚠ CONTRA EL IMÁN"
+    if (side == "long" and bias == "BAJISTA") or (side == "short" and bias == "ALCISTA"):
+        out += " ⚠ CONTRA LAS BILLETERAS"
+    return out
+
+
 def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, now_ms: int,
           events: list[str] | None = None, recent_hours: float = 8, st=None,
-          whales=None) -> tuple[Summary, list[Level], dict]:
+          whales=None, bias: str | None = None) -> tuple[Summary, list[Level], dict]:
     """Resumen en lenguaje simple + niveles para la imagen de una moneda (velas de 4H cerradas)."""
     from .method.backtest import compute_channels, compute_liquidity
     from .method.emas import ema_series
@@ -273,14 +284,14 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
             continue
         name, verb = plan_name(e.note), ("venta" if e.side == "short" else "compra")
         if e.status == "abierta":
-            warn = " ⚠ CONTRA EL IMÁN" if (e.side == "long" and magnet == "abajo") or (e.side == "short" and magnet == "arriba") else ""
+            warn = _warnings(e.side, magnet, bias if coin == "BTC" else None)
             watch.append(f"{name} en curso ({verb} {_k(e.entry)}): stop {_k(e.stop)} · objetivo {_k(e.tp2)}{warn}")
         else:
             tf = e.interval.upper()
             cond = {"below": f"cierre {tf} bajo", "above": f"cierre {tf} sobre", "touch_below": "toque de",
                     "touch_above": "toque de"}.get(e.trigger_dir, "")
             pre = f"tras barrer {_k(e.sweep)}, " if getattr(e, "sweep", 0) else ""
-            warn = " ⚠ CONTRA EL IMÁN" if (e.side == "long" and magnet == "abajo") or (e.side == "short" and magnet == "arriba") else ""
+            warn = _warnings(e.side, magnet, bias if coin == "BTC" else None)
             watch.append(f"{name}: {verb} {pre}con {cond} {_k(e.trigger)}{warn}")
     # zonas con más liquidez estimada (como las franjas del heatmap) y hacia dónde tira el imán
     for lpx, name in ((liq.best_long_px, "liquidez largos"), (liq.best_short_px, "liquidez cortos")):
@@ -328,8 +339,9 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
 
 
 def coin_image(path: str, coin: str, candles: list[Candle], candles_1h: list[Candle], entries, now_ms: int,
-               events: list[str] | None = None, st=None, whales=None) -> tuple[str, Summary]:
-    summary, levels, extra = build(coin, candles, candles_1h, entries, now_ms, events, st=st, whales=whales)
+               events: list[str] | None = None, st=None, whales=None, bias: str | None = None) -> tuple[str, Summary]:
+    summary, levels, extra = build(coin, candles, candles_1h, entries, now_ms, events, st=st, whales=whales,
+                                   bias=bias)
     # la última vela de 4H en curso se dibuja con el precio de 1H para que el gráfico esté al día
     view = list(candles)
     if candles_1h and candles_1h[-1].t >= view[-1].t + 4 * 3_600_000:
