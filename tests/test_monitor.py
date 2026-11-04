@@ -167,3 +167,14 @@ def test_sweep_plan_needs_the_sweep_before_the_close_back_inside():
                Candle(2 * h, 78200, 78250, 77700, 77750, 1)]    # vuelve a cerrar dentro: se activa
     activate_plan(e, candles)
     assert e.status == "abierta" and e.entry == 77750 and e.time == 2 * h
+
+
+def test_pending_plan_is_cancelled_when_price_closes_beyond_its_stop():
+    from copytrading.method.monitor import activate_plan, manual_plan
+    from copytrading.models import Candle
+    h = 3_600_000
+    e = manual_plan("BTC", "short", 78000, "below", 78900, 76300, 75500, sweep=78150, now_ms=0)
+    candles = [Candle(0, 78100, 78400, 78000, 78300, 1), Candle(h, 78300, 79500, 78200, 79400, 1),
+               Candle(2 * h, 79400, 79400, 77500, 77600, 1)]
+    activate_plan(e, candles)
+    assert e.status == "anulada" and "invalidado" in e.exit_reason

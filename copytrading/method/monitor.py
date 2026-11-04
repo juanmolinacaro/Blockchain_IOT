@@ -210,6 +210,10 @@ def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
         if e.expires and c.t >= e.expires:
             e.status = "caducada"
             return e
+        if (c.c > e.stop) if e.side == "short" else (c.c < e.stop):
+            # el precio cerró más allá del stop antes de activarse: la idea quedó invalidada
+            e.status, e.exit_reason = "anulada", "invalidado: el precio cerró más allá del stop antes de activarse"
+            return e
         if e.sweep:                      # primero barre el nivel; luego un cierre de vuelta activa el plan
             swept = swept or (c.h >= e.sweep if e.sweep > e.trigger else c.l <= e.sweep)
             if not swept:

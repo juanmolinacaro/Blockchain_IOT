@@ -1,0 +1,5 @@
+{"t": 1793815564343, "alias": "Lobo", "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98", "coin": "BTC", "antes": -36.10226, "despues": -51.10226, "precio": 80659.5}
+{"t": 1793815564343, "alias": "Oso", "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8", "coin": "ETH", "antes": -250.0, "despues": 0.0, "precio": 2432.95}
+{"t": 1793815564343, "alias": "Tigre", "address": "0x413c2724b62975c18b1415650f998a8f0a67886c", "coin": "BTC", "antes": 0.0, "despues": 20.0, "precio": 80659.5}
+{"t": 1793815564343, "alias": "Toro", "address": "0x6ea486a3426563e23023125f18867117878f0ea7", "coin": "ETH", "antes": -4184.0123, "despues": -4594.0668, "precio": 2432.95}
+{"t": 1793815564343, "alias": "Colibrí", "address": "0x585f4fbe2d2a889c286fa71fb81d01f30773f4b1", "coin": "ETH", "antes": 194.0, "despues": 163.0, "precio": 2432.95}
