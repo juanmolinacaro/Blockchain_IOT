@@ -266,9 +266,13 @@ async def run(minutes: float | None = None) -> None:
 
     source = HyperliquidSource()
     kinds = load_radar()
-    if not kinds:
-        log.warning("Sin radar guardado: buscando robots en el ranking (tarda ~1 min)...")
-        kinds = await asyncio.to_thread(refresh_radar)
+    stale = not RADAR.exists() or time.time() - RADAR.stat().st_mtime > 6 * 3600
+    if not kinds or stale:
+        log.warning("Actualizando la lista de robots desde el ranking (tarda unos minutos)...")
+        try:
+            kinds = await asyncio.to_thread(refresh_radar)
+        except Exception as exc:
+            log.error("No pude actualizar el radar (%s); uso la lista guardada", exc)
     state = State(kinds)
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
     await asyncio.to_thread(refresh_zones, state, source)
