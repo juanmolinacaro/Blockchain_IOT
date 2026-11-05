@@ -246,11 +246,15 @@ async def run(minutes: float | None = None) -> None:
     started = time.time()
     last_minute = int(time.time() // 60)
     last_radar = last_zones = time.time()
+    reconnecting = False
     while minutes is None or time.time() - started < minutes * 60:
         try:
             async with websockets.connect(WS_URL, ping_interval=20, max_size=None) as ws:
                 for coin in COINS:
                     await ws.send(json.dumps({"method": "subscribe", "subscription": {"type": "trades", "coin": coin}}))
+                if reconnecting:
+                    log.warning("Reconectado: escuchando de nuevo %s", ", ".join(COINS))
+                    reconnecting = False
                 while minutes is None or time.time() - started < minutes * 60:
                     try:
                         raw = await asyncio.wait_for(ws.recv(), timeout=5)
@@ -274,7 +278,8 @@ async def run(minutes: float | None = None) -> None:
                         except Exception as exc:
                             log.error("radar: %s", exc)
         except Exception as exc:
-            log.error("Conexión perdida (%s); reconectando en 10 s", exc)
+            log.error("Conexión perdida (%s: %s); reconectando en 10 s", type(exc).__name__, exc)
+            reconnecting = True
             await asyncio.sleep(10)
 
 
