@@ -50,3 +50,15 @@ def test_hourly_activity_per_robot(monkeypatch, tmp_path):
     esc.close_hour(st)
     rows = (tmp_path / "horario.csv").read_text().splitlines()
     assert len(rows) == 3 and any("0xbot,cazador,1,80000" in r for r in rows)
+
+
+def test_heartbeat_line():
+    from copytrading.escucha import State, heartbeat
+    st = State({})
+    st.price["BTC"] = 80000
+    st.trades_seen = 1234
+    for _ in range(15):
+        st.net_hist["BTC"].append(-10_000)
+    line = heartbeat(st, 15)
+    assert line.startswith("✓ Funcionando: 1,234 operaciones en 15 min, sin avisos")
+    assert "BTC 80,000 · cazadores venden neto $0.1M" in line

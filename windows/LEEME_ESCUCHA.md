@@ -36,7 +36,9 @@ enchufado. La pantalla sí se puede apagar.
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un
   lado del precio; el camino queda libre hacia ese lado.
 
-Como mucho un aviso de cada tipo cada 30 minutos. Es experimental: los umbrales se ajustarán con los
+Como mucho un aviso de cada tipo cada 30 minutos. Aunque no haya avisos, la ventana escribe cada
+15 minutos una línea **"✓ Funcionando"** con cuántas operaciones vio y lo que hacen los robots, y
+cada 6 horas llega al móvil un mensaje silencioso **"💚 Escucha activa"**. Es experimental: los umbrales se ajustarán con los
 datos que se guarden.
 
 ## Dónde se guardan los datos

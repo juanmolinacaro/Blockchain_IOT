@@ -17,8 +17,9 @@ import requests
 
 log = logging.getLogger(__name__)
 
-PRIORITY = {"SEÑAL": "urgent", "CERRADA": "high", "VIGILAR": "default", "PRUEBA": "default"}
-TAGS = {"SEÑAL": "rotating_light", "CERRADA": "white_check_mark", "VIGILAR": "eyes", "PRUEBA": "test_tube"}
+PRIORITY = {"SEÑAL": "urgent", "CERRADA": "high", "VIGILAR": "default", "PRUEBA": "default", "ESTADO": "min"}
+TAGS = {"SEÑAL": "rotating_light", "CERRADA": "white_check_mark", "VIGILAR": "eyes", "PRUEBA": "test_tube",
+        "ESTADO": "green_heart"}
 
 
 def send_ntfy(title: str, body: str, level: str, topic: str, server: str | None = None,

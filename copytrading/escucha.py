@@ -46,6 +46,8 @@ MIN_PUSH_USD = 300_000       # ...y al menos este tamaño
 PULL_RATIO = 0.4             # los creadores dejan < 40 % de su liquidez media de un lado
 MIN_BOOK_USD = 200_000       # (solo si normalmente tenían al menos esto)
 COOLDOWN_S = 30 * 60         # no repetir el mismo tipo de aviso antes de 30 min
+BEAT_MIN = 15                # línea "✓ Funcionando" en la ventana cada 15 min
+PHONE_BEAT_H = 6             # mensaje silencioso al móvil cada 6 h para saber que sigue viva
 
 
 class State:
@@ -58,6 +60,8 @@ class State:
         self.last_alert: dict[str, float] = {}
         self.zones: dict[str, tuple[list, list]] = {}
         self.trades_seen = 0
+        self.trades_at_last_beat = 0
+        self.alerts_since_beat = 0
         self.pending: list[list] = []                           # filas aún sin escribir (archivo bloqueado)
         self.hourly: dict[str, list] = {}                       # robot -> [operaciones, USD] en la hora en curso
         self.hour_pending: list[list] = []
@@ -138,6 +142,7 @@ def alert(state: State, key: str, title: str, body: str, data: dict) -> None:
     if now - state.last_alert.get(key, 0) < COOLDOWN_S:
         return
     state.last_alert[key] = now
+    state.alerts_since_beat += 1
     EVENTS.parent.mkdir(parents=True, exist_ok=True)
     try:
         with EVENTS.open("a", encoding="utf-8") as fh:
@@ -178,6 +183,25 @@ def close_minute(state: State, source, makers: list[str]) -> None:
 
 
 HOURLY_CSV = Path("data/hft_horario.csv")
+
+
+def heartbeat(state: State, minutes: int) -> str:
+    """Línea de estado para la ventana (y, de vez en cuando, para el móvil) aunque no haya avisos."""
+    parts = []
+    for coin in COINS:
+        hist = list(state.net_hist[coin])[-minutes:]
+        net = sum(hist)
+        px = state.price.get(coin, 0.0)
+        side = "compran" if net > 0 else "venden"
+        book = state.book_hist[coin][-1] if state.book_hist[coin] else (0.0, 0.0)
+        parts.append(f"{coin} {px:,.0f} · cazadores {side} neto ${abs(net) / 1e6:.1f}M · creadores "
+                     f"${book[0] / 1e6:.1f}M compra / ${book[1] / 1e6:.1f}M venta a ±1 %")
+    seen = state.trades_seen - state.trades_at_last_beat
+    state.trades_at_last_beat = state.trades_seen
+    alerts = state.alerts_since_beat
+    state.alerts_since_beat = 0
+    return (f"✓ Funcionando: {seen:,} operaciones en {minutes} min, "
+            f"{'sin avisos' if not alerts else f'{alerts} aviso(s)'} | " + " | ".join(parts))
 
 
 def close_hour(state: State) -> None:
@@ -283,6 +307,8 @@ async def run(minutes: float | None = None) -> None:
     last_radar = last_zones = time.time()
     reconnecting = False
     last_hour = int(time.time() // 3600)
+    last_beat = time.time()
+    last_phone_beat = time.time()
     while minutes is None or time.time() - started < minutes * 60:
         try:
             async with websockets.connect(WS_URL, ping_interval=20, max_size=None) as ws:
@@ -303,6 +329,17 @@ async def run(minutes: float | None = None) -> None:
                     if int(time.time() // 60) != last_minute:
                         last_minute = int(time.time() // 60)
                         await asyncio.to_thread(close_minute, state, source, makers)
+                        if time.time() - last_beat >= BEAT_MIN * 60:      # señal de vida en la ventana
+                            last_beat = time.time()
+                            log.warning(heartbeat(state, BEAT_MIN))
+                        if time.time() - last_phone_beat >= PHONE_BEAT_H * 3600 and os.environ.get("NTFY_TOPIC"):
+                            last_phone_beat = time.time()
+                            try:
+                                from .notify import send_ntfy
+                                await asyncio.to_thread(send_ntfy, "💚 Escucha activa", heartbeat(state, 60),
+                                                        "ESTADO", os.environ["NTFY_TOPIC"])
+                            except Exception as exc:
+                                log.error("ntfy: %s", exc)
                         if int(time.time() // 3600) != last_hour:
                             last_hour = int(time.time() // 3600)
                             await asyncio.to_thread(close_hour, state)
