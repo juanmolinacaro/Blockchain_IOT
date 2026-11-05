@@ -8,3 +8,4 @@
 {"t": 1793837216636, "alias": "Tortuga", "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db", "coin": "ETH", "antes": -297.3189, "despues": -280.865, "precio": 2421.55}
 {"t": 1793887878188, "alias": "Oso", "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8", "coin": "BTC", "antes": 4.0, "despues": 5.0, "precio": 79570.5}
 {"t": 1793887878188, "alias": "Ardilla", "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344", "coin": "BTC", "antes": 0.0, "despues": 10.0, "precio": 79570.5}
+{"t": 1793889860886, "alias": "Ardilla", "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344", "coin": "BTC", "antes": 10.0, "despues": 12.5, "precio": 79007.0}
