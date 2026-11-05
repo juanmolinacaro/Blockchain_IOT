@@ -609,3 +609,21 @@ Hyperliquid) solo +$0,15M. Las ballenas que más ganaron con poco volumen estaba
 la tendencia**. Se añadieron 5 al seguimiento (solo información): **El Gran Corto**, **Bobby**,
 **El Francotirador**, **El Martillo** y **Cuervo**. El monitor muestra sus posiciones en BTC/ETH/SOL
 y sus movimientos ≥ $5M; al móvil solo llegan los ≥ $10M.
+
+### Radar de alta frecuencia (5 nov 2026)
+
+`python -m copytrading hft` busca en el ranking las cuentas con volumen semanal ≥ $1.000M (o que
+mueven ≥ 50 veces su capital), lee sus ~2.000 fills más recientes y sus órdenes abiertas, y las
+clasifica:
+
+* **Cazador**: ≤ 35 % maker (cruza el precio), muchos fills por hora, tamaños pequeños.
+* **Creador de mercado**: ≥ 70 % maker y, a menudo, cientos de órdenes abiertas.
+* **Ejecutor**: tamaño casi fijo y ritmo regular (una ballena troceando una orden).
+
+Primera pasada (semana al 4 nov, 25 cuentas): 14 creadores de mercado (+$21,5M, $43.000M de
+volumen), 5 cazadores (+$13,0M; uno solo, `0xf5d8…`, +$14,2M con ~12.000 fills por hora y 17 %
+maker) y 6 mixtos (−$0,8M). Se guarda en `data/alta_frecuencia.json`.
+
+Siguiente paso: cada operación pública de Hyperliquid trae las dos direcciones (comprador y
+vendedor), así que con el canal en vivo se puede medir **hacia dónde empujan los cazadores** y
+**si los creadores de mercado retiran órdenes** cerca de un pool, antes del barrido.

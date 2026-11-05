@@ -452,6 +452,33 @@ def cmd_ballena(cfg: Config, args) -> None:
               f"{sc['capitulaciones_en_suelo']} justo antes de un rebote")
 
 
+def cmd_hft(cfg: Config, args) -> None:
+    """Radar de alta frecuencia: encuentra y clasifica los robots del ranking de Hyperliquid."""
+    import json
+    from .hft import as_dict, scan
+
+    src = HyperliquidSource(cfg.network)
+    profiles = scan(src, top=args.top)
+    print(f"{'cuenta':<12} {'tipo':<19} {'vol. semana':>11} {'PnL semana':>11} {'fills/h':>8} {'maker':>6} "
+          f"{'tamaño med.':>11} {'órdenes':>7}  monedas")
+    for p in profiles:
+        print(f"{p.address[:10]:<12} {p.kind:<19} ${p.week_volume / 1e9:8.1f}B ${p.week_pnl / 1e6:+8.1f}M "
+              f"{p.fills_per_hour:8.0f} {p.maker_share:6.0%} ${p.median_usd:10,.0f} {p.open_orders:7}  "
+              f"{', '.join(p.top_coins)}")
+    kinds: dict[str, list] = {}
+    for p in profiles:
+        kinds.setdefault(p.kind, []).append(p)
+    print("\nResumen por tipo:")
+    for k, ps in kinds.items():
+        print(f"  {k:<19} {len(ps):2} cuentas · PnL semana ${sum(p.week_pnl for p in ps) / 1e6:+.1f}M · "
+              f"volumen ${sum(p.week_volume for p in ps) / 1e9:.0f}B")
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"actualizado": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                               "cuentas": [as_dict(p) for p in profiles]}, indent=1), encoding="utf-8")
+    print(f"\nGuardado en {out}")
+
+
 def cmd_billeteras(cfg: Config, args) -> None:
     from .walletbias import report as wallet_report
 
@@ -575,6 +602,10 @@ def main(argv: list[str] | None = None) -> None:
     po.add_argument("--interval", choices=["1h", "4h"], default="1h")
     po.add_argument("--days", type=int, default=830)
 
+    hf = sub.add_parser("hft", help="radar de alta frecuencia: robots del ranking y su tipo")
+    hf.add_argument("--top", type=int, default=25)
+    hf.add_argument("--out", default="data/alta_frecuencia.json")
+
     bw = sub.add_parser("ballena", help="historial de las ballenas seguidas (indicador contrario)")
     bw.add_argument("--address", help="otra dirección (por defecto, las de data/ballenas_seguidas.json)")
     bw.add_argument("--days", type=int, default=60)
@@ -627,7 +658,7 @@ def main(argv: list[str] | None = None) -> None:
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
-     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena,
+     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft,
      "trampas": cmd_trampas}[args.cmd](cfg, args)
 
 

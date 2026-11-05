@@ -1,0 +1,420 @@
+{
+ "actualizado": "2026-11-05",
+ "cuentas": [
+  {
+   "address": "0xf5d81a135f756ca16544e53c20fc20643ec3ad53",
+   "week_volume": 12370007864.259996,
+   "week_pnl": 14202346.61155,
+   "account_value": 88978409.50535901,
+   "fills_per_hour": 12180.515235794475,
+   "maker_share": 0.167,
+   "median_usd": 324.9375,
+   "size_cv": 3.0981622698279034,
+   "open_orders": 44,
+   "top_coins": [
+    "ZEC",
+    "HYPE",
+    "BTC"
+   ],
+   "kind": "cazador"
+  },
+  {
+   "address": "0x85ecf584f25db6f146718b86d493e33c5af72052",
+   "week_volume": 12105920349.719997,
+   "week_pnl": 149936.8987640004,
+   "account_value": 61676031.97519801,
+   "fills_per_hour": 97.75782118237107,
+   "maker_share": 0.6195,
+   "median_usd": 9999.63941,
+   "size_cv": 1.5659877560497615,
+   "open_orders": 0,
+   "top_coins": [
+    "ETH"
+   ],
+   "kind": "mixto"
+  },
+  {
+   "address": "0x399965e15d4e61ec3529cc98b7f7ebb93b733336",
+   "week_volume": 8623167229.64,
+   "week_pnl": 644482.2087689998,
+   "account_value": 27089006.85470999,
+   "fills_per_hour": 6205.077822017685,
+   "maker_share": 0.7665,
+   "median_usd": 177.82467000000003,
+   "size_cv": 2.129694844353744,
+   "open_orders": 72,
+   "top_coins": [
+    "io:SNDK",
+    "io:DRAM",
+    "@107"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0x87f9cd15f5050a9283b8896300f7c8cf69ece2cf",
+   "week_volume": 6982753838.940001,
+   "week_pnl": 7107536.328652003,
+   "account_value": 109087931.420872,
+   "fills_per_hour": 304.29486200540543,
+   "maker_share": 1.0,
+   "median_usd": 946.0529999999999,
+   "size_cv": 0.7587042256908012,
+   "open_orders": 0,
+   "top_coins": [
+    "BTC"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0x7839e2f2c375dd2935193f2736167514efff9916",
+   "week_volume": 6098817757.780001,
+   "week_pnl": 563735.9280480001,
+   "account_value": 11339504.056281999,
+   "fills_per_hour": 0.22854367126055064,
+   "maker_share": 0.4445,
+   "median_usd": 1410.5676500000002,
+   "size_cv": 2.8227469395854725,
+   "open_orders": 0,
+   "top_coins": [
+    "@107",
+    "io:ANTH",
+    "xyz:SPCX"
+   ],
+   "kind": "mixto"
+  },
+  {
+   "address": "0x8c625ff57d8a4374784c7eff585dfdc42ccec974",
+   "week_volume": 5941930788.320001,
+   "week_pnl": 320499.692551,
+   "account_value": 6968124.251615001,
+   "fills_per_hour": 1.9112074540013333,
+   "maker_share": 0.8478057889822596,
+   "median_usd": 550.11167,
+   "size_cv": 2.475550154070757,
+   "open_orders": 0,
+   "top_coins": [
+    "DOGE",
+    "@107"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xecb63caa47c7c4e77f60f1ce858cf28dc2b82b00",
+   "week_volume": 3745083112.15,
+   "week_pnl": 3483663.858566,
+   "account_value": 106480946.191853,
+   "fills_per_hour": 8729.124359712667,
+   "maker_share": 0.7575,
+   "median_usd": 270.85440000000006,
+   "size_cv": 4.177874582042541,
+   "open_orders": 1690,
+   "top_coins": [
+    "@107",
+    "xyz:TSLA",
+    "@188"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xc926ddba8b7617dbc65712f20cf8e1b58b8598d3",
+   "week_volume": 3407756139.9,
+   "week_pnl": -47007.819384,
+   "account_value": 27189417.932702,
+   "fills_per_hour": 400.31571566108465,
+   "maker_share": 0.951,
+   "median_usd": 266.444625,
+   "size_cv": 4.920897400898012,
+   "open_orders": 25,
+   "top_coins": [
+    "HYPE",
+    "PUMP",
+    "ZEC"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xdf9ea6ec3b7109935ccb4fb267e15ac1fb077ab1",
+   "week_volume": 3405989415.359999,
+   "week_pnl": 87539.301705,
+   "account_value": 5510000.839432998,
+   "fills_per_hour": 743.1672736382156,
+   "maker_share": 1.0,
+   "median_usd": 322.39750000000004,
+   "size_cv": 0.6880761010125803,
+   "open_orders": 0,
+   "top_coins": [
+    "HYPE",
+    "@107"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xff4cd3826ecee12acd4329aada4a2d3419fc463c",
+   "week_volume": 2920448915.14,
+   "week_pnl": -508021.171382,
+   "account_value": 45838219.356628984,
+   "fills_per_hour": 1.3553149447239798,
+   "maker_share": 0.9815,
+   "median_usd": 1134.12398,
+   "size_cv": 4.367021832736738,
+   "open_orders": 0,
+   "top_coins": [
+    "BTC",
+    "ETH",
+    "SOL"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xfc667adba8d4837586078f4fdcdc29804337ca06",
+   "week_volume": 1512316827.35,
+   "week_pnl": 7577138.43396,
+   "account_value": 63898002.86806,
+   "fills_per_hour": 9513.327246565623,
+   "maker_share": 0.876,
+   "median_usd": 327.74719999999996,
+   "size_cv": 2.5895198635649836,
+   "open_orders": 20,
+   "top_coins": [
+    "io:ANTH",
+    "xyz:ANT",
+    "xyz:GOLD"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xe357fa9fecb084f0303ff341b0bc55c89f2bb5ce",
+   "week_volume": 1414024089.07,
+   "week_pnl": -555788.2854279999,
+   "account_value": 9228232.069276001,
+   "fills_per_hour": 0.016573906350172286,
+   "maker_share": 0.9015544041450777,
+   "median_usd": 482.03107,
+   "size_cv": 3.5774741416723748,
+   "open_orders": 0,
+   "top_coins": [
+    "@151",
+    "BTC",
+    "@195"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0x7b7f72a28fe109fa703eeed7984f2a8a68fedee2",
+   "week_volume": 1400430463.84,
+   "week_pnl": 152309.960167,
+   "account_value": 7567003.980842,
+   "fills_per_hour": 1182.3891025765245,
+   "maker_share": 0.7405,
+   "median_usd": 2127.18441,
+   "size_cv": 3.087756601607587,
+   "open_orders": 1332,
+   "top_coins": [
+    "HYPE",
+    "BTC",
+    "xyz:CL"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xbc76170c8a15b34941ba9e00567d7e0f11ba417c",
+   "week_volume": 1040202452.16,
+   "week_pnl": -799868.652492,
+   "account_value": 138553.901969,
+   "fills_per_hour": 439.01585085021827,
+   "maker_share": 0.0,
+   "median_usd": 7999.418675,
+   "size_cv": 2.1003468360442605,
+   "open_orders": 0,
+   "top_coins": [
+    "BTC"
+   ],
+   "kind": "cazador"
+  },
+  {
+   "address": "0x4b62652d2f176bf5422c8157c5b37984837d57ca",
+   "week_volume": 1002279302.06,
+   "week_pnl": -473223.126113,
+   "account_value": 420352.868282,
+   "fills_per_hour": 214.01751721488543,
+   "maker_share": 0.0,
+   "median_usd": 4736.811425,
+   "size_cv": 2.919369100662248,
+   "open_orders": 8,
+   "top_coins": [
+    "TRUMP",
+    "BTC",
+    "MELANIA"
+   ],
+   "kind": "cazador"
+  },
+  {
+   "address": "0xbf732ea04197942783e34730ed6e0f6099575d58",
+   "week_volume": 964503487.73,
+   "week_pnl": -2876698.038994,
+   "account_value": 7831631.358837,
+   "fills_per_hour": 717.2001224419987,
+   "maker_share": 0.6145,
+   "median_usd": 997.847905,
+   "size_cv": 3.7407188239732143,
+   "open_orders": 0,
+   "top_coins": [
+    "xyz:MU",
+    "xyz:INTC",
+    "BTC"
+   ],
+   "kind": "mixto"
+  },
+  {
+   "address": "0x4e23288cee4960f9f962195c22948e4bc7ae20c3",
+   "week_volume": 928026470.43,
+   "week_pnl": 2168577.245175,
+   "account_value": 17222208.784509,
+   "fills_per_hour": 1063.211151667366,
+   "maker_share": 0.934,
+   "median_usd": 2541.8067499999997,
+   "size_cv": 2.611284769760091,
+   "open_orders": 0,
+   "top_coins": [
+    "xyz:NVDA",
+    "ETH",
+    "SOL"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0x5c9b84105d63f0c8ed35fd62f66d9b8c6800ce01",
+   "week_volume": 922395700.57,
+   "week_pnl": 81676.377114,
+   "account_value": 12687889.155599,
+   "fills_per_hour": 2274.7154946984915,
+   "maker_share": 0.832,
+   "median_usd": 980.23874,
+   "size_cv": 3.424541836851863,
+   "open_orders": 25,
+   "top_coins": [
+    "xyz:SKHX",
+    "xyz:DRAM",
+    "xyz:KORU"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xeeb56331b6a250fe2dbc123f08bdb87aa9840464",
+   "week_volume": 855279501.05,
+   "week_pnl": 13916.779746,
+   "account_value": 12316360.788717,
+   "fills_per_hour": 0.1063399850689092,
+   "maker_share": 0.05568814638027048,
+   "median_usd": 197.87922,
+   "size_cv": 4.293904517791389,
+   "open_orders": 0,
+   "top_coins": [
+    "@150",
+    "@230",
+    "@107"
+   ],
+   "kind": "cazador"
+  },
+  {
+   "address": "0xc179e03922afe8fa9533d3f896338b9fb87ce0c8",
+   "week_volume": 809963913.06,
+   "week_pnl": 986501.755473,
+   "account_value": 8786782.185166,
+   "fills_per_hour": 5387.318252832832,
+   "maker_share": 1.0,
+   "median_usd": 270.5892,
+   "size_cv": 5.015959022831383,
+   "open_orders": 429,
+   "top_coins": [
+    "XMR",
+    "ETH",
+    "NEAR"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0xb1ec7febea4f841d525785955b7fe0e812d6e86a",
+   "week_volume": 751203910.51,
+   "week_pnl": 1483264.626067,
+   "account_value": 11424832.178473,
+   "fills_per_hour": 709.5470241942725,
+   "maker_share": 0.494,
+   "median_usd": 3222.9398499999998,
+   "size_cv": 3.5861498858611625,
+   "open_orders": 11,
+   "top_coins": [
+    "ETH",
+    "xyz:AAPL",
+    "xyz:GOOGL"
+   ],
+   "kind": "mixto"
+  },
+  {
+   "address": "0x1c1c270b573d55b68b3d14722b5d5d401511bed0",
+   "week_volume": 559046692.5799999,
+   "week_pnl": 22644.828002,
+   "account_value": 1827198.2343469998,
+   "fills_per_hour": 442.68553457998087,
+   "maker_share": 1.0,
+   "median_usd": 105.705355,
+   "size_cv": 1.9091498129900837,
+   "open_orders": 4,
+   "top_coins": [
+    "@107",
+    "@142"
+   ],
+   "kind": "creador de mercado"
+  },
+  {
+   "address": "0x3bcae23e8c380dab4732e9a159c0456f12d866f3",
+   "week_volume": 519569573.56,
+   "week_pnl": -136247.575298,
+   "account_value": 8327333.465565,
+   "fills_per_hour": 609.152310413188,
+   "maker_share": 0.5435,
+   "median_usd": 3243.49092,
+   "size_cv": 2.051443812285873,
+   "open_orders": 143,
+   "top_coins": [
+    "BTC",
+    "ETH",
+    "xyz:SKHX"
+   ],
+   "kind": "mixto"
+  },
+  {
+   "address": "0xf84d8d3863043d578b17c1f76dded6655d1f05fc",
+   "week_volume": 517627051.61,
+   "week_pnl": 20877.906576,
+   "account_value": 1143645.1234839999,
+   "fills_per_hour": 1488.1029271191258,
+   "maker_share": 0.0,
+   "median_usd": 743.3778,
+   "size_cv": 1.7983250922298932,
+   "open_orders": 0,
+   "top_coins": [
+    "BTC",
+    "@107"
+   ],
+   "kind": "cazador"
+  },
+  {
+   "address": "0xe4c6ae25959d7fc66cf2dd5965fb78c5e09c4048",
+   "week_volume": 493155472.79,
+   "week_pnl": 18964.652938,
+   "account_value": 1072598.098668,
+   "fills_per_hour": 0.3841417258834618,
+   "maker_share": 0.4165,
+   "median_usd": 2948.48617,
+   "size_cv": 1.8274373824692038,
+   "open_orders": 0,
+   "top_coins": [
+    "xyz:GOLD",
+    "xyz:XYZ100",
+    "ETH"
+   ],
+   "kind": "mixto"
+  }
+ ]
+}
