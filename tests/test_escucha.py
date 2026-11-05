@@ -40,3 +40,13 @@ def test_locked_csv_keeps_rows_in_memory(monkeypatch, tmp_path):
     st.pending.append(["2026-11-04 20:13", "BTC", 80010, 0, 0, 0, 0, 0, 0, 0, 0])
     flush_rows(st)
     assert st.pending == [] and len(target.read_text().splitlines()) == 3   # cabecera + 2 filas
+
+
+def test_hourly_activity_per_robot(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "HOURLY_CSV", tmp_path / "horario.csv")
+    st = esc.State({"0xbot": "cazador", "0xmm": "creador de mercado"})
+    st.add_trade({"coin": "BTC", "side": "B", "px": "80000", "sz": "1", "users": ["0xbot", "0xmm"]})
+    esc.close_hour(st)
+    rows = (tmp_path / "horario.csv").read_text().splitlines()
+    assert len(rows) == 3 and any("0xbot,cazador,1,80000" in r for r in rows)

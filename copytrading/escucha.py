@@ -59,6 +59,8 @@ class State:
         self.zones: dict[str, tuple[list, list]] = {}
         self.trades_seen = 0
         self.pending: list[list] = []                           # filas aún sin escribir (archivo bloqueado)
+        self.hourly: dict[str, list] = {}                       # robot -> [operaciones, USD] en la hora en curso
+        self.hour_pending: list[list] = []
         self.warned_locked = False
 
     def add_trade(self, t: dict) -> None:
@@ -66,6 +68,11 @@ class State:
         usd = float(t["sz"]) * float(t["px"])
         self.price[coin] = float(t["px"])
         buyer, seller = t.get("users", ["", ""])
+        for who in {buyer.lower(), seller.lower()}:            # horario de cada robot (como maker o taker)
+            if who in self.kinds:
+                h = self.hourly.setdefault(who, [0, 0.0])
+                h[0] += 1
+                h[1] += usd
         taker = buyer if t["side"] == "B" else seller
         kind = self.kinds.get(taker.lower(), "otros")
         m = self.minute.setdefault(coin, {})
@@ -170,6 +177,29 @@ def close_minute(state: State, source, makers: list[str]) -> None:
     flush_rows(state)
 
 
+HOURLY_CSV = Path("data/hft_horario.csv")
+
+
+def close_hour(state: State) -> None:
+    """Guarda cuántas operaciones hizo cada robot confirmado en la hora que termina (para ver sus horarios)."""
+    hour = (datetime.now(COT) - timedelta(hours=1)).strftime("%Y-%m-%d %H:00")
+    for addr, kind in state.kinds.items():
+        n, usd = state.hourly.get(addr, [0, 0.0])
+        state.hour_pending.append([hour, addr, kind, n, round(usd)])
+    state.hourly = {}
+    try:
+        new_file = not HOURLY_CSV.exists()
+        HOURLY_CSV.parent.mkdir(parents=True, exist_ok=True)
+        with HOURLY_CSV.open("a", newline="", encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            if new_file:
+                w.writerow(["hora_col", "cuenta", "tipo", "operaciones_btc_eth", "usd"])
+            w.writerows(state.hour_pending)
+        state.hour_pending = []
+    except PermissionError:
+        log.warning("El archivo %s está abierto; guardo la hora en memoria.", HOURLY_CSV)
+
+
 def flush_rows(state: State) -> None:
     """Escribe las filas pendientes. Si el archivo está abierto en Excel (Windows lo bloquea), las guarda
     en memoria y lo vuelve a intentar el minuto siguiente: no se pierde nada ni se corta la escucha."""
@@ -248,6 +278,7 @@ async def run(minutes: float | None = None) -> None:
     last_minute = int(time.time() // 60)
     last_radar = last_zones = time.time()
     reconnecting = False
+    last_hour = int(time.time() // 3600)
     while minutes is None or time.time() - started < minutes * 60:
         try:
             async with websockets.connect(WS_URL, ping_interval=20, max_size=None) as ws:
@@ -268,6 +299,9 @@ async def run(minutes: float | None = None) -> None:
                     if int(time.time() // 60) != last_minute:
                         last_minute = int(time.time() // 60)
                         await asyncio.to_thread(close_minute, state, source, makers)
+                        if int(time.time() // 3600) != last_hour:
+                            last_hour = int(time.time() // 3600)
+                            await asyncio.to_thread(close_hour, state)
                     if time.time() - last_zones > 15 * 60:
                         last_zones = time.time()
                         await asyncio.to_thread(refresh_zones, state, source)

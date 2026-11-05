@@ -647,3 +647,11 @@ muestra qué señal falla en cada cuenta.
 Límites que no se pueden eliminar: solo se ven los ~2.000 fills más recientes de cada cuenta y las
 órdenes abiertas en el momento (no cada cancelación); algunas cuentas operan por subcuentas o
 bóvedas y sus datos no cuadran con su volumen (se descartan).
+
+**Horarios de los robots (5 nov 2026).** Con el historial disponible (últimos 10.000 fills):
+los robots más rápidos (el cazador principal y 3 creadores de mercado) solo dejan ver 1,6–6,4 h, y
+estaban activos a las 20:46 hora Colombia (fuera del horario de EE. UU.). Cazador `0x4b62…`: activo
+los 7 días y casi todas las horas, con picos a las 20:00 (13 %) y 18:00 (9 %). Cazador `0xa4de…`:
+7 días pero mucho menos el fin de semana, quieto de 2 a 5 am, pico a las 8 am (14 %). Ejecutor
+`0x4e23…`: solo de 9 am a 5 pm (opera acciones; sigue la bolsa de EE. UU.). La escucha guarda desde
+ahora `data/hft_horario.csv` (operaciones por robot y hora) para completar el horario de los rápidos.

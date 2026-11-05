@@ -46,6 +46,7 @@ En la carpeta `data`:
 * `hft_flujo.csv`: cada minuto, el flujo agresivo de cazadores, creadores y resto, y la liquidez
   de los creadores a ±1 % del precio.
 * `hft_eventos.jsonl`: cada aviso enviado.
+* `hft_horario.csv`: cada hora, cuántas operaciones hizo cada robot confirmado (para ver sus horarios).
 
 Para mirar el CSV sin bloquearlo, **cópialo** (Ctrl+C, Ctrl+V) y abre la copia en Excel. Si abres el
 original, el programa sigue escuchando y guarda los datos en memoria hasta que cierres Excel.
