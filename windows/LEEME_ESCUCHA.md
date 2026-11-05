@@ -18,6 +18,13 @@ Claude mientras corre.
 Verás una ventana negra con la línea `Escuchando BTC, ETH · 25 robots en el radar`. Déjala abierta
 (puedes minimizarla). Para parar, ciérrala.
 
+## Cortes de conexión
+
+Un "Conexión perdida … Reconectado" de vez en cuando es normal (internet o el servidor); se reconecta
+solo en 10 s. Si pasa muy seguido: usa cable de red si puedes, y en el WiFi desactiva el ahorro de
+energía (Administrador de dispositivos → Adaptadores de red → tu WiFi → Propiedades → Administración de
+energía → quitar "Permitir que el equipo apague este dispositivo para ahorrar energía").
+
 ## Que no se duerma el computador
 
 Configuración → Sistema → Inicio/apagado y batería (o Energía) → **Suspender: Nunca** cuando esté

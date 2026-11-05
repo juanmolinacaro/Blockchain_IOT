@@ -186,10 +186,14 @@ HEADER = ["hora_col", "moneda", "precio", "cazador_compra", "cazador_venta", "cr
           "creador_venta", "otros_compra", "otros_venta", "liq_creadores_compra_1pct", "liq_creadores_venta_1pct"]
 
 
-def close_minute(state: State, source, makers: list[str]) -> None:
+def close_minute(state: State, source, makers: list[str], snap: dict | None = None) -> None:
+    """Cierra un minuto. `snap` es el acumulado del minuto, ya separado en el hilo principal para que la
+    escucha siga recibiendo mientras esto (que consulta la API) corre en segundo plano."""
     ts = (datetime.now(COT) - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M")   # minuto que se cierra
+    if snap is None:
+        snap, state.minute = state.minute, {}
     for coin in COINS:
-        m = state.minute.get(coin, {})
+        m = snap.get(coin, {})
         px = state.price.get(coin, 0.0)
         g = lambda k: round(m.get(k, 0.0))
         hunt_net = m.get("cazador|compra", 0.0) - m.get("cazador|venta", 0.0)
@@ -201,7 +205,6 @@ def close_minute(state: State, source, makers: list[str]) -> None:
         state.pending.append([ts, coin, px, g("cazador|compra"), g("cazador|venta"), g("creador de mercado|compra"),
                               g("creador de mercado|venta"), g("otros|compra"), g("otros|venta"), round(bid), round(ask)])
         check_signals(state, coin)
-    state.minute = {}
     flush_rows(state)
 
 
@@ -230,15 +233,16 @@ def heartbeat(state: State, minutes: int) -> str:
     return line
 
 
-def close_hour(state: State) -> None:
+def close_hour(state: State, snap: dict | None = None) -> None:
     """Guarda, por cuenta de la cohorte y hora: operaciones, volumen, cuánto empujó comprando/vendiendo
     (taker) y cuánta liquidez puso (maker). Con un mes de esto se ve quién es más activo y quién mueve el precio."""
     hour = (datetime.now(COT) - timedelta(hours=1)).strftime("%Y-%m-%d %H:00")
+    if snap is None:
+        snap, state.hourly = state.hourly, {}
     for addr, kind in state.kinds.items():
-        n, usd, tb, ts, mk = state.hourly.get(addr, [0, 0.0, 0.0, 0.0, 0.0])
+        n, usd, tb, ts, mk = snap.get(addr, [0, 0.0, 0.0, 0.0, 0.0])
         state.hour_pending.append([hour, addr, kind, n, round(usd), round(tb), round(ts), round(mk),
                                    state.price.get("BTC", 0.0), state.price.get("ETH", 0.0)])
-    state.hourly = {}
     try:
         new_file = not HOURLY_CSV.exists()
         HOURLY_CSV.parent.mkdir(parents=True, exist_ok=True)
@@ -346,9 +350,35 @@ async def run(minutes: float | None = None) -> None:
     last_hour = int(time.time() // 3600)
     last_beat = time.time()
     last_phone_beat = time.time()
+    background: set = set()
+
+    def spawn(coro) -> None:
+        """Tareas lentas (API, archivos) en segundo plano: la conexión nunca deja de leer, así el
+        servidor no la da por muerta (antes: 'keepalive ping timeout')."""
+        task = asyncio.create_task(coro)
+        background.add(task)
+        task.add_done_callback(background.discard)
+
+    async def radar_job() -> None:
+        nonlocal makers
+        try:
+            state.kinds = await asyncio.to_thread(refresh_radar)
+            makers = [a for a, k in state.kinds.items() if k == "creador de mercado"][:12]
+        except Exception as exc:
+            log.error("radar: %s", exc)
+
+    async def phone_beat() -> None:
+        try:
+            from .notify import send_ntfy
+            await asyncio.to_thread(send_ntfy, "💚 Escucha activa", heartbeat(state, 60), "ESTADO",
+                                    os.environ["NTFY_TOPIC"])
+        except Exception as exc:
+            log.error("ntfy: %s", exc)
+
     while minutes is None or time.time() - started < minutes * 60:
         try:
-            async with websockets.connect(WS_URL, ping_interval=20, max_size=None) as ws:
+            async with websockets.connect(WS_URL, ping_interval=20, ping_timeout=60, max_size=None,
+                                          max_queue=4096) as ws:
                 for coin in COINS:
                     await ws.send(json.dumps({"method": "subscribe", "subscription": {"type": "trades", "coin": coin}}))
                 if reconnecting:
@@ -365,36 +395,45 @@ async def run(minutes: float | None = None) -> None:
                         pass
                     if int(time.time() // 60) != last_minute:
                         last_minute = int(time.time() // 60)
-                        await asyncio.to_thread(close_minute, state, source, makers)
+                        snap, state.minute = state.minute, {}
+                        spawn(asyncio.to_thread(close_minute, state, source, list(makers), snap))
                         if time.time() - last_beat >= BEAT_MIN * 60:      # señal de vida en la ventana
                             last_beat = time.time()
                             log.warning(heartbeat(state, BEAT_MIN))
                         if time.time() - last_phone_beat >= PHONE_BEAT_H * 3600 and os.environ.get("NTFY_TOPIC"):
                             last_phone_beat = time.time()
-                            try:
-                                from .notify import send_ntfy
-                                await asyncio.to_thread(send_ntfy, "💚 Escucha activa", heartbeat(state, 60),
-                                                        "ESTADO", os.environ["NTFY_TOPIC"])
-                            except Exception as exc:
-                                log.error("ntfy: %s", exc)
+                            spawn(phone_beat())
                         if int(time.time() // 3600) != last_hour:
                             last_hour = int(time.time() // 3600)
-                            await asyncio.to_thread(close_hour, state)
+                            hsnap, state.hourly = state.hourly, {}
+                            spawn(asyncio.to_thread(close_hour, state, hsnap))
                     if time.time() - last_zones > 15 * 60:
                         last_zones = time.time()
-                        await asyncio.to_thread(refresh_zones, state, source)
+                        spawn(asyncio.to_thread(refresh_zones, state, source))
                     if time.time() - last_radar > 6 * 3600:
                         last_radar = time.time()
-                        try:
-                            state.kinds = await asyncio.to_thread(refresh_radar)
-                            makers = [a for a, k in state.kinds.items() if k == "creador de mercado"][:12]
-                        except Exception as exc:
-                            log.error("radar: %s", exc)
+                        spawn(radar_job())
         except Exception as exc:
             log.error("Conexión perdida (%s: %s); reconectando en 10 s", type(exc).__name__, exc)
             reconnecting = True
             await asyncio.sleep(10)
     binance_task.cancel()
+
+
+def _disable_quick_edit() -> None:
+    """En Windows, un clic dentro de la ventana activa el modo 'Seleccionar' y CONGELA el programa hasta
+    pulsar una tecla (las conexiones se caen por falta de respuesta). Se desactiva ese modo."""
+    if os.name != "nt":
+        return
+    try:
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        handle = k32.GetStdHandle(-10)                    # entrada estándar de la consola
+        mode = ctypes.c_uint32()
+        if k32.GetConsoleMode(handle, ctypes.byref(mode)):
+            k32.SetConsoleMode(handle, (mode.value & ~0x0040) | 0x0080)   # sin QuickEdit, con flags extendidos
+    except Exception:
+        pass
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -406,6 +445,7 @@ def main(argv: list[str] | None = None) -> None:
     if args.ntfy_topic:
         os.environ["NTFY_TOPIC"] = args.ntfy_topic
     logging.basicConfig(level=logging.WARNING, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
+    _disable_quick_edit()
     try:
         asyncio.run(run(args.minutos))
     except KeyboardInterrupt:

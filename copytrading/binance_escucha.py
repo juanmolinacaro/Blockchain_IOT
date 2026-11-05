@@ -92,7 +92,7 @@ def _get(session, path: str, **params):
     return r.json()
 
 
-def poll_minute(bstate: BinanceState, session) -> list[list]:
+def poll_minute(bstate: BinanceState, session, liq: dict | None = None) -> list[list]:
     ts = (datetime.now(COT) - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M")
     now = time.time()
     if now - bstate.last_ratio >= 300:                     # las proporciones salen cada 5 minutos
@@ -110,10 +110,11 @@ def poll_minute(bstate: BinanceState, session) -> list[list]:
         kl = _get(session, "/fapi/v1/klines", symbol=sym, interval="1m", limit=2)
         oi = _get(session, "/fapi/v1/openInterest", symbol=sym)
         prem = _get(session, "/fapi/v1/premiumIndex", symbol=sym)
-        row = build_row(coin, ts, kl[0], oi, prem, bstate.liq.get(coin, {}), bstate.ratios.get(coin, {}))
+        if liq is None:
+            liq, bstate.liq = bstate.liq, {}
+        row = build_row(coin, ts, kl[0], oi, prem, liq.get(coin, {}), bstate.ratios.get(coin, {}))
         rows.append(row)
         bstate.recent[coin] = (bstate.recent[coin] + [row])[-120:]
-    bstate.liq = {}
     return rows
 
 
@@ -133,6 +134,26 @@ def flush(bstate: BinanceState) -> None:
         log.warning("El archivo %s está abierto; guardo los datos de Binance en memoria.", CSV_PATH)
 
 
+async def _minute(bstate: BinanceState, session, liq: dict, alert, first: bool) -> None:
+    """Datos del minuto en segundo plano (la conexión de liquidaciones sigue leyendo mientras tanto)."""
+    try:
+        rows = await asyncio.to_thread(poll_minute, bstate, session, liq)
+    except Exception as exc:
+        log.error("Binance (datos del minuto): %s", exc)
+        return
+    bstate.pending += rows
+    await asyncio.to_thread(flush, bstate)
+    if first:
+        log.warning("Binance datos ✓ " + " | ".join(f"{r[1]} {r[2]:,.0f} · interés abierto {r[6]:,.0f}" for r in rows))
+    for r in rows:
+        coin, px = r[1], r[2]
+        for side, usd in (("largos", r[8]), ("cortos", r[9])):
+            if usd >= LIQ_ALERT_USD.get(coin, 5e6):
+                alert(f"liq-binance-{coin}-{side}", f"💥 {coin}: Binance liquidó {side} ${usd / 1e6:.1f}M en 1 minuto",
+                      f"Barrido en marcha a {px:,.0f} (mínimo registrado; Binance publica una liquidación por "
+                      f"segundo)", {"moneda": coin, "precio": px, "usd": usd, "lado": side})
+
+
 async def run(alert, should_stop, bstate: BinanceState) -> None:
     """Escucha liquidaciones en vivo y, cada minuto, consulta los datos agregados.
     `alert(clave, título, texto, datos)` es el aviso de la escucha principal (mismo enfriamiento)."""
@@ -142,9 +163,11 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
     session = requests.Session()
     last_minute = int(time.time() // 60)
     failures = 0
+    jobs: set = set()
     while not should_stop():
         try:
-            async with websockets.connect(WS, ping_interval=20, max_size=None) as ws:
+            async with websockets.connect(WS, ping_interval=20, ping_timeout=60, max_size=None,
+                                          max_queue=1024) as ws:
                 log.warning("Binance conectado ✓ (liquidaciones en vivo); los datos por minuto llegan en 1-2 min")
                 bstate.available, failures = True, 0
                 first_data = True
@@ -157,26 +180,11 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
                         pass
                     if int(time.time() // 60) != last_minute:
                         last_minute = int(time.time() // 60)
-                        try:
-                            rows = await asyncio.to_thread(poll_minute, bstate, session)
-                        except Exception as exc:
-                            log.error("Binance (datos del minuto): %s", exc)
-                            continue
-                        bstate.pending += rows
-                        await asyncio.to_thread(flush, bstate)
-                        if first_data:
-                            first_data = False
-                            log.warning("Binance datos ✓ " + " | ".join(
-                                f"{r[1]} {r[2]:,.0f} · interés abierto {r[6]:,.0f}" for r in rows))
-                        for r in rows:
-                            coin, px = r[1], r[2]
-                            for side, usd in (("largos", r[8]), ("cortos", r[9])):
-                                if usd >= LIQ_ALERT_USD.get(coin, 5e6):
-                                    alert(f"liq-binance-{coin}-{side}",
-                                          f"💥 {coin}: Binance liquidó {side} ${usd / 1e6:.1f}M en 1 minuto",
-                                          f"Barrido en marcha a {px:,.0f} (mínimo registrado; Binance publica "
-                                          f"una liquidación por segundo)", {"moneda": coin, "precio": px,
-                                                                           "usd": usd, "lado": side})
+                        snap, bstate.liq = bstate.liq, {}
+                        task = asyncio.create_task(_minute(bstate, session, snap, alert, first_data))
+                        jobs.add(task)
+                        task.add_done_callback(jobs.discard)
+                        first_data = False
         except Exception as exc:
             failures += 1
             if bstate.available or failures in (1, 10):
