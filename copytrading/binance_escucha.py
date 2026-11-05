@@ -145,9 +145,9 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
     while not should_stop():
         try:
             async with websockets.connect(WS, ping_interval=20, max_size=None) as ws:
-                if not bstate.available:
-                    log.warning("Binance disponible de nuevo")
+                log.warning("Binance conectado ✓ (liquidaciones en vivo); los datos por minuto llegan en 1-2 min")
                 bstate.available, failures = True, 0
+                first_data = True
                 while not should_stop():
                     try:
                         parsed = parse_force_order(json.loads(await asyncio.wait_for(ws.recv(), timeout=5)))
@@ -164,6 +164,10 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
                             continue
                         bstate.pending += rows
                         await asyncio.to_thread(flush, bstate)
+                        if first_data:
+                            first_data = False
+                            log.warning("Binance datos ✓ " + " | ".join(
+                                f"{r[1]} {r[2]:,.0f} · interés abierto {r[6]:,.0f}" for r in rows))
                         for r in rows:
                             coin, px = r[1], r[2]
                             for side, usd in (("largos", r[8]), ("cortos", r[9])):
@@ -175,7 +179,7 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
                                                                            "usd": usd, "lado": side})
         except Exception as exc:
             failures += 1
-            if bstate.available:
+            if bstate.available or failures in (1, 10):
                 log.error("Binance no disponible (%s: %s); reintento cada minuto", type(exc).__name__, exc)
             bstate.available = False
             await asyncio.sleep(60 if failures < 10 else 300)
