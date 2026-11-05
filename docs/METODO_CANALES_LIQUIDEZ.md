@@ -627,3 +627,10 @@ maker) y 6 mixtos (−$0,8M). Se guarda en `data/alta_frecuencia.json`.
 Siguiente paso: cada operación pública de Hyperliquid trae las dos direcciones (comprador y
 vendedor), así que con el canal en vivo se puede medir **hacia dónde empujan los cazadores** y
 **si los creadores de mercado retiran órdenes** cerca de un pool, antes del barrido.
+
+**Escucha 24/7 (5 nov 2026):** `copytrading/escucha.py` (en Windows, `windows/escuchar_hft.bat`;
+instrucciones en `windows/LEEME_ESCUCHA.md`) se conecta al canal en vivo de Hyperliquid, clasifica
+al agresor de cada operación de BTC/ETH (cazador, creador de mercado u otros), guarda el flujo por
+minuto y la liquidez de los creadores a ±1 %, y avisa por ntfy cuando los cazadores empujan muy por
+encima de lo normal (≥ 3σ y ≥ $300k en 5 min) o los creadores retiran > 60 % de un lado del libro.
+Probado en vivo: el volumen captado por minuto coincide con el de Hyperliquid.
