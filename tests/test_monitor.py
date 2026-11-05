@@ -178,3 +178,17 @@ def test_pending_plan_is_cancelled_when_price_closes_beyond_its_stop():
                Candle(2 * h, 79400, 79400, 77500, 77600, 1)]
     activate_plan(e, candles)
     assert e.status == "anulada" and "invalidado" in e.exit_reason
+
+
+def test_runner_secures_half_and_trails():
+    from copytrading.method.backtest import MethodConfig, Trade, manage
+    from copytrading.models import Candle
+    h = 3_600_000
+    # corto en 100: TP1 98 (mitad), luego cae a 90 y rebota; el stop móvil (máximo de 3 velas) lo saca en 92,6
+    path = [(100, 100.5, 99.5, 100), (100, 100.2, 97.8, 98), (98, 98.2, 95, 95.5), (95.5, 95.6, 92, 92.5),
+            (92.5, 92.6, 90, 90.5), (90.5, 91, 90, 90.8), (90.8, 91, 90.2, 90.9), (90.9, 94, 90.8, 93.8)]
+    candles = [Candle(i * h, o, hi, lo, c, 1) for i, (o, hi, lo, c) in enumerate(path)]
+    cfg = MethodConfig(trail_bars=3, fee=0.0, slippage=0.0, stop_buffer=0.0)
+    t = manage(Trade("short", 0, 100.0, 102.0, 98.0, 0.0), candles, cfg)
+    assert t.exit_reason == "stop móvil"
+    assert abs(t.r - (0.5 * (100 - 98) / 2 + 0.5 * (100 - 92.6) / 2)) < 1e-9   # la mitad corrió hasta 92,6

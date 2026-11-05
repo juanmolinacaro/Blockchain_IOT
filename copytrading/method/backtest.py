@@ -66,6 +66,7 @@ class MethodConfig:
     risk_per_trade: float = 0.01    # 1 % del capital por operación
     half_life_bars: float = 84      # vida media de los niveles de liquidación (84 velas de 4h = 14 días)
     vol_window: int = 50
+    trail_bars: int = 0             # "dejar correr": tras TP1 el stop sigue el extremo de las últimas N velas
 
 
 @dataclass
@@ -233,12 +234,19 @@ def manage(trade: Trade, candles: list[Candle], cfg: MethodConfig) -> Trade:
         if hit_stop:
             px = stop_px * (1 - cfg.slippage) if long else stop_px * (1 + cfg.slippage)
             realized += (0.5 if half_done else 1.0) * r_at(px)
-            trade.exit_i, trade.exit_reason = j, "stop" if not half_done else "breakeven"
+            moved = half_done and (stop > trade.entry if long else stop < trade.entry)
+            trade.exit_i = j
+            trade.exit_reason = "stop" if not half_done else ("stop móvil" if moved else "breakeven")
             break
         if not half_done and (c.h >= trade.tp1 if long else c.l <= trade.tp1):
             realized += 0.5 * r_at(trade.tp1)
             half_done, stop = True, trade.entry
-        if half_done and (c.h >= trade.tp2 if long else c.l <= trade.tp2):
+        runner = not trade.tp2                                   # sin TP2: la otra mitad corre con stop móvil
+        if half_done and runner and cfg.trail_bars:
+            win = candles[max(trade.entry_i + 1, j - cfg.trail_bars + 1):j + 1]
+            trail = min(x.l for x in win) * (1 - cfg.stop_buffer) if long else max(x.h for x in win) * (1 + cfg.stop_buffer)
+            stop = max(stop, trail) if long else min(stop, trail)
+        if half_done and not runner and (c.h >= trade.tp2 if long else c.l <= trade.tp2):
             realized += 0.5 * r_at(trade.tp2)
             trade.exit_i, trade.exit_reason = j, "tp2"
             break

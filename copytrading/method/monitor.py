@@ -245,7 +245,8 @@ def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
             fill_px = c.c
         if crossed:
             e.time, e.entry = c.t, fill_px
-            valid = (e.stop > e.entry > e.tp1 >= e.tp2) if e.side == "short" else (e.stop < e.entry < e.tp1 <= e.tp2)
+            valid = ((e.stop > e.entry > e.tp1 and (not e.tp2 or e.tp1 >= e.tp2)) if e.side == "short"
+                     else (e.stop < e.entry < e.tp1 and (not e.tp2 or e.tp1 <= e.tp2)))
             e.status = "abierta" if valid else "anulada"
             if not valid:
                 e.exit_reason = "el cierre de activación quedó más allá del stop o del objetivo"
@@ -264,6 +265,9 @@ def update_outcome(e: JournalEntry, candles: list[Candle], cfg: MethodConfig = V
     if e.interval == "1h":
         # el límite de tiempo del método es ~5 días: 30 velas de 4H equivalen a 120 de 1H
         cfg = replace(cfg, max_bars=cfg.max_bars * 4)
+    # "asegurar y dejar correr" (Juan): mitad en TP1, stop a la entrada, y la otra mitad con stop móvil
+    # sobre el extremo de las últimas 6 velas de 1H (≈ 6 h) o 3 de 4H (12 h) si el plan no tiene TP2
+    cfg = replace(cfg, trail_bars=6 if e.interval == "1h" else 3)
     idx = next((k for k, c in enumerate(candles) if c.t >= e.time), None)
     if idx is None:
         return e
@@ -295,9 +299,9 @@ def summary(entries: list[JournalEntry]) -> list[str]:
 def manual_entry(coin: str, side: str, entry: float, stop: float, tp1: float, tp2: float,
                  note: str = "", interval: str = "4h", now_ms: int | None = None) -> JournalEntry:
     now_ms = int(time.time() * 1000) if now_ms is None else now_ms
-    if side == "long" and not stop < entry < tp1 <= tp2:
+    if side == "long" and not (stop < entry < tp1 and (not tp2 or tp1 <= tp2)):
         raise ValueError("Para un largo: stop < entrada < TP1 <= TP2")
-    if side == "short" and not stop > entry > tp1 >= tp2:
+    if side == "short" and not (stop > entry > tp1 and (not tp2 or tp1 >= tp2)):
         raise ValueError("Para un corto: stop > entrada > TP1 >= TP2")
     return JournalEntry(f"juan-{coin}-{now_ms}", "juan", coin, interval, side, now_ms,
                         entry, stop, tp1, tp2, note)
@@ -310,9 +314,9 @@ def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: fl
     now_ms = int(time.time() * 1000) if now_ms is None else now_ms
     if trigger_dir not in ("below", "above", "touch_below", "touch_above"):
         raise ValueError("trigger_dir debe ser below, above, touch_below o touch_above")
-    if side == "short" and not stop > trigger > tp1 >= tp2:
+    if side == "short" and not (stop > trigger > tp1 and (not tp2 or tp1 >= tp2)):
         raise ValueError("Para un corto: stop > activación > TP1 >= TP2")
-    if side == "long" and not stop < trigger < tp1 <= tp2:
+    if side == "long" and not (stop < trigger < tp1 and (not tp2 or tp1 <= tp2)):
         raise ValueError("Para un largo: stop < activación < TP1 <= TP2")
     bar_ms = {"1h": 3_600_000, "4h": 4 * 3_600_000}[interval]
     start = now_ms - now_ms % bar_ms      # cuenta desde la vela en curso (aún sin cerrar)

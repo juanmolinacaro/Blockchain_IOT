@@ -646,7 +646,8 @@ def main(argv: list[str] | None = None) -> None:
     di.add_argument("--entry", type=float)
     di.add_argument("--stop", type=float)
     di.add_argument("--tp1", type=float)
-    di.add_argument("--tp2", type=float)
+    di.add_argument("--tp2", type=float, default=0.0,
+                    help="segundo objetivo; 0 (por defecto) = asegurar en TP1 y dejar correr con stop móvil")
     di.add_argument("--nota", default="")
     di.add_argument("--trigger", type=float, help="plan: nivel de activación")
     di.add_argument("--trigger-dir", choices=["below", "above", "touch_below", "touch_above"],

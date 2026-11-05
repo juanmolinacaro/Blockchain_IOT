@@ -62,6 +62,7 @@ class Position:
     name: str            # "D", "C" o ""
     pending: bool        # aún no activado: se dibuja más tenue
     cond: str = ""       # "si cierra 4H < 77.250"
+    runner: bool = False # sin TP2: asegura en TP1 y deja correr
 
     @property
     def rr(self) -> float:
@@ -84,7 +85,8 @@ def plan_positions(entries, coin: str) -> list[Position]:
                     }.get(e.trigger_dir, "")
             if getattr(e, "sweep", 0):
                 cond = f"tras barrer {_k(e.sweep)}, {cond}"
-        out.append(Position(e.side, entry, e.stop, e.tp1, e.tp2, e.time, name, pending, cond))
+        out.append(Position(e.side, entry, e.stop, e.tp1, e.tp2 or e.tp1, e.time, name, pending, cond,
+                            runner=not e.tp2))
     return out
 
 
@@ -106,7 +108,8 @@ def _draw_position(ax, pos: Position, x0: float, x1: float, fs: float = 8.5) -> 
     head = f"{verb}{tag} {_k(pos.entry)}" + (" (pendiente)" if pos.pending else "")
     ax.text(x0 + 0.3, pos.entry, head + f" · R/R {pos.rr:.1f}".replace(".", ","), color="white", fontsize=fs,
             va="bottom" if pos.side == "long" else "top", fontweight="bold", zorder=7, bbox=box)
-    ax.text(x0 + 0.3, pos.tp2, f"Objetivo {_k(pos.tp2)} ({pct(pos.tp2)})", color="#4caf50", fontsize=fs,
+    ax.text(x0 + 0.3, pos.tp2, f"Objetivo {_k(pos.tp2)} ({pct(pos.tp2)})" + (" → asegurar y dejar correr" if pos.runner else ""),
+            color="#4caf50", fontsize=fs,
             va="top" if pos.side == "long" else "bottom", fontweight="bold", zorder=7, bbox=box)
     ax.text(x0 + 0.3, pos.stop, f"Stop {_k(pos.stop)} ({pct(pos.stop)})", color="#ff6b6b", fontsize=fs,
             va="bottom" if pos.side == "long" else "top", fontweight="bold", zorder=7, bbox=box)
@@ -288,7 +291,8 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
         name, verb = plan_name(e.note), ("venta" if e.side == "short" else "compra")
         if e.status == "abierta":
             warn = _warnings(e.side, magnet, bias if coin == "BTC" else None, trend)
-            watch.append(f"{name} en curso ({verb} {_k(e.entry)}): stop {_k(e.stop)} · objetivo {_k(e.tp2)}{warn}")
+            goal = f"objetivo {_k(e.tp2)}" if e.tp2 else f"asegura en {_k(e.tp1)} y deja correr"
+            watch.append(f"{name} en curso ({verb} {_k(e.entry)}): stop {_k(e.stop)} · {goal}{warn}")
         else:
             tf = e.interval.upper()
             cond = {"below": f"cierre {tf} bajo", "above": f"cierre {tf} sobre", "touch_below": "toque de",

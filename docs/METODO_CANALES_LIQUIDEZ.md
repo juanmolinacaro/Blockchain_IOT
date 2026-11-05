@@ -671,3 +671,12 @@ volumen, compra/venta agresiva, interés abierto, funding, liquidaciones reales 
 largos/cortos de los top traders y de todas las cuentas. Aviso "💥" si en un minuto se liquidan
 ≥ $5M (BTC) o ≥ $2M (ETH) de un lado: barrido confirmado. Desde los servidores de la nube Binance
 está bloqueado ("ubicación restringida"); si no responde, la escucha de Hyperliquid sigue igual.
+
+### Gestión de Juan: asegurar y dejar correr (5 nov 2026)
+
+"Esa operación es para tomar ganancia, asegurar la operación y dejarla correr." Desde ahora, un plan
+sin segundo objetivo (`--tp2` vacío) se gestiona así: **mitad en TP1, stop a la entrada, y la otra
+mitad corre con stop móvil** sobre el máximo (corto) o mínimo (largo) de las últimas 6 velas de 1H
+(planes de 1H) o 3 de 4H (planes de 4H). Sale por el stop móvil o por tiempo. El plan J (5 nov) se
+apuntó con un solo objetivo y queda registrado así (+0,36R); la nueva gestión se aplica a los planes
+nuevos para no medir con lo que ya se sabe.
