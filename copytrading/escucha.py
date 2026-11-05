@@ -223,8 +223,11 @@ def heartbeat(state: State, minutes: int) -> str:
     state.trades_at_last_beat = state.trades_seen
     alerts = state.alerts_since_beat
     state.alerts_since_beat = 0
-    return (f"✓ Funcionando: {seen:,} operaciones en {minutes} min, "
+    line = (f"✓ Funcionando: {seen:,} operaciones en {minutes} min, "
             f"{'sin avisos' if not alerts else f'{alerts} aviso(s)'} | " + " | ".join(parts))
+    if getattr(state, "binance", None) is not None:
+        line += "\n   " + state.binance.summary(minutes)
+    return line
 
 
 def close_hour(state: State) -> None:
@@ -330,6 +333,13 @@ async def run(minutes: float | None = None) -> None:
     log.warning("Escuchando %s · estudiando %d cuentas (%d cazadores y %d creadores de mercado confirmados)",
                 ", ".join(COINS), len(kinds), sum(k == "cazador" for k in kinds.values()), len(makers))
     started = time.time()
+    # Binance en paralelo (liquidaciones, interés abierto, volumen agresivo, largos/cortos)
+    from . import binance_escucha
+    bstate = binance_escucha.BinanceState()
+    state.binance = bstate
+    stop = lambda: minutes is not None and time.time() - started >= minutes * 60
+    binance_task = asyncio.create_task(
+        binance_escucha.run(lambda k, t, b, d: alert(state, k, t, b, d), stop, bstate))
     last_minute = int(time.time() // 60)
     last_radar = last_zones = time.time()
     reconnecting = False
@@ -384,6 +394,7 @@ async def run(minutes: float | None = None) -> None:
             log.error("Conexión perdida (%s: %s); reconectando en 10 s", type(exc).__name__, exc)
             reconnecting = True
             await asyncio.sleep(10)
+    binance_task.cancel()
 
 
 def main(argv: list[str] | None = None) -> None:

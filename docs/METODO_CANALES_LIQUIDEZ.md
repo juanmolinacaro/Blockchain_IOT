@@ -662,3 +662,12 @@ Cada hora guarda por cuenta: operaciones, volumen, cuánto empujó comprando/ven
 cuánta liquidez puso (maker) y el precio (`data/hft_cuentas_hora.csv`). Cada mes se revisa quién es
 más activo y quién mueve el precio, y se descarta a las que no aportan. El flujo por minuto y los
 avisos siguen usando solo las confirmadas.
+
+**Binance en la escucha (5 nov 2026).** Binance no publica quién es quién ni los precios de
+liquidación (los mapas de liquidez con datos de Binance son estimaciones), pero sí datos agregados.
+La escucha del computador de Juan guarda cada minuto en `data/binance_minuto.csv`, para BTC y ETH:
+volumen, compra/venta agresiva, interés abierto, funding, liquidaciones reales de largos y cortos
+(canal `forceOrder`; Binance publica como mucho una por segundo, así que es un mínimo) y proporción
+largos/cortos de los top traders y de todas las cuentas. Aviso "💥" si en un minuto se liquidan
+≥ $5M (BTC) o ≥ $2M (ETH) de un lado: barrido confirmado. Desde los servidores de la nube Binance
+está bloqueado ("ubicación restringida"); si no responde, la escucha de Hyperliquid sigue igual.

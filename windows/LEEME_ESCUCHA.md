@@ -33,6 +33,8 @@ enchufado. La pantalla sí se puede apagar.
 
 * **🤖 Los cazadores COMPRAN / VENDEN agresivo**: el flujo de los robots cazadores en 5 minutos está
   muy por encima de lo normal. Dice hacia qué pool de liquidez va el precio.
+* **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
+  (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un
   lado del precio; el camino queda libre hacia ese lado.
 
@@ -50,6 +52,9 @@ En la carpeta `data`:
 * `hft_eventos.jsonl`: cada aviso enviado.
 * `hft_cuentas_hora.csv`: cada hora, para cada una de las 30 cuentas en estudio: operaciones, volumen,
   cuánto empujó el precio comprando o vendiendo, cuánta liquidez puso, y el precio de BTC y ETH.
+* `binance_minuto.csv`: cada minuto, de Binance Futuros (BTC y ETH): volumen, compra y venta agresiva,
+  interés abierto, funding, liquidaciones de largos y de cortos, y proporción largos/cortos de los top
+  traders y de todas las cuentas.
 * `hft_cohorte.json`: las 30 cuentas que se estudian este mes (se revisan y descartan cada mes).
 
 Para mirar el CSV sin bloquearlo, **cópialo** (Ctrl+C, Ctrl+V) y abre la copia en Excel. Si abres el
