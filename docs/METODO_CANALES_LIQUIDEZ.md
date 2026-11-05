@@ -655,3 +655,10 @@ los 7 días y casi todas las horas, con picos a las 20:00 (13 %) y 18:00 (9 %). 
 7 días pero mucho menos el fin de semana, quieto de 2 a 5 am, pico a las 8 am (14 %). Ejecutor
 `0x4e23…`: solo de 9 am a 5 pm (opera acciones; sigue la bolsa de EE. UU.). La escucha guarda desde
 ahora `data/hft_horario.csv` (operaciones por robot y hora) para completar el horario de los rápidos.
+
+**Cohorte de 30 cuentas (decisión de Juan, 5 nov 2026).** Más datos es mejor: la escucha estudia
+durante un mes las 30 cuentas de más volumen (confirmadas o no), fijas en `data/hft_cohorte.json`.
+Cada hora guarda por cuenta: operaciones, volumen, cuánto empujó comprando/vendiendo (taker),
+cuánta liquidez puso (maker) y el precio (`data/hft_cuentas_hora.csv`). Cada mes se revisa quién es
+más activo y quién mueve el precio, y se descarta a las que no aportan. El flujo por minuto y los
+avisos siguen usando solo las confirmadas.

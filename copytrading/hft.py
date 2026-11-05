@@ -154,10 +154,21 @@ def profile(source, cand: dict, churn_wait_s: float = 15) -> HFTProfile | None:
     return p
 
 
-def scan(source, top: int = 25, pause_s: float = 0.3) -> list[HFTProfile]:
+def scan(source, top: int = 25, pause_s: float = 0.3, addresses: list[str] | None = None) -> list[HFTProfile]:
+    """Perfila las `top` cuentas candidatas del ranking, o una lista fija de direcciones (la cohorte)."""
     rows = source._request("GET", source.leaderboard_url)["leaderboardRows"]
+    if addresses:
+        want = {a.lower() for a in addresses}
+        cands = []
+        for r in rows:
+            if r["ethAddress"].lower() in want:
+                w = dict(r["windowPerformances"])["week"]
+                cands.append({"address": r["ethAddress"], "week_volume": float(w["vlm"]),
+                              "week_pnl": float(w["pnl"]), "account_value": float(r["accountValue"])})
+    else:
+        cands = candidates(rows, top)
     out = []
-    for c in candidates(rows, top):
+    for c in cands:
         try:
             p = profile(source, c)
         except Exception:

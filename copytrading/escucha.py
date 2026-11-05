@@ -38,7 +38,9 @@ RADAR = Path("data/alta_frecuencia.json")
 FLOW_CSV = Path("data/hft_flujo.csv")
 EVENTS = Path("data/hft_eventos.jsonl")
 COT = timezone(timedelta(hours=-5))
-CONFIRMED = ("cazador", "creador de mercado")     # solo cuentas confirmadas por todas las señales del radar
+CONFIRMED = ("cazador", "creador de mercado")     # tipos confirmados por todas las señales del radar
+COHORT = Path("data/hft_cohorte.json")            # las 30 cuentas que se estudian durante el mes
+COHORT_SIZE = 30
 
 # umbrales de partida
 Z_PUSH = 3.0                 # flujo neto de 5 min de los cazadores: desviaciones sobre lo normal
@@ -63,7 +65,7 @@ class State:
         self.trades_at_last_beat = 0
         self.alerts_since_beat = 0
         self.pending: list[list] = []                           # filas aún sin escribir (archivo bloqueado)
-        self.hourly: dict[str, list] = {}                       # robot -> [operaciones, USD] en la hora en curso
+        self.hourly: dict[str, list] = {}       # cuenta -> [operaciones, USD, taker compra, taker venta, maker USD]
         self.hour_pending: list[list] = []
         self.warned_locked = False
 
@@ -72,13 +74,19 @@ class State:
         usd = float(t["sz"]) * float(t["px"])
         self.price[coin] = float(t["px"])
         buyer, seller = t.get("users", ["", ""])
-        for who in {buyer.lower(), seller.lower()}:            # horario de cada robot (como maker o taker)
+        taker = (buyer if t["side"] == "B" else seller).lower()
+        for who in {buyer.lower(), seller.lower()}:            # actividad de cada cuenta de la cohorte
             if who in self.kinds:
-                h = self.hourly.setdefault(who, [0, 0.0])
+                h = self.hourly.setdefault(who, [0, 0.0, 0.0, 0.0, 0.0])
                 h[0] += 1
                 h[1] += usd
-        taker = buyer if t["side"] == "B" else seller
-        kind = self.kinds.get(taker.lower(), "otros")
+                if who == taker:                               # empujó el precio
+                    h[2 if t["side"] == "B" else 3] += usd
+                else:                                          # puso la liquidez
+                    h[4] += usd
+        kind = self.kinds.get(taker, "otros")
+        if kind not in CONFIRMED:                              # el flujo por minuto agrupa solo los confirmados
+            kind = "otros"
         m = self.minute.setdefault(coin, {})
         key = f"{kind}|{'compra' if t['side'] == 'B' else 'venta'}"
         m[key] = m.get(key, 0.0) + usd
@@ -86,20 +94,35 @@ class State:
 
 
 def load_radar(path: Path = RADAR) -> dict[str, str]:
+    """Todas las cuentas del radar con su tipo (también las 'sin confirmar': se estudian un mes)."""
     if not path.exists():
         return {}
     data = json.loads(path.read_text(encoding="utf-8"))
-    return {c["address"].lower(): c["kind"] for c in data.get("cuentas", []) if c.get("kind") in CONFIRMED}
+    return {c["address"].lower(): c["kind"] for c in data.get("cuentas", [])}
+
+
+def load_cohort() -> list[str]:
+    if not COHORT.exists():
+        return []
+    return [a.lower() for a in json.loads(COHORT.read_text(encoding="utf-8")).get("cuentas", [])]
 
 
 def refresh_radar() -> dict[str, str]:
+    """Vuelve a perfilar las cuentas de la cohorte (fija durante el mes). Si no hay cohorte, la crea
+    con las 30 primeras del ranking. Las cuentas solo se cambian en la revisión mensual."""
     from .hft import as_dict, scan
     from .sources.hyperliquid import HyperliquidSource
-    profiles = scan(HyperliquidSource(), top=25)
+    cohort = load_cohort()
+    profiles = scan(HyperliquidSource(), top=COHORT_SIZE, addresses=cohort or None)
+    if not cohort:
+        COHORT.parent.mkdir(parents=True, exist_ok=True)
+        COHORT.write_text(json.dumps({"desde": datetime.now(COT).strftime("%Y-%m-%d"),
+                                      "nota": "Cuentas en estudio durante un mes; se revisan y descartan cada mes.",
+                                      "cuentas": [p.address for p in profiles]}, indent=1), encoding="utf-8")
     RADAR.parent.mkdir(parents=True, exist_ok=True)
     RADAR.write_text(json.dumps({"actualizado": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"),
                                  "cuentas": [as_dict(p) for p in profiles]}, indent=1), encoding="utf-8")
-    return {p.address.lower(): p.kind for p in profiles if p.kind in CONFIRMED}
+    return {p.address.lower(): p.kind for p in profiles}
 
 
 def mm_liquidity(source, makers: list[str], coin: str, price: float, band: float = 0.01) -> tuple[float, float]:
@@ -182,7 +205,7 @@ def close_minute(state: State, source, makers: list[str]) -> None:
     flush_rows(state)
 
 
-HOURLY_CSV = Path("data/hft_horario.csv")
+HOURLY_CSV = Path("data/hft_cuentas_hora.csv")
 
 
 def heartbeat(state: State, minutes: int) -> str:
@@ -205,11 +228,13 @@ def heartbeat(state: State, minutes: int) -> str:
 
 
 def close_hour(state: State) -> None:
-    """Guarda cuántas operaciones hizo cada robot confirmado en la hora que termina (para ver sus horarios)."""
+    """Guarda, por cuenta de la cohorte y hora: operaciones, volumen, cuánto empujó comprando/vendiendo
+    (taker) y cuánta liquidez puso (maker). Con un mes de esto se ve quién es más activo y quién mueve el precio."""
     hour = (datetime.now(COT) - timedelta(hours=1)).strftime("%Y-%m-%d %H:00")
     for addr, kind in state.kinds.items():
-        n, usd = state.hourly.get(addr, [0, 0.0])
-        state.hour_pending.append([hour, addr, kind, n, round(usd)])
+        n, usd, tb, ts, mk = state.hourly.get(addr, [0, 0.0, 0.0, 0.0, 0.0])
+        state.hour_pending.append([hour, addr, kind, n, round(usd), round(tb), round(ts), round(mk),
+                                   state.price.get("BTC", 0.0), state.price.get("ETH", 0.0)])
     state.hourly = {}
     try:
         new_file = not HOURLY_CSV.exists()
@@ -217,7 +242,8 @@ def close_hour(state: State) -> None:
         with HOURLY_CSV.open("a", newline="", encoding="utf-8") as fh:
             w = csv.writer(fh)
             if new_file:
-                w.writerow(["hora_col", "cuenta", "tipo", "operaciones_btc_eth", "usd"])
+                w.writerow(["hora_col", "cuenta", "tipo", "operaciones_btc_eth", "usd", "empuja_compra_usd",
+                            "empuja_venta_usd", "liquidez_puesta_usd", "precio_btc", "precio_eth"])
             w.writerows(state.hour_pending)
         state.hour_pending = []
     except PermissionError:
@@ -290,9 +316,10 @@ async def run(minutes: float | None = None) -> None:
 
     source = HyperliquidSource()
     kinds = load_radar()
-    stale = not RADAR.exists() or time.time() - RADAR.stat().st_mtime > 6 * 3600
+    stale = (not COHORT.exists() or not RADAR.exists() or time.time() - RADAR.stat().st_mtime > 6 * 3600
+             or len(kinds) < len(load_cohort()))
     if not kinds or stale:
-        log.warning("Actualizando la lista de robots desde el ranking (tarda unos minutos)...")
+        log.warning("Actualizando el estudio de las cuentas desde el ranking (tarda unos minutos)...")
         try:
             kinds = await asyncio.to_thread(refresh_radar)
         except Exception as exc:
@@ -300,8 +327,8 @@ async def run(minutes: float | None = None) -> None:
     state = State(kinds)
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
     await asyncio.to_thread(refresh_zones, state, source)
-    log.warning("Escuchando %s · %d robots en el radar (%d creadores de mercado)", ", ".join(COINS),
-                len(kinds), len(makers))
+    log.warning("Escuchando %s · estudiando %d cuentas (%d cazadores y %d creadores de mercado confirmados)",
+                ", ".join(COINS), len(kinds), sum(k == "cazador" for k in kinds.values()), len(makers))
     started = time.time()
     last_minute = int(time.time() // 60)
     last_radar = last_zones = time.time()

@@ -62,3 +62,12 @@ def test_heartbeat_line():
     line = heartbeat(st, 15)
     assert line.startswith("✓ Funcionando: 1,234 operaciones en 15 min, sin avisos")
     assert "BTC 80,000 · cazadores venden neto $0.1M" in line
+
+
+def test_hourly_push_and_liquidity_per_account(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "HOURLY_CSV", tmp_path / "h.csv")
+    st = esc.State({"0xa": "sin confirmar", "0xb": "creador de mercado"})
+    st.add_trade({"coin": "BTC", "side": "A", "px": "80000", "sz": "1", "users": ["0xb", "0xa"]})  # 0xa vende agresivo
+    assert st.hourly["0xa"][3] == 80000 and st.hourly["0xb"][4] == 80000
+    assert st.minute["BTC"] == {"otros|venta": 80000.0}          # 'sin confirmar' no entra en el flujo de robots
