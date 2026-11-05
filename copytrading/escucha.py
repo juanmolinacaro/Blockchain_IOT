@@ -57,6 +57,8 @@ class State:
         self.last_alert: dict[str, float] = {}
         self.zones: dict[str, tuple[list, list]] = {}
         self.trades_seen = 0
+        self.pending: list[list] = []                           # filas aún sin escribir (archivo bloqueado)
+        self.warned_locked = False
 
     def add_trade(self, t: dict) -> None:
         coin = t["coin"]
@@ -129,8 +131,11 @@ def alert(state: State, key: str, title: str, body: str, data: dict) -> None:
         return
     state.last_alert[key] = now
     EVENTS.parent.mkdir(parents=True, exist_ok=True)
-    with EVENTS.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps({"t": int(now * 1000), "tipo": key, "titulo": title, **data}, ensure_ascii=False) + "\n")
+    try:
+        with EVENTS.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"t": int(now * 1000), "tipo": key, "titulo": title, **data}, ensure_ascii=False) + "\n")
+    except PermissionError:
+        log.warning("No pude guardar el aviso en %s (archivo abierto)", EVENTS)
     log.warning("%s | %s", title, body)
     topic = os.environ.get("NTFY_TOPIC")
     if topic:
@@ -141,30 +146,49 @@ def alert(state: State, key: str, title: str, body: str, data: dict) -> None:
             log.error("ntfy: %s", exc)
 
 
+HEADER = ["hora_col", "moneda", "precio", "cazador_compra", "cazador_venta", "creador_compra",
+          "creador_venta", "otros_compra", "otros_venta", "liq_creadores_compra_1pct", "liq_creadores_venta_1pct"]
+
+
 def close_minute(state: State, source, makers: list[str]) -> None:
     ts = (datetime.now(COT) - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M")   # minuto que se cierra
-    new_file = not FLOW_CSV.exists()
-    FLOW_CSV.parent.mkdir(parents=True, exist_ok=True)
-    with FLOW_CSV.open("a", newline="", encoding="utf-8") as fh:
-        w = csv.writer(fh)
-        if new_file:
-            w.writerow(["hora_col", "moneda", "precio", "cazador_compra", "cazador_venta", "creador_compra",
-                        "creador_venta", "otros_compra", "otros_venta", "liq_creadores_compra_1pct",
-                        "liq_creadores_venta_1pct"])
-        for coin in COINS:
-            m = state.minute.get(coin, {})
-            px = state.price.get(coin, 0.0)
-            g = lambda k: round(m.get(k, 0.0))
-            hunt_net = m.get("cazador|compra", 0.0) - m.get("cazador|venta", 0.0)
-            state.net_hist[coin].append(hunt_net)
-            bid = ask = 0.0
-            if px and makers:
-                bid, ask = mm_liquidity(source, makers, coin, px)
-                state.book_hist[coin].append((bid, ask))
-            w.writerow([ts, coin, px, g("cazador|compra"), g("cazador|venta"), g("creador de mercado|compra"),
-                        g("creador de mercado|venta"), g("otros|compra"), g("otros|venta"), round(bid), round(ask)])
-            check_signals(state, coin)
+    for coin in COINS:
+        m = state.minute.get(coin, {})
+        px = state.price.get(coin, 0.0)
+        g = lambda k: round(m.get(k, 0.0))
+        hunt_net = m.get("cazador|compra", 0.0) - m.get("cazador|venta", 0.0)
+        state.net_hist[coin].append(hunt_net)
+        bid = ask = 0.0
+        if px and makers:
+            bid, ask = mm_liquidity(source, makers, coin, px)
+            state.book_hist[coin].append((bid, ask))
+        state.pending.append([ts, coin, px, g("cazador|compra"), g("cazador|venta"), g("creador de mercado|compra"),
+                              g("creador de mercado|venta"), g("otros|compra"), g("otros|venta"), round(bid), round(ask)])
+        check_signals(state, coin)
     state.minute = {}
+    flush_rows(state)
+
+
+def flush_rows(state: State) -> None:
+    """Escribe las filas pendientes. Si el archivo está abierto en Excel (Windows lo bloquea), las guarda
+    en memoria y lo vuelve a intentar el minuto siguiente: no se pierde nada ni se corta la escucha."""
+    if not state.pending:
+        return
+    try:
+        new_file = not FLOW_CSV.exists()
+        FLOW_CSV.parent.mkdir(parents=True, exist_ok=True)
+        with FLOW_CSV.open("a", newline="", encoding="utf-8") as fh:
+            w = csv.writer(fh)
+            if new_file:
+                w.writerow(HEADER)
+            w.writerows(state.pending)
+        state.pending = []
+        state.warned_locked = False
+    except PermissionError:
+        if not state.warned_locked:
+            log.warning("El archivo %s está abierto (¿en Excel?). Sigo escuchando y guardo los datos en "
+                        "memoria; se escribirán cuando lo cierres.", FLOW_CSV)
+            state.warned_locked = True
 
 
 def check_signals(state: State, coin: str) -> None:

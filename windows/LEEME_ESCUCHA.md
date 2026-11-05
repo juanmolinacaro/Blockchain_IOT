@@ -47,6 +47,9 @@ En la carpeta `data`:
   de los creadores a ±1 % del precio.
 * `hft_eventos.jsonl`: cada aviso enviado.
 
+Para mirar el CSV sin bloquearlo, **cópialo** (Ctrl+C, Ctrl+V) y abre la copia en Excel. Si abres el
+original, el programa sigue escuchando y guarda los datos en memoria hasta que cierres Excel.
+
 Cada cierto tiempo pásame esos dos archivos (o súbelos al chat) para medir si los avisos se
 adelantan a los barridos.
 
