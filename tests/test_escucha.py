@@ -71,3 +71,12 @@ def test_hourly_push_and_liquidity_per_account(monkeypatch, tmp_path):
     st.add_trade({"coin": "BTC", "side": "A", "px": "80000", "sz": "1", "users": ["0xb", "0xa"]})  # 0xa vende agresivo
     assert st.hourly["0xa"][3] == 80000 and st.hourly["0xb"][4] == 80000
     assert st.minute["BTC"] == {"otros|venta": 80000.0}          # 'sin confirmar' no entra en el flujo de robots
+
+
+def test_failed_liquidity_fetch_is_not_zero():
+    from copytrading.escucha import mm_liquidity
+
+    class Src:
+        def _info(self, payload):
+            raise RuntimeError("HTTP 429")
+    assert mm_liquidity(Src(), ["0xmm"], "BTC", 80000) is None

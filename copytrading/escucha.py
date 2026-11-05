@@ -125,14 +125,16 @@ def refresh_radar() -> dict[str, str]:
     return {p.address.lower(): p.kind for p in profiles}
 
 
-def mm_liquidity(source, makers: list[str], coin: str, price: float, band: float = 0.01) -> tuple[float, float]:
-    """USD en órdenes de compra / venta de los creadores de mercado a ±band del precio."""
+def mm_liquidity(source, makers: list[str], coin: str, price: float, band: float = 0.01) -> tuple[float, float] | None:
+    """USD en órdenes de compra / venta de los creadores de mercado a ±band del precio.
+    Devuelve None si alguna consulta falla (p. ej. límite de la API en plena caída): un fallo NO es
+    'liquidez cero' (el 5 nov dio avisos falsos de retiro por eso)."""
     bid = ask = 0.0
     for a in makers:
         try:
             orders = source._info({"type": "openOrders", "user": a}) or []
         except Exception:
-            continue
+            return None
         for o in orders:
             if o.get("coin") != coin:
                 continue
@@ -198,12 +200,15 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         g = lambda k: round(m.get(k, 0.0))
         hunt_net = m.get("cazador|compra", 0.0) - m.get("cazador|venta", 0.0)
         state.net_hist[coin].append(hunt_net)
-        bid = ask = 0.0
+        bid = ask = ""
         if px and makers:
-            bid, ask = mm_liquidity(source, makers, coin, px)
-            state.book_hist[coin].append((bid, ask))
+            got = mm_liquidity(source, makers, coin, px)
+            if got is not None:
+                bid, ask = got
+                state.book_hist[coin].append(got)
         state.pending.append([ts, coin, px, g("cazador|compra"), g("cazador|venta"), g("creador de mercado|compra"),
-                              g("creador de mercado|venta"), g("otros|compra"), g("otros|venta"), round(bid), round(ask)])
+                              g("creador de mercado|venta"), g("otros|compra"), g("otros|venta"),
+                              round(bid) if bid != "" else "", round(ask) if ask != "" else ""])
         check_signals(state, coin)
     flush_rows(state)
 
@@ -420,6 +425,19 @@ async def run(minutes: float | None = None) -> None:
     binance_task.cancel()
 
 
+def _keep_awake() -> None:
+    """En Windows, impide que el equipo se suspenda solo mientras la escucha corre (el 5 nov se durmió de
+    23:42 a 09:51 y se perdió la ruptura de las 7 am). No evita la suspensión al cerrar la tapa."""
+    if os.name != "nt":
+        return
+    try:
+        import ctypes
+        ES_CONTINUOUS, ES_SYSTEM_REQUIRED = 0x80000000, 0x00000001
+        ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)
+    except Exception:
+        pass
+
+
 def _disable_quick_edit() -> None:
     """En Windows, un clic dentro de la ventana activa el modo 'Seleccionar' y CONGELA el programa hasta
     pulsar una tecla (las conexiones se caen por falta de respuesta). Se desactiva ese modo."""
@@ -446,6 +464,7 @@ def main(argv: list[str] | None = None) -> None:
         os.environ["NTFY_TOPIC"] = args.ntfy_topic
     logging.basicConfig(level=logging.WARNING, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
     _disable_quick_edit()
+    _keep_awake()
     try:
         asyncio.run(run(args.minutos))
     except KeyboardInterrupt:

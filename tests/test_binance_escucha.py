@@ -19,3 +19,9 @@ def test_build_row_and_summary():
     assert row == ["2026-11-05 10:00", "BTC", 80050.0, 800000, 500000, 300000, 90000.0, 0.0001, 1200000, 0, 1.4, 2.1]
     st.recent["BTC"] = [row]
     assert "liquidado largos $1.2M" in st.summary()
+
+
+def test_force_order_array_format():
+    msg = {"stream": "!forceOrder@arr", "data": {"e": "forceOrder", "o": {
+        "s": "ETHUSDT", "S": "BUY", "q": "10", "p": "2300", "ap": "2301", "z": "10"}}}
+    assert parse_force_order(msg) == ("ETH", "cortos", 23010.0)

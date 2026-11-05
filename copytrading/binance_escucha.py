@@ -25,7 +25,11 @@ from pathlib import Path
 
 log = logging.getLogger("escucha")
 FAPI = "https://fapi.binance.com"
-WS = "wss://fstream.binance.com/stream?streams=btcusdt@forceOrder/ethusdt@forceOrder"
+# canal de TODAS las liquidaciones del mercado (se filtra BTC/ETH): así hay mensajes casi siempre y un
+# silencio largo delata una conexión que no entrega datos. Si una dirección calla, se prueba la otra.
+WS_URLS = ["wss://fstream.binance.com/market/stream?streams=!forceOrder@arr",
+           "wss://fstream.binance.com/stream?streams=!forceOrder@arr"]
+SILENCE_S = 15 * 60
 SYMBOLS = {"BTC": "BTCUSDT", "ETH": "ETHUSDT"}
 CSV_PATH = Path("data/binance_minuto.csv")
 COT = timezone(timedelta(hours=-5))
@@ -37,7 +41,10 @@ HEADER = ["hora_col", "moneda", "precio", "volumen_usd", "compra_agresiva_usd", 
 
 def parse_force_order(msg: dict) -> tuple[str, str, float] | None:
     """(moneda, 'largos' | 'cortos', USD). Una orden de VENTA forzada liquida a un largo."""
-    o = (msg.get("data") or msg).get("o")
+    data = msg.get("data") or msg
+    if isinstance(data, list):              # algunos formatos agrupan varias liquidaciones
+        data = data[0] if data else {}
+    o = data.get("o")
     if not o:
         return None
     coin = next((c for c, s in SYMBOLS.items() if s == o.get("s")), None)
@@ -66,6 +73,7 @@ class BinanceState:
         self.last_ratio = 0.0
         self.available = True
         self.recent: dict[str, list] = {c: [] for c in SYMBOLS}   # últimas filas por moneda (para el resumen)
+        self.liq_msgs = 0                                           # mensajes de liquidación recibidos (cualquier moneda)
 
     def add_liq(self, coin: str, side: str, usd: float) -> None:
         d = self.liq.setdefault(coin, {"largos": 0.0, "cortos": 0.0})
@@ -83,7 +91,8 @@ class BinanceState:
             sell = sum(r[5] for r in rows)
             parts.append(f"{coin} OI {rows[-1][6]:,.0f} · agresivo {buy / 1e6:.0f}M compra / {sell / 1e6:.0f}M venta"
                          f" · liquidado largos ${ll / 1e6:.1f}M / cortos ${lc / 1e6:.1f}M")
-        return "Binance: " + " | ".join(parts) if parts else "Binance: sin datos todavía"
+        tail = f" | mensajes de liquidación recibidos: {self.liq_msgs:,}"
+        return ("Binance: " + " | ".join(parts) if parts else "Binance: sin datos todavía") + tail
 
 
 def _get(session, path: str, **params):
@@ -107,7 +116,10 @@ def poll_minute(bstate: BinanceState, session, liq: dict | None = None) -> list[
                 pass
     rows = []
     for coin, sym in SYMBOLS.items():
-        kl = _get(session, "/fapi/v1/klines", symbol=sym, interval="1m", limit=2)
+        closed = (int(time.time()) // 60 - 1) * 60_000          # la vela de 1 minuto que acaba de cerrar
+        kl = _get(session, "/fapi/v1/klines", symbol=sym, interval="1m", startTime=closed, limit=1)
+        if not kl or int(kl[0][0]) != closed:
+            continue                                          # aún no publicada: mejor sin fila que repetida
         oi = _get(session, "/fapi/v1/openInterest", symbol=sym)
         prem = _get(session, "/fapi/v1/premiumIndex", symbol=sym)
         if liq is None:
@@ -164,20 +176,31 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
     last_minute = int(time.time() // 60)
     failures = 0
     jobs: set = set()
+    url_i = 0
     while not should_stop():
+        url = WS_URLS[url_i % len(WS_URLS)]
         try:
-            async with websockets.connect(WS, ping_interval=20, ping_timeout=60, max_size=None,
+            async with websockets.connect(url, ping_interval=20, ping_timeout=60, max_size=None,
                                           max_queue=1024) as ws:
-                log.warning("Binance conectado ✓ (liquidaciones en vivo); los datos por minuto llegan en 1-2 min")
+                log.warning("Binance conectado ✓ (liquidaciones en vivo, %s); los datos por minuto llegan en 1-2 min",
+                            url.split("/")[3])
                 bstate.available, failures = True, 0
                 first_data = True
+                last_msg = time.time()
                 while not should_stop():
                     try:
-                        parsed = parse_force_order(json.loads(await asyncio.wait_for(ws.recv(), timeout=5)))
+                        msg = json.loads(await asyncio.wait_for(ws.recv(), timeout=5))
+                        last_msg = time.time()
+                        bstate.liq_msgs += 1
+                        parsed = parse_force_order(msg)
                         if parsed:
                             bstate.add_liq(*parsed)
                     except asyncio.TimeoutError:
                         pass
+                    if time.time() - last_msg > SILENCE_S:     # conectado pero sin liquidaciones: probar la otra dirección
+                        log.warning("Binance: 15 min sin liquidaciones por %s; pruebo la otra dirección", url.split("/")[3])
+                        url_i += 1
+                        break
                     if int(time.time() // 60) != last_minute:
                         last_minute = int(time.time() // 60)
                         snap, bstate.liq = bstate.liq, {}

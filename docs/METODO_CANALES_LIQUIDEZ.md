@@ -680,3 +680,27 @@ mitad corre con stop móvil** sobre el máximo (corto) o mínimo (largo) de las 
 (planes de 1H) o 3 de 4H (planes de 4H). Sale por el stop móvil o por tiempo. El plan J (5 nov) se
 apuntó con un solo objetivo y queda registrado así (+0,36R); la nueva gestión se aplica a los planes
 nuevos para no medir con lo que ya se sabe.
+
+### Primera revisión de la escucha: caída del 5 nov 2026
+
+Datos del PC de Juan (`data/escucha_pc/2026-11-05/`). Cobertura: 4 nov 21:01–23:41 y 5 nov
+09:51–11:09 (el equipo se suspendió de madrugada: se perdió la ruptura de las 7 am).
+
+* **Binance**: el volumen por minuto de BTC pasó de ~$3M a $100–220M; el interés abierto cayó de
+  95.800 a 91.200 BTC (−4,8 %, ~$350M en posiciones cerradas). La proporción largos/cortos de
+  **todas las cuentas** subió de 1,38 a 2,37 mientras caía: el público compró la caída (combustible
+  para más bajada), los top traders apenas cambiaron (1,93 → 2,05).
+* **Hyperliquid, cuentas en estudio (hora 10–11 am)**: vendedores netos agresivos `0xfc66…` (−$19M;
+  ya vendía en la hora anterior), `0xecb6…` (−$13M), `0x4e23…` (−$6,6M); compradores netos que
+  absorbieron la caída `0xb1ec…` (+$20M), `0xbf73…` (+$7,6M), `0xf71a…` (+$6,8M). El cazador
+  principal `0xf5d8…` movió $52M pero equilibrado (compra ≈ vende): ruido para la dirección.
+* El flujo de "otros" (no robots) fue mucho mayor que el de los robots: la caída la movieron cuentas
+  normales y liquidaciones, no la alta frecuencia.
+* Avisos: 🤖 "cazadores venden" a las 11:01 (tarde, cerca del mínimo). La mayoría de avisos 🏦 de
+  "retiro" fueron **falsos**: la API devolvía error en plena caída y el programa lo tomaba como
+  liquidez cero (corregido: un fallo ya no cuenta como cero).
+
+Errores corregidos tras la revisión: velas de Binance repetidas (se pide la vela exacta del minuto
+cerrado), liquidaciones de Binance en cero (canal de todo el mercado con dirección alternativa y
+contador de mensajes), avisos falsos de retiro, y el equipo ya no se suspende solo mientras corre la
+escucha (no evita la suspensión al cerrar la tapa).
