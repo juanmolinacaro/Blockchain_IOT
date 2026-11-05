@@ -1,15 +1,32 @@
 from copytrading.hft import HFTProfile, candidates, taker_flow
 
 
-def _p(fph, maker, cv):
-    return HFTProfile("0x1", 2e9, 1e6, 5e7, fph, maker, 300, cv, 10, ["BTC"])
+def _p(maker, fph=50000, median=300, cv=1.0, **kw):
+    base = dict(turnover=100, net_ratio=0.1, round_trip_h=0.5, fills_per_order=1.2, twap_share=0.0,
+                mean_usd=median)
+    base.update(kw)
+    return HFTProfile("0x1", 2e9, 1e6, 2e7, fph, maker, median, cv, 50, ["BTC"], **base)
 
 
-def test_classification():
-    assert _p(12000, 0.16, 1.0).classify() == "cazador"
-    assert _p(6000, 0.80, 1.0).classify() == "creador de mercado"
-    assert _p(100, 0.60, 0.05).classify() == "ejecutor"
-    assert _p(3000, 0.5, 1.0).classify() == "mixto"
+def test_classification_requires_every_signal():
+    assert _p(0.16).classify() == "cazador"
+    mm = _p(0.85)
+    assert mm.classify() == "creador de mercado" and mm.confidence == "alta"
+    assert _p(0.6, net_ratio=0.95, cv=0.05, fph=100).classify() == "ejecutor"       # una ballena troceando
+    assert _p(0.5, twap_share=0.9).classify() == "ejecutor"                          # TWAP nativo
+    # falla una sola señal -> no se etiqueta
+    assert _p(0.85, round_trip_h=30).classify() == "sin confirmar"                  # aguanta posición
+    assert _p(0.16, turnover=3).classify() == "sin confirmar"                       # poca rotación
+    assert _p(0.85, fills_per_order=40).classify() == "sin confirmar"               # "creador" con órdenes enormes
+    assert _p(0.16, fills_per_order=40).classify() == "cazador"                     # el cazador sí barre niveles
+
+
+def test_round_trip_hours():
+    from copytrading.hft import _round_trip_hours
+    h = 3_600_000
+    f = lambda t, side, start: {"coin": "BTC", "time": t, "side": side, "sz": "1", "startPosition": str(start)}
+    fills = [f(0, "B", 0), f(h // 2, "A", 1), f(h, "B", 0), f(2 * h, "A", 1)]   # sin posición a 0,5 h y a 2 h
+    assert _round_trip_hours(fills) == 1.5
 
 
 def test_candidates_by_volume_or_turnover():

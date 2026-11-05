@@ -465,6 +465,11 @@ def cmd_hft(cfg: Config, args) -> None:
         print(f"{p.address[:10]:<12} {p.kind:<19} ${p.week_volume / 1e9:8.1f}B ${p.week_pnl / 1e6:+8.1f}M "
               f"{p.fills_per_hour:8.0f} {p.maker_share:6.0%} ${p.median_usd:10,.0f} {p.open_orders:7}  "
               f"{', '.join(p.top_coins)}")
+        if args.detalle:
+            falla = [k for k, ok in (p.checks or {}).items() if not ok]
+            print(f"{'':12} rotación {p.turnover:6.0f}x · equilibrio {p.net_ratio:.0%} · ida y vuelta "
+                  f"{p.round_trip_h:5.1f} h · fills/orden {p.fills_per_order:4.1f} · TWAP {p.twap_share:.0%} · "
+                  f"cambio de órdenes {p.order_churn:.0%}" + (f" · no cumple: {'; '.join(falla)}" if falla else ""))
     kinds: dict[str, list] = {}
     for p in profiles:
         kinds.setdefault(p.kind, []).append(p)
@@ -605,6 +610,7 @@ def main(argv: list[str] | None = None) -> None:
     hf = sub.add_parser("hft", help="radar de alta frecuencia: robots del ranking y su tipo")
     hf.add_argument("--top", type=int, default=25)
     hf.add_argument("--out", default="data/alta_frecuencia.json")
+    hf.add_argument("--detalle", action="store_true", help="mostrar cada señal y lo que no cumple")
 
     bw = sub.add_parser("ballena", help="historial de las ballenas seguidas (indicador contrario)")
     bw.add_argument("--address", help="otra dirección (por defecto, las de data/ballenas_seguidas.json)")

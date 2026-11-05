@@ -634,3 +634,16 @@ al agresor de cada operación de BTC/ETH (cazador, creador de mercado u otros), 
 minuto y la liquidez de los creadores a ±1 %, y avisa por ntfy cuando los cazadores empujan muy por
 encima de lo normal (≥ 3σ y ≥ $300k en 5 min) o los creadores retiran > 60 % de un lado del libro.
 Probado en vivo: el volumen captado por minuto coincide con el de Hyperliquid.
+
+**Radar afinado (5 nov 2026).** Para no etiquetar mal, una cuenta solo se marca como alta frecuencia
+si cumple todas las señales: rotación ≥ 20x su capital en la semana, compra ≈ vende (desequilibrio
+≤ 35 %), vuelve a quedar sin posición en ≤ 2 h, no usa el TWAP de Hyperliquid y sus fills cuadran
+con su volumen semanal. Creador de mercado: además ≥ 70 % maker y ≤ 3 fills por orden. Cazador:
+≤ 35 % taker-maker, ≥ 100 fills/h, tamaño mediano ≤ $5.000 y rotación ≥ 50x. Ejecutor: TWAP o todo
+en un sentido. El resto queda "sin confirmar" y la escucha no lo usa. Pasada del 5 nov (30 cuentas):
+4 cazadores, 3 creadores de mercado y 1 ejecutor confirmados; 22 sin confirmar. `hft --detalle`
+muestra qué señal falla en cada cuenta.
+
+Límites que no se pueden eliminar: solo se ven los ~2.000 fills más recientes de cada cuenta y las
+órdenes abiertas en el momento (no cada cancelación); algunas cuentas operan por subcuentas o
+bóvedas y sus datos no cuadran con su volumen (se descartan).

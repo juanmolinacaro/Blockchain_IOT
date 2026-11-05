@@ -38,6 +38,7 @@ RADAR = Path("data/alta_frecuencia.json")
 FLOW_CSV = Path("data/hft_flujo.csv")
 EVENTS = Path("data/hft_eventos.jsonl")
 COT = timezone(timedelta(hours=-5))
+CONFIRMED = ("cazador", "creador de mercado")     # solo cuentas confirmadas por todas las señales del radar
 
 # umbrales de partida
 Z_PUSH = 3.0                 # flujo neto de 5 min de los cazadores: desviaciones sobre lo normal
@@ -77,7 +78,7 @@ def load_radar(path: Path = RADAR) -> dict[str, str]:
     if not path.exists():
         return {}
     data = json.loads(path.read_text(encoding="utf-8"))
-    return {c["address"].lower(): c["kind"] for c in data.get("cuentas", [])}
+    return {c["address"].lower(): c["kind"] for c in data.get("cuentas", []) if c.get("kind") in CONFIRMED}
 
 
 def refresh_radar() -> dict[str, str]:
@@ -87,7 +88,7 @@ def refresh_radar() -> dict[str, str]:
     RADAR.parent.mkdir(parents=True, exist_ok=True)
     RADAR.write_text(json.dumps({"actualizado": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"),
                                  "cuentas": [as_dict(p) for p in profiles]}, indent=1), encoding="utf-8")
-    return {p.address.lower(): p.kind for p in profiles}
+    return {p.address.lower(): p.kind for p in profiles if p.kind in CONFIRMED}
 
 
 def mm_liquidity(source, makers: list[str], coin: str, price: float, band: float = 0.01) -> tuple[float, float]:
