@@ -92,12 +92,14 @@ def plan_positions(entries, coin: str) -> list[Position]:
 
 def _draw_position(ax, pos: Position, x0: float, x1: float, fs: float = 8.5) -> None:
     from matplotlib.patches import Rectangle
-    a = 0.2 if pos.pending else 0.26
+    # pendiente = aún NO se ha entrado: caja rayada y borde discontinuo para no confundirla con una entrada hecha
+    a = 0.10 if pos.pending else 0.26
     green, red = "#089981", "#f23645"
+    style = dict(linestyle="--", hatch="//", linewidth=1.0) if pos.pending else dict(linewidth=0.8)
     ax.add_patch(Rectangle((x0, min(pos.entry, pos.tp2)), x1 - x0, abs(pos.tp2 - pos.entry),
-                           facecolor=green, alpha=a, edgecolor=green, linewidth=0.8, zorder=1.5))
+                           facecolor=(0.03, 0.6, 0.5, a), edgecolor=green, zorder=1.5, **style))
     ax.add_patch(Rectangle((x0, min(pos.entry, pos.stop)), x1 - x0, abs(pos.stop - pos.entry),
-                           facecolor=red, alpha=a, edgecolor=red, linewidth=0.8, zorder=1.5))
+                           facecolor=(0.95, 0.21, 0.27, a), edgecolor=red, zorder=1.5, **style))
     ax.hlines(pos.entry, x0, x1, color="#d1d4dc", linewidth=1.2, linestyles="--" if pos.pending else "-", zorder=2.5)
     if pos.tp1 != pos.tp2:
         ax.hlines(pos.tp1, x0, x1, color=green, linewidth=0.9, linestyles=":", zorder=2.5)
@@ -105,7 +107,7 @@ def _draw_position(ax, pos: Position, x0: float, x1: float, fs: float = 8.5) -> 
     tag = f" {pos.name}" if pos.name else ""
     pct = lambda p: f"{(p / pos.entry - 1) * 100:+.1f} %".replace(".", ",")
     box = dict(facecolor="#131722", edgecolor="none", pad=1.0, alpha=0.75)
-    head = f"{verb}{tag} {_k(pos.entry)}" + (" (pendiente)" if pos.pending else "")
+    head = f"{verb}{tag} {_k(pos.entry)}" + (" · PENDIENTE, aún no activado" if pos.pending else "")
     ax.text(x0 + 0.3, pos.entry, head + f" · R/R {pos.rr:.1f}".replace(".", ","), color="white", fontsize=fs,
             va="bottom" if pos.side == "long" else "top", fontweight="bold", zorder=7, bbox=box)
     ax.text(x0 + 0.3, pos.tp2, f"Objetivo {_k(pos.tp2)} ({pct(pos.tp2)})" + (" → asegurar y dejar correr" if pos.runner else ""),

@@ -9,3 +9,8 @@
 {"t": 1793887878188, "alias": "Oso", "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8", "coin": "BTC", "antes": 4.0, "despues": 5.0, "precio": 79570.5}
 {"t": 1793887878188, "alias": "Ardilla", "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344", "coin": "BTC", "antes": 0.0, "despues": 10.0, "precio": 79570.5}
 {"t": 1793889860886, "alias": "Ardilla", "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344", "coin": "BTC", "antes": 10.0, "despues": 12.5, "precio": 79007.0}
+{"t": 1793906171681, "alias": "Lobo", "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98", "coin": "BTC", "antes": -51.10226, "despues": -48.55546, "precio": 76293.5}
+{"t": 1793906171681, "alias": "Cóndor", "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623", "coin": "BTC", "antes": 0.0, "despues": 15.41028, "precio": 76293.5}
+{"t": 1793906171681, "alias": "Cóndor", "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623", "coin": "ETH", "antes": 0.0, "despues": 383.8627, "precio": 2258.15}
+{"t": 1793906171681, "alias": "Tigre", "address": "0x413c2724b62975c18b1415650f998a8f0a67886c", "coin": "BTC", "antes": 20.0, "despues": 0.0, "precio": 76293.5}
+{"t": 1793906171681, "alias": "Ardilla", "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344", "coin": "BTC", "antes": 12.5, "despues": 15.0, "precio": 76293.5}
