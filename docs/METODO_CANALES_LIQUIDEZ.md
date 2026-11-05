@@ -600,3 +600,12 @@ La pendiente de la EMA 50 diaria separa mejor: a favor gana, en contra pierde. L
 de pocos días no sirve (tras un barrido el precio suele ir contra la estructura reciente). El
 monitor muestra la tendencia de cada moneda ("buscar solo cortos/largos") y marca **"⚠ CONTRA LA
 TENDENCIA"** en cualquier plan que vaya en contra. 4 nov: BTC, ETH y SOL en tendencia BAJISTA.
+
+### Quién ganó la semana (4 nov 2026)
+
+Ranking semanal de Hyperliquid (48.542 cuentas): las 15 cuentas de alta frecuencia (> $1.000M de
+volumen) ganaron +$31,9M sobre $72.000M de volumen (~0,1 % por operación); el HLP (liquidador de
+Hyperliquid) solo +$0,15M. Las ballenas que más ganaron con poco volumen estaban **cortas a favor de
+la tendencia**. Se añadieron 5 al seguimiento (solo información): **El Gran Corto**, **Bobby**,
+**El Francotirador**, **El Martillo** y **Cuervo**. El monitor muestra sus posiciones en BTC/ETH/SOL
+y sus movimientos ≥ $5M; al móvil solo llegan los ≥ $10M.

@@ -290,16 +290,20 @@ def cmd_monitor(cfg: Config, args) -> None:
             print(f"\n🐋 {w['alias']}: no se pudo leer ({exc})")
             continue
         print(f"\n🐋 {w['alias']} ({w['address'][:8]}…), en seguimiento (solo información):")
+        time.sleep(0.3)                    # varias ballenas seguidas: respetar el límite de la API
         for coin_, p_ in pos.items():
-            if abs(p_.size * (p_.liquidation_px or 0)) > 1e6:
-                print(f"   {coin_}: {'largo' if p_.size > 0 else 'corto'} {abs(p_.size):,.2f} · liquidación {p_.liquidation_px:,.1f}")
+            if coin_ in coin_list and abs(p_.size * (p_.liquidation_px or p_.entry_px or 0)) > 1e6:
+                liq_txt = f"liquidación {p_.liquidation_px:,.1f}" if p_.liquidation_px else "sin liquidación cercana"
+                print(f"   {coin_}: {'largo' if p_.size > 0 else 'corto'} {abs(p_.size):,.2f} · {liq_txt}")
         for e in eps:
-            if e.end >= now - args.alert_hours * 3_600_000:
+            # solo las monedas que seguimos y movimientos grandes; avisar al móvil solo los muy grandes
+            if e.end >= now - args.alert_hours * 3_600_000 and e.coin in coin_list and e.usd >= 5_000_000:
                 msg = whale_describe(w["alias"], e)
                 print("   " + msg)
-                alerts.append(f"{e.coin} {msg}")
-                details.append(msg)
-                levels.add("VIGILAR")
+                if e.usd >= 10_000_000:
+                    alerts.append(f"{e.coin} {msg}")
+                    details.append(msg)
+                    levels.add("VIGILAR")
     trend_labels: dict = {}
     wallet_lines = wallet_report(src, labels=trend_labels)
     for coin_, lab in trend_labels.items():
