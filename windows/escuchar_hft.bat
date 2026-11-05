@@ -1,5 +1,6 @@
 @echo off
 REM Escucha 24/7 de la alta frecuencia en Hyperliquid. Doble clic para empezar; cerrar la ventana para parar.
+REM Al abrir, se actualiza solo desde GitHub (sin tocar la carpeta data).
 chcp 65001 >nul
 cd /d "%~dp0.."
 title Escucha alta frecuencia - Hyperliquid
@@ -15,8 +16,11 @@ if not exist ".venv\Scripts\python.exe" (
   echo Primera vez: preparando el entorno, tarda un minuto...
   python -m venv .venv
   ".venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
-  ".venv\Scripts\python.exe" -m pip install --quiet -r requirements-escucha.txt
 )
+
+echo Buscando actualizaciones...
+".venv\Scripts\python.exe" -m copytrading.actualizar
+".venv\Scripts\python.exe" -m pip install --quiet -r requirements-escucha.txt
 
 REM Tema de ntfy para los avisos (el mismo del monitor)
 set NTFY_TOPIC=juan-ruta-d89ef32a94

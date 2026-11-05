@@ -56,5 +56,6 @@ adelantan a los barridos.
 
 ## Actualizar
 
-Descarga otra vez el ZIP y reemplaza la carpeta, pero **conserva tu carpeta `data`**, que tiene lo
-que se ha ido guardando.
+Es automático: cada vez que abres `escuchar_hft.bat`, busca la última versión en GitHub y reemplaza
+solo el código. Tu carpeta `data` (lo guardado) no se toca. Si no hay internet, arranca con la
+versión que ya tienes.
