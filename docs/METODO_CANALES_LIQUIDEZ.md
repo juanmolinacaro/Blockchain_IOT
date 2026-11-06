@@ -704,3 +704,25 @@ Errores corregidos tras la revisión: velas de Binance repetidas (se pide la vel
 cerrado), liquidaciones de Binance en cero (canal de todo el mercado con dirección alternativa y
 contador de mensajes), avisos falsos de retiro, y el equipo ya no se suspende solo mientras corre la
 escucha (no evita la suspensión al cerrar la tapa).
+
+## Memoria de patrones (6 nov 2026)
+
+Idea de Juan: el mercado repite comportamientos humanos; lo que falla es la memoria.
+
+**Lo que NO funcionó (medido):** buscar "el momento del pasado más parecido" combinando a la vez
+tendencia, EMAs, canal, imán, movimiento, volumen y rupturas (BTC + ETH + SOL, 4H, 2,3 años; cada
+consulta solo con datos anteriores). La dirección de las 72 h siguientes acertó un 48–51 % frente a
+un 49 % de base, y los casos "muy claros" acertaron menos. El parecido general no predice.
+
+**Lo que sí hace la memoria** (`python -m copytrading memoria`, y en el monitor y la imagen con 🧠):
+
+1. **Patrones medidos activos ahora**, con su número: tendencia (a favor +0,43R / en contra
+   −0,10R), trampa reciente, imán ≥ 2x (8 de cada 10), pérdida o recuperación de la EMA 200 diaria,
+   movimiento ≥ 4 % en 24 h (no perseguir).
+2. **Casos anotados** (`data/casos.json`): momentos reales con lo que pasó. Si el momento actual
+   comparte ≥ 2 patrones con un caso de hace más de 3 días, aparece "Se parece a …".
+3. **Se llena sola:** cada movimiento ≥ 4 % en 24 h se anota como caso con los patrones que había
+   justo antes. Con los meses, cada patrón acumula sus casos y se podrá decir cuántas veces se repitió.
+
+Casos iniciales: 2 nov (falsa ruptura en la apertura del CME), 3 nov (barrido de la ballena y
+rebote +7,3 %), 5 nov (trampa alcista en la línea de tendencia y caída −6 %), 4–5 nov ETH y SOL.

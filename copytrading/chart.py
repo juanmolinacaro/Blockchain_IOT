@@ -252,7 +252,7 @@ def _warnings(side: str, magnet: str, bias: str | None, trend: str = "") -> str:
 
 def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, now_ms: int,
           events: list[str] | None = None, recent_hours: float = 8, st=None,
-          whales=None, bias: str | None = None) -> tuple[Summary, list[Level], dict]:
+          whales=None, bias: str | None = None, memory: list[str] | None = None) -> tuple[Summary, list[Level], dict]:
     """Resumen en lenguaje simple + niveles para la imagen de una moneda (velas de 4H cerradas)."""
     from .method.backtest import compute_channels, compute_liquidity
     from .method.emas import ema_series
@@ -334,6 +334,10 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
     if trend in ("ALCISTA", "BAJISTA"):
         watch.insert(0, f"Tendencia {trend} (EMA 50 diaria {slope:+.1%} en 6 días): "
                         f"buscar solo {'largos' if trend == 'ALCISTA' else 'cortos'}".replace(".", ",", 1))
+    # memoria: un caso parecido pesa más que una estadística genérica
+    if memory:
+        case = next((m for m in memory if m.startswith("Se parece a")), None)
+        happened.append("🧠 " + (case or memory[0]))
     activated = any("ACTIVADO" in ev or "SEÑAL" in ev for ev in happened)
     near_trigger = any(e.coin == coin and e.status == "pendiente" and abs(e.trigger / px - 1) < 0.01 for e in entries)
     if not trading_allowed(now_ms):
@@ -351,9 +355,10 @@ def build(coin: str, candles: list[Candle], candles_1h: list[Candle], entries, n
 
 
 def coin_image(path: str, coin: str, candles: list[Candle], candles_1h: list[Candle], entries, now_ms: int,
-               events: list[str] | None = None, st=None, whales=None, bias: str | None = None) -> tuple[str, Summary]:
+               events: list[str] | None = None, st=None, whales=None, bias: str | None = None,
+               memory: list[str] | None = None) -> tuple[str, Summary]:
     summary, levels, extra = build(coin, candles, candles_1h, entries, now_ms, events, st=st, whales=whales,
-                                   bias=bias)
+                                   bias=bias, memory=memory)
     # la última vela de 4H en curso se dibuja con el precio de 1H para que el gráfico esté al día
     view = list(candles)
     if candles_1h and candles_1h[-1].t >= view[-1].t + 4 * 3_600_000:

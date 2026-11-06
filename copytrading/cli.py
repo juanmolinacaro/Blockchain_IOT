@@ -213,6 +213,18 @@ def cmd_monitor(cfg: Config, args) -> None:
             print(f"   🐋 Ballenas Hyperliquid: ${z.usd / 1e6:,.0f}M de {kind} se liquidan en {z.low:,.0f}–{z.high:,.0f}"
                   f" ({z.n} posición{'es' if z.n != 1 else ''})")
         layers[coin] = {"st": st_long + st_short, "whales": whales.get(coin, [])}
+        # memoria: patrones medidos activos y casos parecidos; y anota sola los movimientos fuertes
+        try:
+            from .method.memoria import auto_record, memory_lines
+            new_case = auto_record(coin, candles, c1h_st)
+            if new_case:
+                print(f"   🧠 Memoria: movimiento fuerte anotado como caso ({new_case})")
+            mem = memory_lines(coin, candles, c1h_st)
+            for n in mem:
+                print(f"   🧠 {n}")
+            layers[coin]["memory"] = mem
+        except Exception as exc:
+            print(f"   🧠 memoria: no disponible ({exc})")
         for source, t in st.signals.items():
             print(f"   {source}: {t.side.upper()} entrada {t.entry:,.1f} stop {t.stop:,.1f} "
                   f"TP1 {t.tp1:,.1f} TP2 {t.tp2:,.1f}")
@@ -484,6 +496,22 @@ def cmd_hft(cfg: Config, args) -> None:
     print(f"\nGuardado en {out}")
 
 
+def cmd_memoria(cfg: Config, args) -> None:
+    """Patrones medidos activos ahora y casos anotados que se parecen al momento actual."""
+    from .method.memoria import load_cases, matching_cases, memory_lines, tags
+    from .method.monitor import closed_candles
+
+    src = HyperliquidSource(cfg.network)
+    now = int(time.time() * 1000)
+    for coin in [c.strip().upper() for c in args.coins.split(",")]:
+        c4 = closed_candles(src.candles(coin, "4h", now - 830 * MS_PER_DAY, now), "4h", now)
+        c1 = closed_candles(src.candles(coin, "1h", now - 10 * MS_PER_DAY, now), "1h", now)
+        print(f"\n🧠 {coin} — patrones activos: {', '.join(tags(c4, c1)) or 'ninguno'}")
+        for line in memory_lines(coin, c4, c1):
+            print(f"   {line}")
+    print(f"\nCasos anotados en la memoria: {len(load_cases())} (data/casos.json)")
+
+
 def cmd_billeteras(cfg: Config, args) -> None:
     from .walletbias import report as wallet_report
 
@@ -612,6 +640,9 @@ def main(argv: list[str] | None = None) -> None:
     hf.add_argument("--out", default="data/alta_frecuencia.json")
     hf.add_argument("--detalle", action="store_true", help="mostrar cada señal y lo que no cumple")
 
+    me = sub.add_parser("memoria", help="memoria de patrones: qué patrones medidos están activos y casos parecidos")
+    me.add_argument("--coins", default="BTC,ETH")
+
     bw = sub.add_parser("ballena", help="historial de las ballenas seguidas (indicador contrario)")
     bw.add_argument("--address", help="otra dirección (por defecto, las de data/ballenas_seguidas.json)")
     bw.add_argument("--days", type=int, default=60)
@@ -665,7 +696,7 @@ def main(argv: list[str] | None = None) -> None:
     {"discover": cmd_discover, "backtest": cmd_backtest, "run": cmd_run,
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
-     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft,
+     "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
      "trampas": cmd_trampas}[args.cmd](cfg, args)
 
 

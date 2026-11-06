@@ -14,3 +14,10 @@
 {"t": 1793906171681, "alias": "Cóndor", "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623", "coin": "ETH", "antes": 0.0, "despues": 383.8627, "precio": 2258.15}
 {"t": 1793906171681, "alias": "Tigre", "address": "0x413c2724b62975c18b1415650f998a8f0a67886c", "coin": "BTC", "antes": 20.0, "despues": 0.0, "precio": 76293.5}
 {"t": 1793906171681, "alias": "Ardilla", "address": "0x8f8d2d2565bfb10608a7ce64b48e2aea7875a344", "coin": "BTC", "antes": 12.5, "despues": 15.0, "precio": 76293.5}
+{"t": 1793929037545, "alias": "Lobo", "address": "0x6041f881358c71d64bc9253c9ba0391df69f7d98", "coin": "BTC", "antes": -48.55546, "despues": -46.12769, "precio": 76144.5}
+{"t": 1793929037545, "alias": "Oso", "address": "0x92ae4209e3a5760903aff0c423312392eb3f86a8", "coin": "BTC", "antes": 5.0, "despues": 0.0, "precio": 76144.5}
+{"t": 1793929037545, "alias": "Tortuga", "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db", "coin": "BTC", "antes": -14.87485, "despues": -12.85567, "precio": 76144.5}
+{"t": 1793929037545, "alias": "Tortuga", "address": "0xf899937184168b1d9dee75acbaa3fef0f52888db", "coin": "ETH", "antes": -280.865, "despues": -279.4603, "precio": 2240.75}
+{"t": 1793929037545, "alias": "León", "address": "0x054a01da80ee37d5220af5471b1eedbdcd2cdb2f", "coin": "BTC", "antes": 0.0, "despues": 3.0, "precio": 76144.5}
+{"t": 1793929037545, "alias": "Cóndor", "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623", "coin": "BTC", "antes": 15.41028, "despues": 18.29909, "precio": 76144.5}
+{"t": 1793929037545, "alias": "Cóndor", "address": "0x42fd5648cf21c158d15e4f58785760755b3f6623", "coin": "ETH", "antes": 383.8627, "despues": 0.0, "precio": 2240.75}
