@@ -726,3 +726,11 @@ un 49 % de base, y los casos "muy claros" acertaron menos. El parecido general n
 
 Casos iniciales: 2 nov (falsa ruptura en la apertura del CME), 3 nov (barrido de la ballena y
 rebote +7,3 %), 5 nov (trampa alcista en la línea de tendencia y caída −6 %), 4–5 nov ETH y SOL.
+
+**Segunda revisión (datos del 5 nov, 16:00–21:23, sin huecos).** El barrido de las 6 pm se ve en
+las cuentas: `0xf71a…` vendió agresivo $22M entre las 5 y las 6 pm (precio ~75.700) y `0x4b62…`
+otros $13M; el precio barrió hasta 75.189 (debajo del mínimo anterior y de los largos de 100x) y en
+la hora siguiente `0xf71a…` **compró** $11M y `0xfc66…` $2,5M en el mínimo: vender para tumbar el
+precio hasta los stops y comprar abajo, la conducta de "cazador" que describió Juan. Binance no
+guardó filas desde las 11:09: los datos por minuto dependían de que el canal de liquidaciones en vivo
+estuviera conectado; ahora van por separado.

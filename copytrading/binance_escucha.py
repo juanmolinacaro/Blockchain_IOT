@@ -74,6 +74,7 @@ class BinanceState:
         self.available = True
         self.recent: dict[str, list] = {c: [] for c in SYMBOLS}   # últimas filas por moneda (para el resumen)
         self.liq_msgs = 0                                           # mensajes de liquidación recibidos (cualquier moneda)
+        self.last_error = 0.0                                       # último error de los datos por minuto
 
     def add_liq(self, coin: str, side: str, usd: float) -> None:
         d = self.liq.setdefault(coin, {"largos": 0.0, "cortos": 0.0})
@@ -151,8 +152,13 @@ async def _minute(bstate: BinanceState, session, liq: dict, alert, first: bool) 
     try:
         rows = await asyncio.to_thread(poll_minute, bstate, session, liq)
     except Exception as exc:
-        log.error("Binance (datos del minuto): %s", exc)
+        if time.time() - bstate.last_error >= 1800:          # no llenar la ventana: un aviso cada 30 min
+            bstate.last_error = time.time()
+            log.error("Binance (datos del minuto) no disponible: %s; sigo intentando cada minuto", exc)
         return
+    if bstate.last_error:
+        log.warning("Binance (datos del minuto) disponible de nuevo ✓")
+        bstate.last_error = 0.0
     bstate.pending += rows
     await asyncio.to_thread(flush, bstate)
     if first:
@@ -166,26 +172,37 @@ async def _minute(bstate: BinanceState, session, liq: dict, alert, first: bool) 
                       f"segundo)", {"moneda": coin, "precio": px, "usd": usd, "lado": side})
 
 
-async def run(alert, should_stop, bstate: BinanceState) -> None:
-    """Escucha liquidaciones en vivo y, cada minuto, consulta los datos agregados.
-    `alert(clave, título, texto, datos)` es el aviso de la escucha principal (mismo enfriamiento)."""
-    import requests
+async def _poll_loop(alert, should_stop, bstate: BinanceState, session) -> None:
+    """Datos por minuto (REST): corre aparte de las liquidaciones en vivo, así un fallo del canal en vivo
+    no deja el archivo sin filas (el 5 nov no hubo filas desde las 11:09 por eso)."""
+    last_minute = int(time.time() // 60)
+    first = True
+    while not should_stop():
+        await asyncio.sleep(1)
+        if int(time.time() // 60) == last_minute:
+            continue
+        last_minute = int(time.time() // 60)
+        await asyncio.sleep(3)                         # dar tiempo a que Binance publique la vela cerrada
+        snap, bstate.liq = bstate.liq, {}
+        before = len(bstate.recent.get("BTC", []))
+        await _minute(bstate, session, snap, alert, first)
+        if len(bstate.recent.get("BTC", [])) > before:
+            first = False
+
+
+async def _liquidations(should_stop, bstate: BinanceState) -> None:
+    """Liquidaciones en vivo (websocket), con dirección alternativa si una calla."""
     import websockets
 
-    session = requests.Session()
-    last_minute = int(time.time() // 60)
     failures = 0
-    jobs: set = set()
     url_i = 0
     while not should_stop():
         url = WS_URLS[url_i % len(WS_URLS)]
         try:
             async with websockets.connect(url, ping_interval=20, ping_timeout=60, max_size=None,
                                           max_queue=1024) as ws:
-                log.warning("Binance conectado ✓ (liquidaciones en vivo, %s); los datos por minuto llegan en 1-2 min",
-                            url.split("/")[3])
+                log.warning("Binance conectado ✓ (liquidaciones en vivo, %s)", url.split("/")[3])
                 bstate.available, failures = True, 0
-                first_data = True
                 last_msg = time.time()
                 while not should_stop():
                     try:
@@ -197,20 +214,24 @@ async def run(alert, should_stop, bstate: BinanceState) -> None:
                             bstate.add_liq(*parsed)
                     except asyncio.TimeoutError:
                         pass
-                    if time.time() - last_msg > SILENCE_S:     # conectado pero sin liquidaciones: probar la otra dirección
+                    if time.time() - last_msg > SILENCE_S:
                         log.warning("Binance: 15 min sin liquidaciones por %s; pruebo la otra dirección", url.split("/")[3])
                         url_i += 1
                         break
-                    if int(time.time() // 60) != last_minute:
-                        last_minute = int(time.time() // 60)
-                        snap, bstate.liq = bstate.liq, {}
-                        task = asyncio.create_task(_minute(bstate, session, snap, alert, first_data))
-                        jobs.add(task)
-                        task.add_done_callback(jobs.discard)
-                        first_data = False
         except Exception as exc:
             failures += 1
+            url_i += 1                                 # probar la otra dirección en el siguiente intento
             if bstate.available or failures in (1, 10):
-                log.error("Binance no disponible (%s: %s); reintento cada minuto", type(exc).__name__, exc)
+                log.error("Binance liquidaciones en vivo no disponibles (%s: %s); reintento cada minuto",
+                          type(exc).__name__, exc)
             bstate.available = False
             await asyncio.sleep(60 if failures < 10 else 300)
+
+
+async def run(alert, should_stop, bstate: BinanceState) -> None:
+    """Datos por minuto y liquidaciones en vivo, cada uno por su lado.
+    `alert(clave, título, texto, datos)` es el aviso de la escucha principal (mismo enfriamiento)."""
+    import requests
+
+    session = requests.Session()
+    await asyncio.gather(_poll_loop(alert, should_stop, bstate, session), _liquidations(should_stop, bstate))
