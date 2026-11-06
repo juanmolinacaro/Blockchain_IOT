@@ -222,7 +222,7 @@ def matching_cases(coin: str, active: list[str], cases: list[dict], min_shared: 
     t0 = datetime.strptime(today, "%Y-%m-%d")
     out = []
     for c in cases:
-        if c.get("moneda") not in (coin, "*"):
+        if c.get("moneda") not in (coin, "*") or c.get("pendiente"):     # lecturas aún sin resultado: no cuentan
             continue
         if abs((t0 - datetime.strptime(c["fecha"], "%Y-%m-%d")).days) < 3:
             continue

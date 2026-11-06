@@ -51,5 +51,18 @@
    "trampa_bajista"
   ],
   "resultado": "cayó 6,6 % en 24 h (de 96,0 a 89,0; extremo 88,0)"
+ },
+ {
+  "moneda": "BTC",
+  "fecha": "2026-11-06",
+  "pendiente": true,
+  "titulo": "lectura de Juan: perdió la EMA 200 diaria → va a buscar la EMA semanal/mensual en ~70.000",
+  "patrones": [
+   "tendencia_bajista",
+   "perdio_ema200",
+   "movimiento_fuerte"
+  ],
+  "resultado": "pendiente: cierre diario 5 nov en 76.078 bajo la EMA 200 diaria (~76.770); rango tras la caída 75.189–77.036. Niveles: núcleo del bloque 74.711, liquidación de El Promediador 73.479, EMA 200 semanal 69.187, EMA mensual de Juan 60.172 (TradingView)",
+  "lectura_de": "Juan"
  }
 ]
