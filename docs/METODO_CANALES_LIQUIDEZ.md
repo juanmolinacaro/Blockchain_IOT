@@ -734,3 +734,24 @@ la hora siguiente `0xf71a…` **compró** $11M y `0xfc66…` $2,5M en el mínimo
 precio hasta los stops y comprar abajo, la conducta de "cazador" que describió Juan. Binance no
 guardó filas desde las 11:09: los datos por minuto dependían de que el canal de liquidaciones en vivo
 estuviera conectado; ahora van por separado.
+
+## ¿La bolsa o la disculpa? (6 nov 2026)
+
+Idea de Juan: siempre que hay una caída la culpa es "de las noticias" (la del 5 nov se achacó al
+desplome de las tecnológicas), pero parece más una disculpa. Para medirlo en vez de opinar, la escucha
+guarda desde ahora el futuro del Nasdaq 100 minuto a minuto (`data/nasdaq_minuto.csv`) y
+`python -m copytrading causa` compara cada movimiento fuerte de BTC (≥ 1,5 % en menos de 60 min)
+con lo que hizo el Nasdaq:
+
+* **la bolsa se movió primero**: el Nasdaq ya iba en la misma dirección ≥ 0,3 % en los 30 min previos;
+* **a la vez**: el Nasdaq se movió ≥ 0,4 % en la misma dirección durante el movimiento;
+* **solo cripto**: el Nasdaq no acompañó (si culpan a la bolsa, es disculpa);
+* **bolsa sin datos**: el futuro no cotizaba o faltan datos.
+
+Marca además si la bolsa de Nueva York estaba en sesión (9:30–16:00 hora de NY; en Colombia 9:30 en
+invierno y 8:30 en verano) y si el movimiento empezó antes de que la escucha grabara.
+
+Con los datos del 5 nov (sin Nasdaq todavía): la caída grabada (−6,15 % desde las 9:51) **empezó antes
+de grabar** (el equipo se despertó a las 9:51), así que no se sabe si arrancó antes o después de la
+apertura de Nueva York. El barrido de las 5–6 pm (−1,1 %) y el rebote (+1,4 %) fueron con la bolsa ya
+cerrada. Umbrales a revisar con un mes de datos.

@@ -587,6 +587,15 @@ def cmd_pools(cfg: Config, args) -> None:
         print("\n".join(report(f"TOTAL {args.interval}", merge(results), sc)))
 
 
+def cmd_causa(cfg: Config, args) -> None:
+    from .causa import NQ_FILE, btc_series, episodes, read_series, report
+
+    btc = btc_series()
+    nq = read_series(Path(args.nasdaq) if args.nasdaq else NQ_FILE, "indice", "NASDAQ")
+    print(f"BTC: {len(btc):,} minutos · Nasdaq: {len(nq):,} minutos\n")
+    print("\n".join(report(episodes(btc, nq, args.umbral / 100, args.ventana, args.antes))))
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="copytrading", description="Copy trading on-chain")
     parser.add_argument("--config", default="config.toml")
@@ -666,6 +675,12 @@ def main(argv: list[str] | None = None) -> None:
 
     sub.add_parser("billeteras", help="indicador de billeteras: tendencia y corto plazo")
 
+    ca = sub.add_parser("causa", help="¿la bolsa o la disculpa? movimientos fuertes de BTC frente al Nasdaq")
+    ca.add_argument("--umbral", type=float, default=1.5, help="movimiento mínimo de BTC, en %%")
+    ca.add_argument("--ventana", type=int, default=60, help="en menos de estos minutos")
+    ca.add_argument("--antes", type=int, default=30, help="minutos previos en que se mira el Nasdaq")
+    ca.add_argument("--nasdaq", help="CSV del Nasdaq (por defecto data/nasdaq_minuto.csv)")
+
     ap = sub.add_parser("aviso-prueba", help="enviar una alerta de prueba al móvil")
     ap.add_argument("--ntfy-topic", help="tema de ntfy (o variable NTFY_TOPIC)")
 
@@ -697,7 +712,7 @@ def main(argv: list[str] | None = None) -> None:
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
      "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
-     "trampas": cmd_trampas}[args.cmd](cfg, args)
+     "trampas": cmd_trampas, "causa": cmd_causa}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

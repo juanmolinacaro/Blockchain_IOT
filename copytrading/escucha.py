@@ -349,6 +349,9 @@ async def run(minutes: float | None = None) -> None:
     stop = lambda: minutes is not None and time.time() - started >= minutes * 60
     binance_task = asyncio.create_task(
         binance_escucha.run(lambda k, t, b, d: alert(state, k, t, b, d), stop, bstate))
+    # Nasdaq (futuro NQ) para medir si las caídas de BTC vienen de la bolsa: `copytrading causa`
+    from . import nasdaq_escucha
+    nasdaq_task = asyncio.create_task(nasdaq_escucha.run(stop))
     last_minute = int(time.time() // 60)
     last_radar = last_zones = time.time()
     reconnecting = False
@@ -423,6 +426,7 @@ async def run(minutes: float | None = None) -> None:
             reconnecting = True
             await asyncio.sleep(10)
     binance_task.cancel()
+    nasdaq_task.cancel()
 
 
 def _keep_awake() -> None:

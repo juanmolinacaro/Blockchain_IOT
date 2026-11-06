@@ -62,6 +62,9 @@ En la carpeta `data`:
 * `binance_minuto.csv`: cada minuto, de Binance Futuros (BTC y ETH): volumen, compra y venta agresiva,
   interés abierto, funding, liquidaciones de largos y de cortos, y proporción largos/cortos de los top
   traders y de todas las cuentas.
+* `nasdaq_minuto.csv`: cada minuto, el futuro del Nasdaq 100 (de Yahoo Finanzas, cada 5 minutos con
+  algo de retraso). Sirve para medir si las caídas de BTC vienen de la bolsa o si la noticia es la
+  disculpa. Al arrancar debe salir **"Nasdaq datos ✓"**.
 * `hft_cohorte.json`: las 30 cuentas que se estudian este mes (se revisan y descartan cada mes).
 
 Para mirar el CSV sin bloquearlo, **cópialo** (Ctrl+C, Ctrl+V) y abre la copia en Excel. Si abres el
