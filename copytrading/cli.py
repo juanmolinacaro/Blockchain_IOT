@@ -587,6 +587,20 @@ def cmd_pools(cfg: Config, args) -> None:
         print("\n".join(report(f"TOTAL {args.interval}", merge(results), sc)))
 
 
+def cmd_rendimiento(cfg: Config, args) -> None:
+    from .escucha import load_radar
+    from .rendimiento import cohort, report, save, scan
+
+    addresses, desde = cohort()
+    if not addresses:
+        print("No hay cohorte (data/hft_cohorte.json) ni datos de la escucha para saber qué cuentas revisar.")
+        return
+    rows = scan(HyperliquidSource(cfg.network), addresses, args.desde or desde)
+    print("\n".join(report(rows, args.desde or desde, load_radar())))
+    if not args.no_guardar:
+        save(rows)
+
+
 def cmd_causa(cfg: Config, args) -> None:
     from .causa import NQ_FILE, btc_series, episodes, read_series, report
 
@@ -675,6 +689,10 @@ def main(argv: list[str] | None = None) -> None:
 
     sub.add_parser("billeteras", help="indicador de billeteras: tendencia y corto plazo")
 
+    rn = sub.add_parser("rendimiento", help="¿las cuentas en estudio ganan o solo mueven dinero? (revisión mensual)")
+    rn.add_argument("--desde", help="inicio del estudio AAAA-MM-DD (por defecto, el de la cohorte)")
+    rn.add_argument("--no-guardar", action="store_true", help="no añadir la consulta a data/hft_rendimiento.jsonl")
+
     ca = sub.add_parser("causa", help="¿la bolsa o la disculpa? movimientos fuertes de BTC frente al Nasdaq")
     ca.add_argument("--umbral", type=float, default=1.5, help="movimiento mínimo de BTC, en %%")
     ca.add_argument("--ventana", type=int, default=60, help="en menos de estos minutos")
@@ -712,7 +730,7 @@ def main(argv: list[str] | None = None) -> None:
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
      "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
-     "trampas": cmd_trampas, "causa": cmd_causa}[args.cmd](cfg, args)
+     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

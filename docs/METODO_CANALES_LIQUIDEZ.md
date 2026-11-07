@@ -763,3 +763,25 @@ Con los datos del 5 nov (sin Nasdaq todavía): la caída grabada (−6,15 % desd
 de grabar** (el equipo se despertó a las 9:51), así que no se sabe si arrancó antes o después de la
 apertura de Nueva York. El barrido de las 5–6 pm (−1,1 %) y el rebote (+1,4 %) fueron con la bolsa ya
 cerrada. Umbrales a revisar con un mes de datos.
+
+## Rendimiento de la cohorte: una buena ballena es la que gana (7 nov 2026)
+
+Regla de Juan: no seguimos a cuentas que solo mueven dinero y pierden; esas salen en la primera
+revisión mensual. `python -m copytrading rendimiento` revisa las 30 cuentas en estudio
+(`data/hft_cohorte.json`) con su portafolio público de Hyperliquid: ganancia desde que entraron al
+estudio, de la semana y de 30 días (incluye lo abierto), volumen y **ganancia por cada $10.000
+movidos**. Veredicto: *se queda* (gana en el estudio), *sale (mueve dinero y pierde)*, *sale (pierde)*
+o *sin actividad*. Cada consulta se guarda en `data/hft_rendimiento.jsonl` para ver el mes completo.
+
+Primera foto (estudio desde el 4 nov, 3 días): **5 ganan, 24 pierden, 1 sin actividad.**
+
+* `0xfc66…`: +$1,26M en el estudio, +$24,4M en 30 días y **+$39 por cada $10.000 movidos**, la más
+  eficiente. Es la que **vendía antes y durante la caída del 5 nov**: el dinero listo estaba del lado
+  de la tendencia.
+* `0xecb6…` (creadora de mercado): +$1,44M en el estudio, +$19M en 30 días.
+* `0xb1ec…`, la que "absorbió" la caída comprando +$20M: −$2,52M en el estudio. Comprar la caída
+  contra la tendencia perdió, como dice la regla de tendencia.
+* Todas las marcadas "cazador" por el radar pierden (`0x4b62…` −$1,08M, `0xf5d8…`, `0xa4de…`,
+  `0xf84d…`), y `0xf71a…` −$940k. La peor, `0x4e23…`: −$4,03M en el estudio, −$14,4M en 30 días.
+
+Es provisional (3 días). La decisión se toma en la revisión mensual (~4 dic).
