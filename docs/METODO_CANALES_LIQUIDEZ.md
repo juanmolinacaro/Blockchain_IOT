@@ -731,7 +731,15 @@ rebote +7,3 %), 5 nov (trampa alcista en la línea de tendencia y caída −6 %)
 las cuentas: `0xf71a…` vendió agresivo $22M entre las 5 y las 6 pm (precio ~75.700) y `0x4b62…`
 otros $13M; el precio barrió hasta 75.189 (debajo del mínimo anterior y de los largos de 100x) y en
 la hora siguiente `0xf71a…` **compró** $11M y `0xfc66…` $2,5M en el mínimo: vender para tumbar el
-precio hasta los stops y comprar abajo, la conducta de "cazador" que describió Juan. Binance no
+precio hasta los stops y comprar abajo, la conducta de "cazador" que describió Juan.
+
+**Corrección (7 nov, con sus operaciones reales de Hyperliquid):** `0xf71a…` **no** cazó stops. Había
+comprado la caída de la mañana (~100 BTC entre 77.250 y 78.730) y a las 17:39 **cerró esos largos a
+mercado en ~75.800 perdiendo ~$336k**: los $22M de "venta agresiva" fueron su capitulación, que ayudó a
+empujar el barrido. Luego abrió un corto en 75.850 y lo cerró en 75.200–75.430 (+$22k): esa es la
+"compra en el mínimo". Semana (31 oct–6 nov): **−$1,17M realizado** (−$1,37M contando lo abierto),
+con −$766k solo el jueves; histórico −$1,49M sobre $1.580M de volumen. Lección: el radar mide
+**cómo** opera una cuenta (agresiva, mucha rotación), no si gana. Volumen agresivo ≠ dinero listo. Binance no
 guardó filas desde las 11:09: los datos por minuto dependían de que el canal de liquidaciones en vivo
 estuviera conectado; ahora van por separado.
 
