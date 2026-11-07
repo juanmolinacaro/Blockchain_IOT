@@ -11,7 +11,10 @@ Qué hace:
 4. Cada minuto mira cuánta liquidez tienen puesta los creadores de mercado cerca del precio
    (sus órdenes abiertas a ±1 %) y la guarda en el mismo CSV.
 5. Avisa al móvil (ntfy) cuando:
-   * los cazadores empujan fuerte en una dirección (flujo neto de 5 min muy por encima de lo normal),
+   * **las cuentas que ganan** empujan fuerte en una dirección (flujo neto de 5 min muy por encima de lo
+     normal). Desde el 7 nov: los "cazadores" del radar resultaron perdedores (una cuenta agresiva no es
+     una cuenta lista), así que la alerta sigue a las cuentas de la cohorte que GANAN desde que entraron
+     al estudio (`rendimiento.py`, se renueva cada 6 h). Si aún no se sabe quién gana, usa los cazadores,
    * los creadores de mercado retiran gran parte de su liquidez de un lado del precio,
    * y dice si el precio va hacia un pool de liquidez de corto plazo (25-100x).
 6. Guarda cada aviso en `data/hft_eventos.jsonl` para medir después si anticipan los barridos.
@@ -55,6 +58,7 @@ PHONE_BEAT_H = 6             # mensaje silencioso al móvil cada 6 h para saber 
 class State:
     def __init__(self, kinds: dict[str, str]):
         self.kinds = kinds                                       # dirección -> tipo
+        self.winners: set[str] = set()                          # cuentas de la cohorte que ganan en el estudio
         self.minute: dict[str, dict[str, float]] = {}           # moneda -> acumulado del minuto
         self.price: dict[str, float] = {}
         self.net_hist: dict[str, deque] = {c: deque(maxlen=180) for c in COINS}      # flujo neto/min (3 h)
@@ -88,9 +92,21 @@ class State:
         if kind not in CONFIRMED:                              # el flujo por minuto agrupa solo los confirmados
             kind = "otros"
         m = self.minute.setdefault(coin, {})
-        key = f"{kind}|{'compra' if t['side'] == 'B' else 'venta'}"
+        side = "compra" if t["side"] == "B" else "venta"
+        key = f"{kind}|{side}"
         m[key] = m.get(key, 0.0) + usd
+        if taker in self.winners:                              # aparte: lo que empujan las cuentas que ganan
+            m[f"ganadoras|{side}"] = m.get(f"ganadoras|{side}", 0.0) + usd
         self.trades_seen += 1
+
+    @property
+    def signal_group(self) -> str:
+        """De quién es el flujo que vigila la alerta de empuje."""
+        return "ganadoras" if self.winners else "cazador"
+
+    @property
+    def signal_name(self) -> str:
+        return "las cuentas que ganan" if self.winners else "los cazadores"
 
 
 def load_radar(path: Path = RADAR) -> dict[str, str]:
@@ -185,7 +201,8 @@ def alert(state: State, key: str, title: str, body: str, data: dict) -> None:
 
 
 HEADER = ["hora_col", "moneda", "precio", "cazador_compra", "cazador_venta", "creador_compra",
-          "creador_venta", "otros_compra", "otros_venta", "liq_creadores_compra_1pct", "liq_creadores_venta_1pct"]
+          "creador_venta", "otros_compra", "otros_venta", "liq_creadores_compra_1pct", "liq_creadores_venta_1pct",
+          "ganadoras_compra", "ganadoras_venta"]
 
 
 def close_minute(state: State, source, makers: list[str], snap: dict | None = None) -> None:
@@ -198,8 +215,8 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         m = snap.get(coin, {})
         px = state.price.get(coin, 0.0)
         g = lambda k: round(m.get(k, 0.0))
-        hunt_net = m.get("cazador|compra", 0.0) - m.get("cazador|venta", 0.0)
-        state.net_hist[coin].append(hunt_net)
+        grp = state.signal_group
+        state.net_hist[coin].append(m.get(f"{grp}|compra", 0.0) - m.get(f"{grp}|venta", 0.0))
         bid = ask = ""
         if px and makers:
             got = mm_liquidity(source, makers, coin, px)
@@ -208,7 +225,8 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
                 state.book_hist[coin].append(got)
         state.pending.append([ts, coin, px, g("cazador|compra"), g("cazador|venta"), g("creador de mercado|compra"),
                               g("creador de mercado|venta"), g("otros|compra"), g("otros|venta"),
-                              round(bid) if bid != "" else "", round(ask) if ask != "" else ""])
+                              round(bid) if bid != "" else "", round(ask) if ask != "" else "",
+                              g("ganadoras|compra"), g("ganadoras|venta")])
         check_signals(state, coin)
     flush_rows(state)
 
@@ -225,7 +243,8 @@ def heartbeat(state: State, minutes: int) -> str:
         px = state.price.get(coin, 0.0)
         side = "compran" if net > 0 else "venden"
         book = state.book_hist[coin][-1] if state.book_hist[coin] else (0.0, 0.0)
-        parts.append(f"{coin} {px:,.0f} · cazadores {side} neto ${abs(net) / 1e6:.1f}M · creadores "
+        who = "ganadoras" if state.winners else "cazadores"
+        parts.append(f"{coin} {px:,.0f} · {who} {side} neto ${abs(net) / 1e6:.1f}M · creadores "
                      f"${book[0] / 1e6:.1f}M compra / ${book[1] / 1e6:.1f}M venta a ±1 %")
     seen = state.trades_seen - state.trades_at_last_beat
     state.trades_at_last_beat = state.trades_seen
@@ -262,12 +281,49 @@ def close_hour(state: State, snap: dict | None = None) -> None:
         log.warning("El archivo %s está abierto; guardo la hora en memoria.", HOURLY_CSV)
 
 
+def rotate_old_flow(path: Path | None = None) -> Path | None:
+    """Si el CSV del flujo tiene la cabecera de una versión anterior (menos columnas), lo renombra para
+    no mezclar formatos y empieza uno nuevo. Devuelve el nombre del archivo guardado."""
+    path = path or FLOW_CSV
+    if not path.exists():
+        return None
+    with path.open(encoding="utf-8") as fh:
+        first = fh.readline().strip()
+    if first == ",".join(HEADER):
+        return None
+    old = path.with_name(f"{path.stem}_hasta_{datetime.now(COT):%Y-%m-%d_%H%M}{path.suffix}")
+    path.rename(old)
+    log.warning("Formato nuevo del flujo (con las cuentas que ganan): el anterior queda en %s", old.name)
+    return old
+
+
+def refresh_winners(state: State) -> None:
+    """Cuentas de la cohorte que ganan desde que entraron al estudio (regla de Juan: una buena ballena es
+    la que gana). Si falla, conserva las anteriores."""
+    from .rendimiento import cohort, save, scan
+    from .sources.hyperliquid import HyperliquidSource
+    addresses, desde = cohort(COHORT)
+    if not addresses:
+        return
+    rows = scan(HyperliquidSource(), addresses, desde)
+    if not rows:
+        return
+    try:
+        save(rows)
+    except OSError:
+        pass
+    state.winners = {r.cuenta for r in rows if r.estudio > 0 and r.volumen_mes >= 1_000_000}
+    log.warning("Cuentas que ganan en el estudio: %d de %d (la alerta de empuje las sigue a ellas)",
+                len(state.winners), len(rows))
+
+
 def flush_rows(state: State) -> None:
     """Escribe las filas pendientes. Si el archivo está abierto en Excel (Windows lo bloquea), las guarda
     en memoria y lo vuelve a intentar el minuto siguiente: no se pierde nada ni se corta la escucha."""
     if not state.pending:
         return
     try:
+        rotate_old_flow()
         new_file = not FLOW_CSV.exists()
         FLOW_CSV.parent.mkdir(parents=True, exist_ok=True)
         with FLOW_CSV.open("a", newline="", encoding="utf-8") as fh:
@@ -295,9 +351,10 @@ def check_signals(state: State, coin: str) -> None:
         if abs(z) >= Z_PUSH and abs(five) >= MIN_PUSH_USD:
             up = five > 0
             side = "COMPRAN" if up else "VENDEN"
-            alert(state, f"empuje-{coin}-{side}", f"🤖 {coin}: los cazadores {side} agresivo",
+            icon = "💰" if state.winners else "🤖"
+            alert(state, f"empuje-{coin}-{side}", f"{icon} {coin}: {state.signal_name} {side} agresivo",
                   f"Flujo neto 5 min ${five / 1e6:+.1f}M ({z:+.1f}σ) a {px:,.0f}{nearest_zone(state, coin, up)}",
-                  {"moneda": coin, "precio": px, "flujo_5m": five, "z": z})
+                  {"moneda": coin, "precio": px, "flujo_5m": five, "z": z, "grupo": state.signal_group})
     book = list(state.book_hist[coin])
     if len(book) >= 15:
         avg_bid = statistics.fmean(b for b, _ in book[:-1])
@@ -339,6 +396,10 @@ async def run(minutes: float | None = None) -> None:
     state = State(kinds)
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
     await asyncio.to_thread(refresh_zones, state, source)
+    try:
+        await asyncio.to_thread(refresh_winners, state)
+    except Exception as exc:
+        log.error("No pude revisar quién gana (%s); la alerta sigue a los cazadores", exc)
     log.warning("Escuchando %s · estudiando %d cuentas (%d cazadores y %d creadores de mercado confirmados)",
                 ", ".join(COINS), len(kinds), sum(k == "cazador" for k in kinds.values()), len(makers))
     started = time.time()
@@ -374,6 +435,10 @@ async def run(minutes: float | None = None) -> None:
             makers = [a for a, k in state.kinds.items() if k == "creador de mercado"][:12]
         except Exception as exc:
             log.error("radar: %s", exc)
+        try:
+            await asyncio.to_thread(refresh_winners, state)
+        except Exception as exc:
+            log.error("rendimiento: %s", exc)
 
     async def phone_beat() -> None:
         try:

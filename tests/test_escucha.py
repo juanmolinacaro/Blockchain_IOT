@@ -80,3 +80,35 @@ def test_failed_liquidity_fetch_is_not_zero():
         def _info(self, payload):
             raise RuntimeError("HTTP 429")
     assert mm_liquidity(Src(), ["0xmm"], "BTC", 80000) is None
+
+
+def test_winners_flow_drives_the_push_alert(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.setattr(esc, "FLOW_CSV", tmp_path / "f.csv")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({"0xwin": "sin confirmar", "0xbot": "cazador"})
+    st.winners = {"0xwin"}
+    st.price["BTC"] = 80000
+    st.add_trade({"coin": "BTC", "side": "A", "px": "80000", "sz": "3", "users": ["0xmm", "0xwin"]})   # gana y vende
+    st.add_trade({"coin": "BTC", "side": "B", "px": "80000", "sz": "1", "users": ["0xbot", "0xmm"]})   # cazador compra
+    assert st.minute["BTC"]["ganadoras|venta"] == 240000.0
+    for i in range(80):
+        st.net_hist["BTC"].append(10_000 if i % 2 else -10_000)
+    for _ in range(4):
+        st.net_hist["BTC"].append(-200_000)
+    esc.close_minute(st, None, [])                         # el minuto suma el flujo de las ganadoras, no el del cazador
+    assert st.net_hist["BTC"][-1] == -240000.0
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "las cuentas que ganan VENDEN" in ev and '"grupo": "ganadoras"' in ev
+    row = (tmp_path / "f.csv").read_text().splitlines()[1].split(",")
+    assert row[-2:] == ["0", "240000"]
+
+
+def test_old_flow_csv_is_rotated(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    old = tmp_path / "hft_flujo.csv"
+    old.write_text("hora_col,moneda,precio\n2026-11-05 10:00,BTC,1\n", encoding="utf-8")
+    moved = esc.rotate_old_flow(old)
+    assert moved is not None and moved.exists() and not old.exists()
+    assert esc.rotate_old_flow(old) is None

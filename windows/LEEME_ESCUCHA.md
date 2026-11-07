@@ -38,8 +38,10 @@ enchufado. La pantalla sí se puede apagar.
 
 ## Qué avisos llegan
 
-* **🤖 Los cazadores COMPRAN / VENDEN agresivo**: el flujo de los robots cazadores en 5 minutos está
-  muy por encima de lo normal. Dice hacia qué pool de liquidez va el precio.
+* **💰 Las cuentas que ganan COMPRAN / VENDEN agresivo**: lo que empujan, en 5 minutos, las cuentas
+  del estudio que van ganando dinero está muy por encima de lo normal. Dice hacia qué pool de liquidez
+  va el precio. Quién gana se revisa solo cada 6 horas. (Si todavía no se sabe quién gana, sale el
+  aviso antiguo **🤖 Los cazadores…**.)
 * **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
   (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un
@@ -54,8 +56,10 @@ datos que se guarden.
 
 En la carpeta `data`:
 
-* `hft_flujo.csv`: cada minuto, el flujo agresivo de cazadores, creadores y resto, y la liquidez
-  de los creadores a ±1 % del precio.
+* `hft_flujo.csv`: cada minuto, el flujo agresivo de cazadores, creadores y resto, la liquidez
+  de los creadores a ±1 % del precio y (desde el 7 nov) lo que empujan **las cuentas que ganan**. Al
+  cambiar el formato, el archivo anterior se guarda como `hft_flujo_hasta_<fecha>.csv`.
+* `hft_rendimiento.jsonl`: cada 6 horas, cuánto gana o pierde cada cuenta del estudio.
 * `hft_eventos.jsonl`: cada aviso enviado.
 * `hft_cuentas_hora.csv`: cada hora, para cada una de las 30 cuentas en estudio: operaciones, volumen,
   cuánto empujó el precio comprando o vendiendo, cuánta liquidez puso, y el precio de BTC y ETH.

@@ -785,3 +785,9 @@ Primera foto (estudio desde el 4 nov, 3 días): **5 ganan, 24 pierden, 1 sin act
   `0xf84d…`), y `0xf71a…` −$940k. La peor, `0x4e23…`: −$4,03M en el estudio, −$14,4M en 30 días.
 
 Es provisional (3 días). La decisión se toma en la revisión mensual (~4 dic).
+
+**Ajuste del radar (7 nov):** la alerta de empuje de la escucha ya no sigue a los "cazadores" (pierden)
+sino a **las cuentas de la cohorte que ganan desde que entraron al estudio** y operan (≥ $1M en 30 días).
+Se recalcula cada 6 h junto con el radar; el aviso es "💰 BTC: las cuentas que ganan VENDEN agresivo".
+`hft_flujo.csv` añade las columnas `ganadoras_compra` / `ganadoras_venta` (el archivo con el formato
+anterior se guarda como `hft_flujo_hasta_<fecha>.csv`). Revisión semanal los domingos, no solo mensual.
