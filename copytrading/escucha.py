@@ -300,7 +300,7 @@ def rotate_old_flow(path: Path | None = None) -> Path | None:
 def refresh_winners(state: State) -> None:
     """Cuentas de la cohorte que ganan desde que entraron al estudio (regla de Juan: una buena ballena es
     la que gana). Si falla, conserva las anteriores."""
-    from .rendimiento import cohort, save, scan
+    from .rendimiento import cohort, last_winners, save, scan, select_winners
     from .sources.hyperliquid import HyperliquidSource
     addresses, desde = cohort(COHORT)
     if not addresses:
@@ -308,11 +308,12 @@ def refresh_winners(state: State) -> None:
     rows = scan(HyperliquidSource(), addresses, desde)
     if not rows:
         return
+    previous = state.winners or last_winners()            # al reiniciar, las de la última revisión guardada
+    state.winners = select_winners(rows, previous)
     try:
-        save(rows)
+        save(rows, winners=state.winners)
     except OSError:
         pass
-    state.winners = {r.cuenta for r in rows if r.estudio > 0 and r.volumen_mes >= 1_000_000}
     log.warning("Cuentas que ganan en el estudio: %d de %d (la alerta de empuje las sigue a ellas)",
                 len(state.winners), len(rows))
 

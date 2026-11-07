@@ -589,16 +589,17 @@ def cmd_pools(cfg: Config, args) -> None:
 
 def cmd_rendimiento(cfg: Config, args) -> None:
     from .escucha import load_radar
-    from .rendimiento import cohort, report, save, scan
+    from .rendimiento import cohort, last_winners, report, save, scan, select_winners
 
     addresses, desde = cohort()
     if not addresses:
         print("No hay cohorte (data/hft_cohorte.json) ni datos de la escucha para saber qué cuentas revisar.")
         return
     rows = scan(HyperliquidSource(cfg.network), addresses, args.desde or desde)
-    print("\n".join(report(rows, args.desde or desde, load_radar())))
+    winners = select_winners(rows, last_winners())
+    print("\n".join(report(rows, args.desde or desde, load_radar(), winners)))
     if not args.no_guardar:
-        save(rows)
+        save(rows, winners=winners)
 
 
 def cmd_causa(cfg: Config, args) -> None:

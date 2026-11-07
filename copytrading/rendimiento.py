@@ -30,6 +30,12 @@ COHORT = Path("data/hft_cohorte.json")
 HISTORY = Path("data/hft_rendimiento.jsonl")
 BIG_VOLUME = 50_000_000          # "mueve mucho dinero" en el estudio
 WINDOWS = ("day", "week", "month", "allTime")      # de la serie más fina a la más larga
+# Margen de tolerancia de la alerta (acordado con Juan el 7 nov): para ENTRAR, ganar > $100k en el
+# estudio; para SALIR, perder la mitad de lo mejor que llegó a ganar o quedar en pérdidas. Así una mala
+# racha no saca a una buena cuenta, ni un día de suerte mete a una mala, y no entra y sale por ruido.
+ENTER_USD = 100_000              # el pico se mide con cierres diarios, no con los vaivenes de dentro del día
+KEEP_FRACTION = 0.5
+MIN_ACTIVE_VOLUME = 1_000_000    # tiene que operar de verdad (30 días) para que su empuje cuente
 
 
 @dataclass
@@ -42,6 +48,7 @@ class Rendimiento:
     volumen_semana: float
     volumen_mes: float
     historico: float
+    pico: float = 0.0         # lo mejor que llegó a ganar desde que entró al estudio
 
     @property
     def por_10k(self) -> float | None:
@@ -72,17 +79,32 @@ def cohort(path: Path = COHORT) -> tuple[list[str], str]:
     return list(dict.fromkeys(r["cuenta"].lower() for r in rows)), rows[0]["hora_col"][:10] if rows else ""
 
 
-def pnl_since(portfolio: list, start_ms: int) -> float:
-    """Ganancia desde `start_ms`, con la serie más fina que cubra esa fecha."""
+def pnl_path(portfolio: list, start_ms: int, daily: bool = False) -> list[float]:
+    """Ganancia acumulada desde `start_ms` en cada punto, con la serie más fina que cubra esa fecha.
+    `daily`: solo el cierre de cada día (hora Colombia) y el valor actual. El pico se mide así: una cuenta
+    grande puede subir y bajar millones dentro del mismo día con lo que tiene abierto (0xfc66 llegó a
+    +$4,7M a media tarde del 5 nov y cerró el día en +$2,6M); eso es ruido, no lo que "llegó a ganar"."""
     windows = dict(portfolio)
     for name in WINDOWS:
         hist = (windows.get(name) or {}).get("pnlHistory") or []
         if not hist or int(hist[0][0]) > start_ms:
             continue
         before = [float(v) for t, v in hist if int(t) <= start_ms]
-        return float(hist[-1][1]) - (before[-1] if before else 0.0)
-    hist = (windows.get("allTime") or {}).get("pnlHistory") or []
-    return float(hist[-1][1]) - float(hist[0][1]) if hist else 0.0     # la cuenta es más nueva que el estudio
+        base = before[-1] if before else 0.0
+        pts = [(int(t), float(v) - base) for t, v in hist if int(t) >= start_ms] or [(int(hist[-1][0]), float(hist[-1][1]) - base)]
+        if daily:
+            closes: dict[str, float] = {}
+            for t, v in pts:
+                closes[datetime.fromtimestamp(t / 1000, COT).strftime("%Y-%m-%d")] = v
+            return list(closes.values())
+        return [v for _, v in pts]
+    hist = (windows.get("allTime") or {}).get("pnlHistory") or []       # la cuenta es más nueva que el estudio
+    return [float(v) - float(hist[0][1]) for _, v in hist] if hist else [0.0]
+
+
+def pnl_since(portfolio: list, start_ms: int) -> float:
+    """Ganancia desde `start_ms`."""
+    return pnl_path(portfolio, start_ms)[-1]
 
 
 def _window(portfolio: list, name: str) -> tuple[float, float]:
@@ -97,8 +119,42 @@ def from_portfolio(address: str, portfolio: list, start_ms: int) -> Rendimiento:
     month, vm = _window(portfolio, "month")
     hist, _ = _window(portfolio, "allTime")
     av = (dict(portfolio).get("day") or {}).get("accountValueHistory") or []
-    return Rendimiento(address, float(av[-1][1]) if av else 0.0, week, month, pnl_since(portfolio, start_ms),
-                       vw, vm, hist)
+    closes = pnl_path(portfolio, start_ms, daily=True)
+    return Rendimiento(address, float(av[-1][1]) if av else 0.0, week, month, closes[-1], vw, vm, hist,
+                       max(0.0, max(closes)))
+
+
+def select_winners(rows: list[Rendimiento], previous: set[str] | None = None) -> set[str]:
+    """Cuentas que sigue la alerta, con margen de tolerancia: entran al ganar más de ENTER_USD en el
+    estudio; las que ya estaban se quedan mientras sigan en ganancia y conserven al menos la mitad de lo
+    mejor que llegaron a ganar."""
+    previous = previous or set()
+    out = set()
+    for r in rows:
+        healthy = r.estudio > 0 and r.estudio >= KEEP_FRACTION * r.pico     # no perdió la mitad de su pico
+        if r.volumen_mes < MIN_ACTIVE_VOLUME or not healthy:
+            continue
+        if r.cuenta in previous or r.estudio > ENTER_USD:
+            out.add(r.cuenta)
+    return out
+
+
+def last_winners(path: Path = HISTORY) -> set[str]:
+    """Las que seguía la alerta en la última revisión guardada (para no perderlas al reiniciar)."""
+    if not path.exists():
+        return set()
+    last, seen, out = "", set(), set()
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            d = json.loads(line)
+            if d.get("fecha", "") != last or d["cuenta"] in seen:       # empieza otra revisión
+                last, seen, out = d.get("fecha", ""), set(), set()
+            seen.add(d["cuenta"])
+            if d.get("en_alerta"):
+                out.add(d["cuenta"])
+    except (OSError, ValueError, KeyError):
+        return set()
+    return out
 
 
 def scan(source, addresses: list[str], desde: str, pause_s: float = 0.2) -> list[Rendimiento]:
@@ -114,14 +170,16 @@ def scan(source, addresses: list[str], desde: str, pause_s: float = 0.2) -> list
     return sorted(out, key=lambda r: r.estudio, reverse=True)
 
 
-def save(rows: list[Rendimiento], path: Path = HISTORY) -> None:
+def save(rows: list[Rendimiento], path: Path = HISTORY, winners: set[str] | None = None) -> None:
     now = datetime.now(COT).strftime("%Y-%m-%d %H:%M")
+    winners = winners or set()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
         for r in rows:
             fh.write(json.dumps({"fecha": now, **{k: round(v) if isinstance(v, float) else v
                                                   for k, v in asdict(r).items()},
-                                 "veredicto": r.veredicto()}, ensure_ascii=False) + "\n")
+                                 "veredicto": r.veredicto(), "en_alerta": r.cuenta in winners},
+                                ensure_ascii=False) + "\n")
 
 
 def _usd(v: float) -> str:
@@ -130,17 +188,21 @@ def _usd(v: float) -> str:
     return f"{sign}${v / 1e6:.2f}M" if v >= 1e6 else f"{sign}${v / 1e3:.0f}k"
 
 
-def report(rows: list[Rendimiento], desde: str, labels: dict[str, str] | None = None) -> list[str]:
+def report(rows: list[Rendimiento], desde: str, labels: dict[str, str] | None = None,
+           winners: set[str] | None = None) -> list[str]:
     labels = labels or {}
+    winners = winners or set()
     lines = [f"Cuentas en estudio desde {desde or '?'}: ¿ganan o solo mueven dinero?", "",
              f"{'cuenta':8}  {'tipo':18}  {'estudio':>9}  {'semana':>9}  {'30 días':>9}  {'vol. 30 d':>9}  "
-             f"{'por $10k':>8}  veredicto"]
+             f"{'por $10k':>8}  {'pico':>9}  alerta  veredicto"]
     for r in rows:
         lines.append(f"{r.cuenta[:6]}…  {labels.get(r.cuenta, ''):18}  {_usd(r.estudio):>9}  {_usd(r.semana):>9}  "
-                     f"{_usd(r.mes):>9}  {r.volumen_mes / 1e6:8.0f}M  {'—' if r.por_10k is None else f'{r.por_10k:+.1f}':>8}  {r.veredicto()}")
+                     f"{_usd(r.mes):>9}  {r.volumen_mes / 1e6:8.0f}M  {'—' if r.por_10k is None else f'{r.por_10k:+.1f}':>8}  {_usd(r.pico):>9}  {'💰 sí ' if r.cuenta in winners else '  no  '}  {r.veredicto()}")
     keep = [r for r in rows if r.veredicto() == "se queda"]
     out = [r for r in rows if r.veredicto().startswith("sale")]
     lines += ["", f"Se quedan {len(keep)} · salen {len(out)} · sin actividad {len(rows) - len(keep) - len(out)}",
+              f"La alerta 💰 sigue a {len(winners)}: entran al ganar > ${ENTER_USD // 1000}k en el estudio; salen si "
+              f"pierden la mitad de su mejor ganancia (pico) o quedan en pérdidas.",
               "Regla: una buena ballena es la que gana. Las que mueven dinero y pierden salen en la revisión del mes.",
               "Veredicto provisional hasta la revisión mensual; incluye lo que tienen abierto (no solo lo cerrado)."]
     return lines

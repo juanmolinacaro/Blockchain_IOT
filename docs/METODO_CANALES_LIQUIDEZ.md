@@ -791,3 +791,11 @@ sino a **las cuentas de la cohorte que ganan desde que entraron al estudio** y o
 Se recalcula cada 6 h junto con el radar; el aviso es "💰 BTC: las cuentas que ganan VENDEN agresivo".
 `hft_flujo.csv` añade las columnas `ganadoras_compra` / `ganadoras_venta` (el archivo con el formato
 anterior se guarda como `hft_flujo_hasta_<fecha>.csv`). Revisión semanal los domingos, no solo mensual.
+
+**Margen de tolerancia (7 nov, acordado con Juan):** para **entrar** a la alerta 💰 una cuenta tiene que
+ganar más de $100k en el estudio; para **salir**, perder la mitad de lo mejor que llegó a ganar (pico) o
+quedar en pérdidas. Así no se cuela una mala por un día de suerte ni sale una buena por una mala racha,
+y no entra y sale por ruido. El pico se mide con **cierres diarios**: `0xfc66…` llegó a +$4,7M a media
+tarde del 5 nov con lo que tenía abierto y cerró el día en +$2,6M; medido dentro del día habría salido
+por un vaivén. Al reiniciar la escucha se recuerdan las cuentas de la última revisión. Las 30 cuentas
+se siguen guardando completas (hora a hora y cada 6 h): la alerta solo decide a quién escuchar.
