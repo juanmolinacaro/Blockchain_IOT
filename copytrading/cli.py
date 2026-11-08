@@ -602,6 +602,20 @@ def cmd_rendimiento(cfg: Config, args) -> None:
         save(rows, winners=winners)
 
 
+def cmd_avisos(cfg: Config, args) -> None:
+    from .avisos import load_events, measure, report, typical_move
+
+    events = load_events(Path(args.archivo))
+    if not events:
+        print("No hay avisos en", args.archivo)
+        return
+    src = HyperliquidSource(cfg.network)
+    start, end = events[0]["t"] - 30 * 60_000, int(time.time() * 1000)
+    candles = {c: src.candles(c, "1m", start, end) for c in sorted({e["moneda"] for e in events})}
+    typical = {c: typical_move(cs) for c, cs in candles.items()}
+    print("\n".join(report(measure(events, candles), typical)))
+
+
 def cmd_causa(cfg: Config, args) -> None:
     from .causa import NQ_FILE, btc_series, episodes, read_series, report
 
@@ -694,6 +708,9 @@ def main(argv: list[str] | None = None) -> None:
     rn.add_argument("--desde", help="inicio del estudio AAAA-MM-DD (por defecto, el de la cohorte)")
     rn.add_argument("--no-guardar", action="store_true", help="no añadir la consulta a data/hft_rendimiento.jsonl")
 
+    av = sub.add_parser("avisos", help="¿aciertan los avisos de la escucha? precio 15 y 60 min después")
+    av.add_argument("--archivo", default="data/hft_eventos.jsonl")
+
     ca = sub.add_parser("causa", help="¿la bolsa o la disculpa? movimientos fuertes de BTC frente al Nasdaq")
     ca.add_argument("--umbral", type=float, default=1.5, help="movimiento mínimo de BTC, en %%")
     ca.add_argument("--ventana", type=int, default=60, help="en menos de estos minutos")
@@ -731,7 +748,7 @@ def main(argv: list[str] | None = None) -> None:
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
      "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
-     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento}[args.cmd](cfg, args)
+     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "avisos": cmd_avisos}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":
