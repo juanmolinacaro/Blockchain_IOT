@@ -816,3 +816,21 @@ Datos del PC de Juan (`data/escucha_pc/2026-11-08/`; la escucha estuvo apagada d
   el rebote: una operación de corto plazo, no un cambio de tendencia. En la hora, `0xfc66…` vendió
   −$0,43M antes y compró +$1,6M después; `0xf71a…` compró +$2,5M.
 * Fue antes de reabrir el CME y los futuros del Nasdaq (17:00 hora Colombia): movimiento solo cripto.
+
+**Los avisos del domingo llegaron al móvil, en este orden (hora Colombia):**
+
+| Hora | Aviso | Precio | Después |
+|---|---|---|---|
+| 16:48 | 💰 ETH: las cuentas que ganan VENDEN (−$0,6M, −21,5σ) | 2.210 | mínimo 2.13x |
+| 16:52 | 💰 BTC: las cuentas que ganan VENDEN (−$0,3M, −8σ) | 75.222 | mínimo 73.457 (−2,3 %) |
+| 16:52 | 💥 ETH: Binance liquidó largos $8,2M en 1 min | 2.191 | |
+| 16:53 | 🏦 BTC: los creadores retiran compras ($0,02M frente a $9,3M) | 75.108 | "camino libre abajo" |
+| 16:55 | 💥 BTC: Binance liquidó largos $9,3M en 1 min | 74.870 | |
+| 16:56 | 💰 BTC: las cuentas que ganan COMPRAN (+$1,2M, +15,3σ) | 73.796 | 75.500 a las 18:15 (+2,3 %) |
+| 17:02 | 💰 ETH: las cuentas que ganan COMPRAN (+$1,0M) | 2.136 | |
+
+Secuencia: las ganadoras venden → los creadores vacían el libro → liquidaciones en cascada → las
+ganadoras compran el mínimo → rebote. Las dos alertas 💰 de BTC acertaron la dirección del movimiento
+siguiente (un solo caso; hay que medirlo con muchos). El resumen de la escucha mostraba Binance vivo
+(OI 94.254, liquidaciones $177,9M), así que los datos de Binance llegan; si `binance_minuto.csv` no
+cambia, lo más probable es que el archivo esté abierto en Excel desde el 5 nov (se guardan en memoria).
