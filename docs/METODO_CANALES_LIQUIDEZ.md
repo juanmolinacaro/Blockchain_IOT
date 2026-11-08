@@ -799,3 +799,20 @@ y no entra y sale por ruido. El pico se mide con **cierres diarios**: `0xfc66…
 tarde del 5 nov con lo que tenía abierto y cerró el día en +$2,6M; medido dentro del día habría salido
 por un vaivén. Al reiniciar la escucha se recuerdan las cuentas de la última revisión. Las 30 cuentas
 se siguen guardando completas (hora a hora y cada 6 h): la alerta solo decide a quién escuchar.
+
+### Barrido del domingo 8 nov (16:45–16:57), visto por la escucha
+
+Datos del PC de Juan (`data/escucha_pc/2026-11-08/`; la escucha estuvo apagada del 7 nov 10:58 al
+8 nov 11:05 y Binance sigue sin guardar filas desde el 5 nov 11:09).
+
+* **Los creadores de mercado retiraron la liquidez antes de la caída.** Sus órdenes a ±1 % del precio
+  pasaron de ~$9,5M por lado a **~$0 a las 16:52–16:53**, 2–3 minutos antes de la mecha de las 16:55
+  (75.030 → 73.457), y siguieron en ~0 hasta las 16:57. Son ceros reales, no fallos de la API. Es
+  justo lo que vigila el aviso 🏦 de retiro: el libro se vació y el precio cayó por el hueco.
+* **La venta vino de fuera de la cohorte**: en el minuto 16:55 "otros" vendieron agresivo $160M
+  (compraron $46M). Las 30 cuentas en estudio apenas participaron.
+* **Las cuentas que ganan compraron el mínimo**: +$1,8M netos en el minuto 16:55 y +$1,5M en el
+  16:56, y vendieron ~$1,8M en el rebote de 17:00–17:02 (hasta 74.715). Compra en la mecha y venta en
+  el rebote: una operación de corto plazo, no un cambio de tendencia. En la hora, `0xfc66…` vendió
+  −$0,43M antes y compró +$1,6M después; `0xf71a…` compró +$2,5M.
+* Fue antes de reabrir el CME y los futuros del Nasdaq (17:00 hora Colombia): movimiento solo cripto.
