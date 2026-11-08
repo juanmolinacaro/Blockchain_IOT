@@ -34,6 +34,8 @@ class Medida:
     precio: float
     cambios: dict         # minutos -> cambio relativo
     titulo: str
+    ficha: dict | None = None      # operación armada en el aviso
+    resultado_r: float | None = None   # +R si tocó TP1 antes que el stop, −1 si tocó el stop; None si ninguno
 
     def acierto(self, h: int) -> bool | None:
         c = self.cambios.get(h)
@@ -78,6 +80,23 @@ def classify(events: list[dict]) -> list[tuple[dict, str, int]]:
     return out
 
 
+def simulate_card(card: dict, candles: list, t_ms: int, max_hours: int = 24) -> float | None:
+    """Resultado de la ficha en R: +r si toca TP1 antes que el stop, −1 si toca el stop (si en la misma vela
+    se tocan los dos, se cuenta el stop, lo prudente). None si no toca ninguno en `max_hours`."""
+    long = card["lado"] == "long"
+    end = t_ms + max_hours * 3_600_000
+    for k in candles:
+        if k.t + 60_000 <= t_ms or k.t > end:
+            continue
+        hit_stop = k.l <= card["stop"] if long else k.h >= card["stop"]
+        hit_tp = k.h >= card["tp1"] if long else k.l <= card["tp1"]
+        if hit_stop:
+            return -1.0
+        if hit_tp:
+            return float(card["r"])
+    return None
+
+
 def price_after(times: list[int], closes: list[float], t_ms: int, minutes: int) -> float | None:
     target = t_ms + minutes * 60_000
     i = bisect_right(times, target) - 1
@@ -98,7 +117,9 @@ def measure(events: list[dict], candles: dict[str, list]) -> list[Medida]:
             p = price_after(times, closes, e["t"], h)
             if p is not None and base:
                 cambios[h] = p / base - 1
-        out.append(Medida(e["t"], e["moneda"], clase, esperado, base, cambios, e.get("titulo", "")))
+        card = e.get("ficha")
+        res = simulate_card(card, candles.get(e["moneda"], []), e["t"]) if card else None
+        out.append(Medida(e["t"], e["moneda"], clase, esperado, base, cambios, e.get("titulo", ""), card, res))
     return out
 
 
@@ -142,5 +163,11 @@ def report(medidas: list[Medida], typical: dict[str, float]) -> list[str]:
             ok = sum(m.acierto(h) for m in done)
             parts.append(f"{h} min {ok}/{len(done)}" + (f" ({ok / len(done) * 100:.0f} %)" if done else ""))
         lines.append(f"{name}: {len(ms)} avisos · acierto " + " · ".join(parts))
+    cards = [m for m in medidas if m.ficha]
+    if cards:
+        done = [m for m in cards if m.resultado_r is not None]
+        total = sum(m.resultado_r for m in done)
+        lines.append(f"📋 Fichas de operación: {len(cards)} · cerradas {len(done)} · ganadoras "
+                     f"{sum(m.resultado_r > 0 for m in done)} · resultado {total:+.2f}R")
     lines.append("Pocos casos todavía: con menos de ~20 avisos de un tipo, el porcentaje no es fiable.")
     return lines

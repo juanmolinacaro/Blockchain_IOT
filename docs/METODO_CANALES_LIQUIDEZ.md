@@ -851,3 +851,21 @@ Retiro de los dos lados a la vez (sin dirección): 7 de 12 seguidos de un movimi
 lo normal en 15 minutos. Lectura provisional: el empuje de los cazadores y el retiro de un solo lado
 son una moneda al aire (confirma el cambio a las cuentas que ganan); el retiro de los dos lados avisa
 de **volatilidad**, no de dirección. Muy pocos casos: se repite cada domingo.
+
+### Ficha de operación en el aviso 💰 (8 nov)
+
+Idea de Juan: si las cuentas que ganan saben lo que va a pasar, la ventaja es de ~2 minutos (el
+domingo vendieron a las 16:52 y la mecha llegó a las 16:55), así que la operación tiene que llegar
+**armada** en el aviso. `trade_card` (escucha) añade al aviso 💰:
+
+* solo **a favor de la tendencia** (EMA 50 diaria); en contra: "no abrir; si tienes una posición a
+  favor de la tendencia, asegura". Viernes/sábado: "hoy no se opera";
+* **stop** 0,15 % más allá del extremo de los últimos 30 minutos (fuera del pool);
+* **TP1** en el siguiente pool de liquidez que pague ≥ 1,5R, **0,4 % antes de su centro**: los barridos
+  se quedan cortos del núcleo (vie 6 nov 74.842 frente a 74.711; dom 8 nov 73.457 frente a ~73.2xx);
+* en TP1 asegurar y dejar correr con el stop en la entrada.
+
+Ejemplo, domingo 16:52: CORTO 75.222 · stop 75.885 · TP1 73.497 (2,6R); el mínimo fue 73.457 a las
+16:55 → +2,6R. **Ojo:** el 0,4 % se eligió mirando estos mismos dos casos, así que este resultado no
+prueba nada; la prueba es el mes. `copytrading avisos` simula cada ficha (TP1 antes que el stop = +R;
+stop = −1R; si en la misma vela se tocan los dos, cuenta el stop) y da el total en R.

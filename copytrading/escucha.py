@@ -65,6 +65,8 @@ class State:
         self.book_hist: dict[str, deque] = {c: deque(maxlen=30) for c in COINS}     # (bid, ask) por minuto
         self.last_alert: dict[str, float] = {}
         self.zones: dict[str, tuple[list, list]] = {}
+        self.trend: dict[str, str] = {}                         # moneda -> ALCISTA | BAJISTA (EMA 50 diaria)
+        self.px_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}       # cierre por minuto (1 h)
         self.trades_seen = 0
         self.trades_at_last_beat = 0
         self.alerts_since_beat = 0
@@ -214,6 +216,8 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
     for coin in COINS:
         m = snap.get(coin, {})
         px = state.price.get(coin, 0.0)
+        if px:
+            state.px_hist[coin].append(px)
         g = lambda k: round(m.get(k, 0.0))
         grp = state.signal_group
         state.net_hist[coin].append(m.get(f"{grp}|compra", 0.0) - m.get(f"{grp}|venta", 0.0))
@@ -353,9 +357,12 @@ def check_signals(state: State, coin: str) -> None:
             up = five > 0
             side = "COMPRAN" if up else "VENDEN"
             icon = "💰" if state.winners else "🤖"
+            card_text, card = trade_card(state, coin, up) if state.winners else ("", None)
             alert(state, f"empuje-{coin}-{side}", f"{icon} {coin}: {state.signal_name} {side} agresivo",
-                  f"Flujo neto 5 min ${five / 1e6:+.1f}M ({z:+.1f}σ) a {px:,.0f}{nearest_zone(state, coin, up)}",
-                  {"moneda": coin, "precio": px, "flujo_5m": five, "z": z, "grupo": state.signal_group})
+                  f"Flujo neto 5 min ${five / 1e6:+.1f}M ({z:+.1f}σ) a {px:,.0f}{nearest_zone(state, coin, up)}"
+                  f"{card_text}",
+                  {"moneda": coin, "precio": px, "flujo_5m": five, "z": z, "grupo": state.signal_group,
+                   **({"ficha": card} if card else {})})
     book = list(state.book_hist[coin])
     if len(book) >= 15:
         avg_bid = statistics.fmean(b for b, _ in book[:-1])
@@ -369,6 +376,47 @@ def check_signals(state: State, coin: str) -> None:
                       {"moneda": coin, "precio": px, "ahora": now_v, "media": avg_v, "lado": side_name})
 
 
+CARD_MIN_R = 1.5          # la ficha solo propone la operación si el objetivo paga al menos 1,5 veces el riesgo
+CARD_STOP_PAD = 0.0015    # stop un 0,15 % más allá del extremo de los últimos 30 minutos
+CARD_LOOKBACK = 30
+CARD_TP_FRONT = 0.004     # TP1 un 0,4 % antes del centro del pool: los barridos se quedan cortos del núcleo
+                          # (vie 6 nov: mínimo 74.842 con núcleo 74.711; dom 8 nov: 73.457 con pool ~73.2xx)
+
+
+def trade_card(state: State, coin: str, up: bool, now_ms: int | None = None) -> tuple[str, dict | None]:
+    """Operación ya armada para el aviso de las cuentas que ganan (la ventaja es de ~2 minutos: no hay
+    tiempo de calcular). Reglas de Juan: solo a favor de la tendencia, no viernes/sábado, stop fuera del
+    pool (más allá del extremo reciente), objetivo en el siguiente pool de liquidez que pague ≥ 1,5R,
+    asegurar en TP1 y dejar correr. Devuelve (texto para el aviso, datos para medirla después)."""
+    from .method.monitor import trading_allowed
+    px = state.price.get(coin, 0.0)
+    trend = state.trend.get(coin, "")
+    side = "LARGO" if up else "CORTO"
+    if not px:
+        return "", None
+    if not trading_allowed(now_ms if now_ms is not None else int(time.time() * 1000)):
+        return "\n📋 Hoy no se opera (viernes/sábado hasta el domingo 1 pm).", None
+    if trend and trend != ("ALCISTA" if up else "BAJISTA"):
+        return (f"\n⚠ Contra la tendencia ({trend.lower()}): no abrir {side.lower()}. Si tienes una posición a "
+                f"favor de la tendencia, asegura ganancias."), None
+    hist = list(state.px_hist[coin])[-CARD_LOOKBACK:] or [px]
+    stop = min(hist) * (1 - CARD_STOP_PAD) if up else max(hist) * (1 + CARD_STOP_PAD)
+    risk = abs(px - stop)
+    z = state.zones.get(coin)
+    pools = sorted((s.center for s in z[1] if s.center > px), key=lambda c: c - px) if z and up else \
+        sorted((l.center for l in z[0] if l.center < px), key=lambda c: px - c) if z else []
+    pools = [c * (1 - CARD_TP_FRONT) if up else c * (1 + CARD_TP_FRONT) for c in pools]
+    target = next((c for c in pools if risk and abs(c - px) / risk >= CARD_MIN_R), None)
+    if not risk or target is None:
+        best = f" (el pool más cercano paga {abs(pools[0] - px) / risk:.1f}R)" if pools and risk else ""
+        return f"\n📋 Sin operación: ningún pool paga ≥ {CARD_MIN_R}R con el stop en {stop:,.0f}{best}.", None
+    r = abs(target - px) / risk
+    card = {"lado": "long" if up else "short", "entrada": round(px, 2), "stop": round(stop, 2),
+            "tp1": round(target, 2), "r": round(r, 2)}
+    return (f"\n📋 FICHA {side} {coin}: entrada ~{px:,.0f} · stop {stop:,.0f} · TP1 {target:,.0f} ({r:.1f}R) · "
+            f"en TP1 asegura y deja correr con stop en la entrada."), card
+
+
 def refresh_zones(state: State, source) -> None:
     from .method.shortliq import short_term_zones
     now = int(time.time() * 1000)
@@ -376,6 +424,9 @@ def refresh_zones(state: State, source) -> None:
         try:
             cs = [c for c in source.candles(coin, "1h", now - 8 * 86_400_000, now) if c.t + 3_600_000 <= now]
             state.zones[coin] = short_term_zones(cs)
+            from .method.monitor import trend_state
+            c4 = source.candles(coin, "4h", now - 830 * 86_400_000, now)
+            state.trend[coin] = trend_state(c4)[0]
         except Exception as exc:
             log.error("zonas %s: %s", coin, exc)
 

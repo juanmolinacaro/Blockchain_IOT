@@ -26,3 +26,12 @@ def test_measure_hits_by_direction():
     assert m[1].acierto(15) is False
     lines = report(m, {"BTC": 0.002})
     assert any("cuentas que ganan: 1 avisos · acierto 15 min 1/1" in line for line in lines)
+
+
+def test_card_simulation():
+    from copytrading.avisos import simulate_card
+    k = lambda i, h, l: SimpleNamespace(t=T0 + i * 60_000, h=h, l=l, c=(h + l) / 2)
+    card = {"lado": "short", "entrada": 100, "stop": 101, "tp1": 97, "r": 3.0}
+    assert simulate_card(card, [k(0, 100.5, 99), k(1, 99, 96.9)], T0) == 3.0
+    assert simulate_card(card, [k(0, 101.2, 99)], T0) == -1.0
+    assert simulate_card(card, [k(0, 100.2, 99.5)], T0) is None

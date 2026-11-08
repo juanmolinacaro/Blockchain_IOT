@@ -112,3 +112,35 @@ def test_old_flow_csv_is_rotated(monkeypatch, tmp_path):
     moved = esc.rotate_old_flow(old)
     assert moved is not None and moved.exists() and not old.exists()
     assert esc.rotate_old_flow(old) is None
+
+
+def _card_state():
+    from types import SimpleNamespace
+    import copytrading.escucha as esc
+    st = esc.State({})
+    st.price["BTC"] = 75222
+    st.trend["BTC"] = "BAJISTA"
+    for p in (75700, 75600, 75500, 75300, 75222):
+        st.px_hist["BTC"].append(p)
+    st.zones["BTC"] = ([SimpleNamespace(center=74681), SimpleNamespace(center=73204)],
+                       [SimpleNamespace(center=77145)])
+    return esc, st
+
+
+SUNDAY = 1_794_174_721_737        # domingo 8 nov 16:52 (Colombia)
+
+
+def test_trade_card_short_with_the_trend():
+    esc, st = _card_state()
+    text, card = esc.trade_card(st, "BTC", up=False, now_ms=SUNDAY)
+    assert card and card["lado"] == "short" and card["tp1"] == round(73204 * 1.004, 2)   # 74.681 no paga 1,5R
+    assert round(card["stop"]) == round(75700 * 1.0015) and card["r"] >= 1.5
+    assert "FICHA CORTO BTC" in text
+
+
+def test_trade_card_refuses_against_trend_and_on_saturday():
+    esc, st = _card_state()
+    text, card = esc.trade_card(st, "BTC", up=True, now_ms=SUNDAY)
+    assert card is None and "Contra la tendencia" in text
+    text, card = esc.trade_card(st, "BTC", up=False, now_ms=SUNDAY - 86_400_000)     # sábado
+    assert card is None and "no se opera" in text
