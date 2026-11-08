@@ -834,3 +834,20 @@ ganadoras compran el mínimo → rebote. Las dos alertas 💰 de BTC acertaron l
 siguiente (un solo caso; hay que medirlo con muchos). El resumen de la escucha mostraba Binance vivo
 (OI 94.254, liquidaciones $177,9M), así que los datos de Binance llegan; si `binance_minuto.csv` no
 cambia, lo más probable es que el archivo esté abierto en Excel desde el 5 nov (se guardan en memoria).
+
+### ¿Aciertan los avisos? (primera medición, 8 nov)
+
+`python -m copytrading avisos --archivo data/hft_eventos.jsonl` mide cada aviso con el precio 15 y
+60 minutos después. Con los 35 avisos del 5 al 8 nov:
+
+| Aviso | Casos | Acierto 15 min | Acierto 60 min |
+|---|---|---|---|
+| 💰 empuje de las cuentas que ganan | 5 | 3/5 (60 %) | 3/4 (75 %) |
+| 🤖 empuje de los cazadores (antiguo) | 6 | 3/6 (50 %) | 2/6 (33 %) |
+| 🏦 retiro de un solo lado | 9 | 4/9 (44 %) | 4/8 (50 %) |
+| 💥 liquidaciones de Binance (¿sigue el barrido?) | 3 | 2/3 | 2/3 |
+
+Retiro de los dos lados a la vez (sin dirección): 7 de 12 seguidos de un movimiento mayor que 1,5 veces
+lo normal en 15 minutos. Lectura provisional: el empuje de los cazadores y el retiro de un solo lado
+son una moneda al aire (confirma el cambio a las cuentas que ganan); el retiro de los dos lados avisa
+de **volatilidad**, no de dirección. Muy pocos casos: se repite cada domingo.
