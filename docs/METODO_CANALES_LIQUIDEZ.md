@@ -869,3 +869,12 @@ Ejemplo, domingo 16:52: CORTO 75.222 · stop 75.885 · TP1 73.497 (2,6R); el mí
 16:55 → +2,6R. **Ojo:** el 0,4 % se eligió mirando estos mismos dos casos, así que este resultado no
 prueba nada; la prueba es el mes. `copytrading avisos` simula cada ficha (TP1 antes que el stop = +R;
 stop = −1R; si en la misma vela se tocan los dos, cuenta el stop) y da el total en R.
+
+**Binance en el barrido del domingo (ya se guarda, desde el 7 nov 09:01).** Minuto 16:55: volumen BTC
+$877M, venta agresiva $632M y **$70,8M de largos liquidados en un solo minuto** (mínimo registrado). El
+interés abierto cayó de 96.600 a 94.339 BTC (−2,3 %) en 15 minutos. Antes, de 16:45 a 16:50, había
+**subido** (96.183 → 96.600): se abrían posiciones metiéndose en la caída. Proporción largos/cortos de
+**todas las cuentas**: 1,38 (4 nov, 80.500) → 2,37 (5 nov) → **3,07** (7–8 nov, ~75.900), y solo bajó a
+2,80 tras el barrido. La de los **top traders** bajó de 2,05 a 1,86. El público compró toda la bajada
+mientras los grandes reducían: hay combustible para más barridos abajo (73.2xx, 71.888), a favor de la
+tendencia bajista. Lo que estaba en memoria del 5 al 7 nov se perdió al reiniciar.
