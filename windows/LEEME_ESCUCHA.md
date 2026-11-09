@@ -61,6 +61,9 @@ En la carpeta `data`:
 * `hft_flujo.csv`: cada minuto, el flujo agresivo de cazadores, creadores y resto, la liquidez
   de los creadores a ±1 % del precio y (desde el 7 nov) lo que empujan **las cuentas que ganan**. Al
   cambiar el formato, el archivo anterior se guarda como `hft_flujo_hasta_<fecha>.csv`.
+* `revision_diaria.txt` y `avisos_medidos.jsonl`: cada día a las 8 pm la escucha mide sola cuánto
+  acertó cada tipo de aviso (precio 60 min después) y cuántas R dieron las fichas, y lo manda al móvil
+  como **📊 Revisión del día**.
 * `hft_rendimiento.jsonl`: cada 6 horas, cuánto gana o pierde cada cuenta del estudio.
 * `hft_eventos.jsonl`: cada aviso enviado.
 * `hft_cuentas_hora.csv`: cada hora, para cada una de las 30 cuentas en estudio: operaciones, volumen,

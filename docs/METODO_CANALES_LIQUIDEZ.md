@@ -894,3 +894,9 @@ sola cuenta (`0xbf73…`) **cerrando largos**, no abriendo cortos. Salir de una 
 contra. Desde ahora el aviso consulta las operaciones de las cuentas que ganan y dice "🔎 abren
 cortos $X" (apuestan a la baja, señal fuerte) o "🔎 sobre todo cierran largos $X (señal más débil)";
 `avisos` lo guarda para medir por separado cuál acierta más.
+
+**Revisión diaria automática (9 nov).** Para no esperar al mes: cada día a las 20:00 (hora Colombia) la
+escucha mide los avisos con el precio 60 minutos después, guarda cada aviso medido una sola vez en
+`data/avisos_medidos.jsonl` y manda al móvil "📊 Revisión del día": acierto de hoy y acumulado por tipo
+(💰abren, 💰cierran, 🤖, 🏦 un lado, 🏦 dos lados, 💥), resultado de las fichas en R y qué cuentas
+entraron o salieron de las que ganan. El domingo se decide qué umbral ajustar con esos números.

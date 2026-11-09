@@ -35,3 +35,17 @@ def test_card_simulation():
     assert simulate_card(card, [k(0, 100.5, 99), k(1, 99, 96.9)], T0) == 3.0
     assert simulate_card(card, [k(0, 101.2, 99)], T0) == -1.0
     assert simulate_card(card, [k(0, 100.2, 99.5)], T0) is None
+
+
+def test_measured_once_and_daily_summary(tmp_path):
+    from copytrading.avisos import summary_lines, update_measured
+    candles = {"BTC": [SimpleNamespace(t=T0 - 60_000 + i * 60_000, h=100.0, l=99.0, c=100.0 - i * 0.01)
+                       for i in range(120)]}
+    evs = [_ev(0, "empuje-BTC-VENDEN", grupo="ganadoras", abren_usd=5e6, cierran_usd=0),
+           _ev(60, "empuje-BTC-COMPRAN", grupo="ganadoras", abren_usd=0, cierran_usd=9e6)]
+    p = tmp_path / "m.jsonl"
+    now = T0 + 3 * 3_600_000
+    recs = update_measured(evs, candles, now, p)
+    assert [r["clase"] for r in recs] == ["empuje-ganadoras-abren", "empuje-ganadoras-cierran"]
+    assert len(update_measured(evs, candles, now, p)) == 2 and len(p.read_text().splitlines()) == 2   # sin duplicar
+    assert summary_lines(recs) == ["💰abren 1/1", "💰cierran 0/1"]

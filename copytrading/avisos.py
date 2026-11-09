@@ -65,6 +65,8 @@ def classify(events: list[dict]) -> list[tuple[dict, str, int]]:
         tipo = e["tipo"]
         if tipo.startswith("empuje-"):
             grupo = "ganadoras" if e.get("grupo") == "ganadoras" or "ganan" in e.get("titulo", "") else "cazadores"
+            if grupo == "ganadoras" and ("abren_usd" in e or "cierran_usd" in e):     # desde el 9 nov
+                grupo += "-abren" if e.get("abren_usd", 0) >= e.get("cierran_usd", 0) else "-cierran"
             out.append((e, f"empuje-{grupo}", 1 if tipo.endswith("COMPRAN") else -1))
         elif tipo.startswith("liq-binance-"):
             out.append((e, "liq-binance", -1 if tipo.endswith("largos") else 1))     # dirección del barrido
@@ -130,7 +132,10 @@ def typical_move(candles: list, minutes: int = 15) -> float:
     return sum(moves) / len(moves) if moves else 0.0
 
 
-NAMES = {"empuje-ganadoras": "💰 empuje de las cuentas que ganan", "empuje-cazadores": "🤖 empuje de los cazadores",
+NAMES = {"empuje-ganadoras": "💰 empuje de las cuentas que ganan",
+         "empuje-ganadoras-abren": "💰 las que ganan ABREN posición",
+         "empuje-ganadoras-cierran": "💰 las que ganan solo CIERRAN",
+         "empuje-cazadores": "🤖 empuje de los cazadores",
          "retiro-un-lado": "🏦 retiro de un solo lado", "retiro-ambos": "🏦 retiro de los dos lados a la vez",
          "liq-binance": "💥 liquidaciones de Binance (¿sigue el barrido?)"}
 
@@ -171,3 +176,88 @@ def report(medidas: list[Medida], typical: dict[str, float]) -> list[str]:
                      f"{sum(m.resultado_r > 0 for m in done)} · resultado {total:+.2f}R")
     lines.append("Pocos casos todavía: con menos de ~20 avisos de un tipo, el porcentaje no es fiable.")
     return lines
+
+
+# ---------------------------------------------------------------- revisión diaria (escucha)
+MEASURED = Path("data/avisos_medidos.jsonl")
+SHORT = {"empuje-ganadoras": "💰", "empuje-ganadoras-abren": "💰abren", "empuje-ganadoras-cierran": "💰cierran",
+         "empuje-cazadores": "🤖", "retiro-un-lado": "🏦1lado", "retiro-ambos": "🏦2lados", "liq-binance": "💥"}
+
+
+def _record(m: Medida) -> dict:
+    return {"t": m.t, "moneda": m.moneda, "clase": m.clase, "esperado": m.esperado,
+            "cambios": {str(k): round(v, 5) for k, v in m.cambios.items()},
+            "acierto_15": m.acierto(15), "acierto_60": m.acierto(60), "ficha": m.ficha, "r": m.resultado_r}
+
+
+def update_measured(events: list[dict], candles: dict[str, list], now_ms: int, path: Path = MEASURED) -> list[dict]:
+    """Guarda (una sola vez) cada aviso ya medido: con los 60 min cumplidos y, si traía ficha, con la ficha
+    resuelta o con más de 24 h. Devuelve todos los medidos (los de días anteriores incluidos)."""
+    done = []
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            try:
+                done.append(json.loads(line))
+            except ValueError:
+                continue
+    seen = {(d["t"], d["moneda"], d["clase"]) for d in done}
+    new = []
+    for m in measure(events, candles):
+        if (m.t, m.moneda, m.clase) in seen or 60 not in m.cambios:
+            continue
+        if m.ficha and m.resultado_r is None and now_ms - m.t < 24 * 3_600_000:
+            continue
+        new.append(_record(m))
+    if new:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            for d in new:
+                fh.write(json.dumps(d, ensure_ascii=False) + "\n")
+    return done + new
+
+
+def summary_lines(records: list[dict], since_ms: int = 0) -> list[str]:
+    rs = [d for d in records if d["t"] >= since_ms]
+    out = []
+    for clase, short in SHORT.items():
+        cs = [d for d in rs if d["clase"] == clase]
+        if not cs:
+            continue
+        if clase == "retiro-ambos":
+            out.append(f"{short} {len(cs)}")
+            continue
+        ok = [d for d in cs if d["acierto_60"] is not None]
+        out.append(f"{short} {sum(d['acierto_60'] for d in ok)}/{len(ok)}")
+    cards = [d for d in rs if d.get("ficha") and d.get("r") is not None]
+    if cards:
+        out.append(f"📋 fichas {sum(d['r'] for d in cards):+.1f}R ({sum(d['r'] > 0 for d in cards)}/{len(cards)})")
+    return out
+
+
+def daily_review(source, events_path: Path, winners_now: set[str], winners_before: set[str],
+                 now_ms: int | None = None) -> str:
+    """Texto corto para el móvil: aciertos (a 60 min) de los avisos de hoy y del acumulado, resultado de
+    las fichas en R y cambios en las cuentas que ganan. Así se ajusta cada día, sin esperar al mes."""
+    import time as _t
+    now_ms = now_ms or int(_t.time() * 1000)
+    events = load_events(events_path) if events_path.exists() else []
+    start = max(now_ms - 3 * 86_400_000, (events[0]["t"] - 30 * 60_000) if events else now_ms)
+    recent = [e for e in events if e["t"] >= start]
+    coins = sorted({e["moneda"] for e in recent})
+    candles = {c: source.candles(c, "1m", start, now_ms) for c in coins}
+    records = update_measured(recent, candles, now_ms)
+    day0 = int(datetime.fromtimestamp(now_ms / 1000, COT).replace(hour=0, minute=0, second=0,
+                                                                     microsecond=0).timestamp() * 1000)
+    today = summary_lines(records, day0)
+    total = summary_lines(records)
+    lines = [f"Hoy (acierto a 60 min): {' · '.join(today) if today else 'sin avisos medidos'}",
+             f"Acumulado: {' · '.join(total) if total else '—'}"]
+    entered, left = winners_now - winners_before, winners_before - winners_now
+    w = f"Cuentas que ganan: {len(winners_now)}"
+    if entered:
+        w += " · entran " + ", ".join(a[:6] for a in sorted(entered))
+    if left:
+        w += " · salen " + ", ".join(a[:6] for a in sorted(left))
+    lines.append(w)
+    lines.append("Formato: aciertos/medidos. Pocos casos = no fiable todavía.")
+    return "\n".join(lines)

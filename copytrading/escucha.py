@@ -53,6 +53,7 @@ MIN_BOOK_USD = 200_000       # (solo si normalmente tenían al menos esto)
 COOLDOWN_S = 30 * 60         # no repetir el mismo tipo de aviso antes de 30 min
 BEAT_MIN = 15                # línea "✓ Funcionando" en la ventana cada 15 min
 PHONE_BEAT_H = 6             # mensaje silencioso al móvil cada 6 h para saber que sigue viva
+REVIEW_HOUR = 20             # revisión diaria de los avisos (hora Colombia): ajustar cada día, no al mes
 
 
 class State:
@@ -540,6 +541,29 @@ async def run(minutes: float | None = None) -> None:
         except Exception as exc:
             log.error("rendimiento: %s", exc)
 
+    review = {"day": "", "winners": set(state.winners)}
+
+    async def review_job() -> None:
+        from .avisos import daily_review
+        try:
+            text = await asyncio.to_thread(daily_review, source, EVENTS, set(state.winners), review["winners"])
+        except Exception as exc:
+            log.error("revisión diaria: %s", exc)
+            return
+        review["winners"] = set(state.winners)
+        log.warning("📊 Revisión del día\n%s", text)
+        try:
+            with Path("data/revision_diaria.txt").open("a", encoding="utf-8") as fh:
+                fh.write(f"== {datetime.now(COT):%Y-%m-%d %H:%M}\n{text}\n\n")
+        except OSError:
+            pass
+        if os.environ.get("NTFY_TOPIC"):
+            try:
+                from .notify import send_ntfy
+                await asyncio.to_thread(send_ntfy, "📊 Revisión del día", text, "ESTADO", os.environ["NTFY_TOPIC"])
+            except Exception as exc:
+                log.error("ntfy: %s", exc)
+
     async def phone_beat() -> None:
         try:
             from .notify import send_ntfy
@@ -576,6 +600,10 @@ async def run(minutes: float | None = None) -> None:
                         if time.time() - last_phone_beat >= PHONE_BEAT_H * 3600 and os.environ.get("NTFY_TOPIC"):
                             last_phone_beat = time.time()
                             spawn(phone_beat())
+                        now_cot = datetime.now(COT)
+                        if now_cot.hour == REVIEW_HOUR and review["day"] != now_cot.strftime("%Y-%m-%d"):
+                            review["day"] = now_cot.strftime("%Y-%m-%d")
+                            spawn(review_job())
                         if int(time.time() // 3600) != last_hour:
                             last_hour = int(time.time() // 3600)
                             hsnap, state.hourly = state.hourly, {}
