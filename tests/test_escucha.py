@@ -144,3 +144,21 @@ def test_trade_card_refuses_against_trend_and_on_saturday():
     assert card is None and "Contra la tendencia" in text
     text, card = esc.trade_card(st, "BTC", up=False, now_ms=SUNDAY - 86_400_000)     # sábado
     assert card is None and "no se opera" in text
+
+
+def test_winners_action_distinguishes_opening_from_closing():
+    import copytrading.escucha as esc
+    st = esc.State({})
+    st.winners = {"0xw"}
+
+    class Src:
+        def _info(self, payload):
+            return [{"coin": "BTC", "crossed": True, "side": "A", "dir": "Close Long", "px": "74780", "sz": "300"},
+                    {"coin": "BTC", "crossed": True, "side": "A", "dir": "Open Short", "px": "74780", "sz": "10"},
+                    {"coin": "ETH", "crossed": True, "side": "A", "dir": "Open Short", "px": "2100", "sz": "999"}]
+    st.source = Src()
+    got = esc.winners_action(st, "BTC", up=False)
+    assert got["cierran"] == round(74780 * 300) and got["abren"] == round(74780 * 10)
+    assert "cierran largos" in got["texto"] and "señal más débil" in got["texto"]
+    st.source = None
+    assert esc.winners_action(st, "BTC", up=False) is None

@@ -358,11 +358,16 @@ def check_signals(state: State, coin: str) -> None:
             side = "COMPRAN" if up else "VENDEN"
             icon = "💰" if state.winners else "🤖"
             card_text, card = trade_card(state, coin, up) if state.winners else ("", None)
+            fresh = time.time() - state.last_alert.get(f"empuje-{coin}-{side}", 0) >= COOLDOWN_S
+            action = winners_action(state, coin, up) if state.winners and fresh else None
+            if action:
+                card_text = f"\n{action['texto']}" + card_text
             alert(state, f"empuje-{coin}-{side}", f"{icon} {coin}: {state.signal_name} {side} agresivo",
                   f"Flujo neto 5 min ${five / 1e6:+.1f}M ({z:+.1f}σ) a {px:,.0f}{nearest_zone(state, coin, up)}"
                   f"{card_text}",
                   {"moneda": coin, "precio": px, "flujo_5m": five, "z": z, "grupo": state.signal_group,
-                   **({"ficha": card} if card else {})})
+                   **({"ficha": card} if card else {}),
+                   **({"abren_usd": action["abren"], "cierran_usd": action["cierran"]} if action else {})})
     book = list(state.book_hist[coin])
     if len(book) >= 15:
         avg_bid = statistics.fmean(b for b, _ in book[:-1])
@@ -374,6 +379,48 @@ def check_signals(state: State, coin: str) -> None:
                       f"Liquidez a ±1 %: ${now_v / 1e6:.2f}M frente a ${avg_v / 1e6:.2f}M de media, a {px:,.0f}"
                       f"{nearest_zone(state, coin, up)} (camino libre {'arriba' if up else 'abajo'})",
                       {"moneda": coin, "precio": px, "ahora": now_v, "media": avg_v, "lado": side_name})
+
+
+def winners_action(state: State, coin: str, up: bool, minutes: int = 6) -> dict | None:
+    """¿Las cuentas que ganan ABREN posición en esa dirección o solo CIERRAN la contraria? No es lo mismo:
+    el 9 nov a las 12:08 el aviso "venden $22,5M" fue una sola cuenta cerrando largos (salir no es apostar
+    a la baja). Consulta sus operaciones agresivas de los últimos minutos."""
+    source = getattr(state, "source", None)
+    if source is None:
+        return None
+    since = int(time.time() * 1000) - minutes * 60_000
+    side = "B" if up else "A"
+    opening = "Open Long" if up else "Open Short"
+    closing = "Close Short" if up else "Close Long"
+    abren = cierran = 0.0
+    cuentas = 0
+    for a in state.winners:
+        try:
+            fills = source._info({"type": "userFillsByTime", "user": a, "startTime": since, "aggregateByTime": True}) or []
+        except Exception:
+            continue
+        mine = [f for f in fills if f.get("coin") == coin and f.get("crossed") and f.get("side") == side]
+        if mine:
+            cuentas += 1
+        for f in mine:
+            usd = float(f["px"]) * float(f["sz"])
+            if f.get("dir") == opening:
+                abren += usd
+            elif f.get("dir") == closing:
+                cierran += usd
+    if not abren and not cierran:
+        return None
+    verbo, contra = ("abren largos", "cierran cortos") if up else ("abren cortos", "cierran largos")
+    if abren >= cierran:
+        texto = f"🔎 {cuentas} cuenta(s): {verbo} ${abren / 1e6:.1f}M (apuestan a {'subir' if up else 'bajar'})"
+        if cierran:
+            texto += f" y {contra} ${cierran / 1e6:.1f}M"
+    else:
+        texto = (f"🔎 {cuentas} cuenta(s): sobre todo {contra} ${cierran / 1e6:.1f}M (salen de su posición, no "
+                 f"apuestan a {'subir' if up else 'bajar'}: señal más débil)")
+        if abren:
+            texto += f"; {verbo} ${abren / 1e6:.1f}M"
+    return {"texto": texto, "abren": round(abren), "cierran": round(cierran)}
 
 
 CARD_MIN_R = 1.5          # la ficha solo propone la operación si el objetivo paga al menos 1,5 veces el riesgo
@@ -446,6 +493,7 @@ async def run(minutes: float | None = None) -> None:
         except Exception as exc:
             log.error("No pude actualizar el radar (%s); uso la lista guardada", exc)
     state = State(kinds)
+    state.source = source
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
     await asyncio.to_thread(refresh_zones, state, source)
     try:

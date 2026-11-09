@@ -887,3 +887,10 @@ Hyperliquid, las 30 cuentas del estudio **cerraron cortos con +$292k de ganancia
 mínimo), `0xf71a…` +$48k, `0x3bca…` +$37k (compró 67 veces directamente a cuentas liquidadas),
 `0x4b62…` +$21k. La ganancia total de todos los que vendieron no se puede saber; por cada $1M en corto
 desde el inicio, BTC pagaba hasta ~$26k (−2,6 %) y ETH hasta ~$53k (−5,3 %).
+
+**Abrir no es lo mismo que cerrar (9 nov).** Aviso 💰 de las 12:08: "las cuentas que ganan VENDEN
+$22,5M" con ficha CORTO 74.780 · stop 75.180 · TP1 73.497 (3,2R). Revisadas sus operaciones: fue una
+sola cuenta (`0xbf73…`) **cerrando largos**, no abriendo cortos. Salir de una posición no es apostar en
+contra. Desde ahora el aviso consulta las operaciones de las cuentas que ganan y dice "🔎 abren
+cortos $X" (apuestan a la baja, señal fuerte) o "🔎 sobre todo cierran largos $X (señal más débil)";
+`avisos` lo guarda para medir por separado cuál acierta más.
