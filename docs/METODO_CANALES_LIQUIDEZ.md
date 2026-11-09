@@ -878,3 +878,12 @@ interés abierto cayó de 96.600 a 94.339 BTC (−2,3 %) en 15 minutos. Antes, d
 2,80 tras el barrido. La de los **top traders** bajó de 2,05 a 1,86. El público compró toda la bajada
 mientras los grandes reducían: hay combustible para más barridos abajo (73.2xx, 71.888), a favor de la
 tendencia bajista. Lo que estaba en memoria del 5 al 7 nov se perdió al reiniciar.
+
+**¿Cuánto se liquidó y cuánto ganaron los que vendieron? (dom 8 nov, 16:40–17:10).** Binance (mínimo:
+publica como mucho una liquidación por segundo): largos liquidados **BTC $88,5M + ETH $177,4M = $266M**,
+cortos solo $1,7M. Contratos abiertos: BTC −2.111 BTC (~$158M), ETH −113.700 ETH (~$245M). En
+Hyperliquid, las 30 cuentas del estudio **cerraron cortos con +$292k de ganancia realizada** en esa hora
+(y −$46k cerrando largos): `0xfc66…` +$162k (cerró cortos de BTC y ETH entre 16:51 y 17:23, en el
+mínimo), `0xf71a…` +$48k, `0x3bca…` +$37k (compró 67 veces directamente a cuentas liquidadas),
+`0x4b62…` +$21k. La ganancia total de todos los que vendieron no se puede saber; por cada $1M en corto
+desde el inicio, BTC pagaba hasta ~$26k (−2,6 %) y ETH hasta ~$53k (−5,3 %).
