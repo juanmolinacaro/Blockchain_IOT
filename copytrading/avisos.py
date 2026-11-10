@@ -69,7 +69,8 @@ def classify(events: list[dict]) -> list[tuple[dict, str, int]]:
                 grupo += "-abren" if e.get("abren_usd", 0) >= e.get("cierran_usd", 0) else "-cierran"
             out.append((e, f"empuje-{grupo}", 1 if tipo.endswith("COMPRAN") else -1))
         elif tipo.startswith("ruptura-"):
-            out.append((e, "ruptura", -1 if tipo.endswith("short") else 1))
+            sub = "" if "confirmada" not in e else ("-confirmada" if e["confirmada"] else "-sin-confirmar")
+            out.append((e, "ruptura" + sub, -1 if tipo.endswith("short") else 1))
         elif tipo.startswith("liq-binance-"):
             out.append((e, "liq-binance", -1 if tipo.endswith("largos") else 1))     # dirección del barrido
         elif tipo.startswith("retiro-") and id(e) not in used:
@@ -140,7 +141,9 @@ NAMES = {"empuje-ganadoras": "💰 empuje de las cuentas que ganan",
          "empuje-cazadores": "🤖 empuje de los cazadores",
          "retiro-un-lado": "🏦 retiro de un solo lado", "retiro-ambos": "🏦 retiro de los dos lados a la vez",
          "liq-binance": "💥 liquidaciones de Binance (¿sigue el barrido?)",
-         "ruptura": "📉📈 ruptura de compresión a favor de la tendencia"}
+         "ruptura": "📉📈 ruptura de compresión a favor de la tendencia",
+         "ruptura-confirmada": "📉📈 ruptura CONFIRMADA por los datos",
+         "ruptura-sin-confirmar": "📉📈 ruptura SIN confirmar"}
 
 
 def report(medidas: list[Medida], typical: dict[str, float]) -> list[str]:
@@ -185,7 +188,7 @@ def report(medidas: list[Medida], typical: dict[str, float]) -> list[str]:
 MEASURED = Path("data/avisos_medidos.jsonl")
 SHORT = {"empuje-ganadoras": "💰", "empuje-ganadoras-abren": "💰abren", "empuje-ganadoras-cierran": "💰cierran",
          "empuje-cazadores": "🤖", "retiro-un-lado": "🏦1lado", "retiro-ambos": "🏦2lados", "liq-binance": "💥",
-         "ruptura": "📉📈ruptura"}
+         "ruptura": "📉📈ruptura", "ruptura-confirmada": "✅ruptura", "ruptura-sin-confirmar": "⚠ruptura"}
 
 
 def _record(m: Medida) -> dict:

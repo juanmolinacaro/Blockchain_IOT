@@ -1022,3 +1022,28 @@ a favor de la tendencia pierden −0,33R**: muchos son falsas rupturas (encaja c
 trampa). La acumulación tiene pocos casos. Siguiente paso: combinar la ruptura con el filtro del flujo
 (el público empujando en contra) y con los pools, que es donde la escucha ve ventaja; y probar a operar la
 falsa ruptura del triángulo en vez de la ruptura.
+
+## Confirmación: juntar lo que mide el radar (10 nov 2026)
+
+Idea de Juan: "integrar los datos del radar: acumulación, lo que hace la mayoría, ballenas vendiendo y en
+corto; esos datos nos confirman posibles movimientos". `confirmation()` (escucha) hace votar cada pieza
+−1 (bajista), +1 (alcista) o 0:
+
+1. **Tendencia** (EMA 50 diaria).
+2. **La mayoría**: si el público empuja ≥ $2M en 30 min, vota **en contra** de su empuje (compra →
+   bajista), porque antes de los movimientos fuertes empujó en contra en 12 de 14 casos.
+3. **Las ballenas que ganan**: su posición neta en la moneda (corto → bajista, ≥ $1M), y si
+   aumentan, mantienen o reducen en las últimas 6 h (se consulta cada 15 min).
+4. **Binance**: interés abierto subiendo > 0,3 % en 60 min con las cuentas más largas (los largos se
+   amontonan → bajista) o más cortas (→ alcista).
+5. **Imán de liquidez**: pools de liquidación a ±3 %; si un lado pesa 1,5 veces el otro, vota hacia él.
+
+Resultado: "🎯 Confirmación BAJISTA 4/5: …" con el detalle. Va en el aviso 🗜 de compresión y en el de
+ruptura, que además dice "✅ los datos confirman la ruptura" o "⚠ no la confirman: más riesgo de falsa
+ruptura". `avisos` mide aparte las rupturas confirmadas y sin confirmar, para saber con números si
+confirmar mejora el resultado (los triángulos de 1H a favor perdieron −0,33R sin este filtro).
+
+Foto del 10 nov 15:18 (BTC 73.569): tendencia bajista; las que ganan, netas en corto en BTC (~−$7,8M:
+`0xfc66…` −153 BTC, `0xecb6…` +47 BTC) y las dos en corto en ETH (`0xecb6…` −16.667 ETH, ~$34M); imán
+abajo (largos 72.476 y 71.936 frente a cortos 74.124). Confirmación bajista 3 de 3 sin contar el flujo
+del público ni Binance, que solo ve la escucha.

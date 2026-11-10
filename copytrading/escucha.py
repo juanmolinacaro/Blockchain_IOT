@@ -70,6 +70,7 @@ class State:
         self.px_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}       # cierre por minuto (1 h)
         self.win_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}      # empuje neto de las ganadoras/min
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
+        self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
         self.trades_seen = 0
         self.trades_at_last_beat = 0
         self.alerts_since_beat = 0
@@ -476,6 +477,61 @@ SQUEEZE_RANGE = 0.004       # 60 min con rango < 0,4 %: el precio se comprime (s
 SQUEEZE_COOLDOWN_S = 3 * 3600
 
 
+CROWD_MIN = 2_000_000
+
+
+def confirmation(state: State, coin: str) -> dict:
+    """Junta lo que el radar mide y ha mostrado ventaja (idea de Juan, 10 nov): tendencia, lo que hace la
+    mayoría (el público empuja en contra del movimiento que viene: 12 de 14 casos), las ballenas que ganan
+    (su posición y si aumentan), Binance (interés abierto y largos/cortos de las cuentas) y el imán de
+    liquidez. Cada pieza vota −1 (bajista), +1 (alcista) o 0. Devuelve votos, total y texto."""
+    votos: dict[str, int] = {}
+    det: list[str] = []
+    tr = state.trend.get(coin, "")
+    if tr:
+        votos["tendencia"] = -1 if tr == "BAJISTA" else 1
+        det.append(f"tendencia {tr.lower()}")
+    crowd = sum(list(state.crowd_hist.get(coin, []))[-30:])
+    if abs(crowd) >= CROWD_MIN:
+        votos["público"] = -1 if crowd > 0 else 1
+        det.append(f"el público {'compra' if crowd > 0 else 'vende'} ${abs(crowd) / 1e6:.1f}M (combustible "
+                   f"{'abajo' if crowd > 0 else 'arriba'})")
+    wp = list(state.whale_pos.get(coin, []))
+    if wp:
+        now_v = wp[-1][1]
+        old_v = wp[0][1]
+        if abs(now_v) >= 1_000_000:
+            votos["ballenas"] = -1 if now_v < 0 else 1
+            change = abs(now_v) - abs(old_v)
+            trend_txt = "aumentan" if change > 0.05 * abs(old_v or 1) else "reducen" if change < -0.05 * abs(old_v or 1) else "mantienen"
+            det.append(f"las que ganan en {'corto' if now_v < 0 else 'largo'} ${abs(now_v) / 1e6:.1f}M ({trend_txt})")
+    rows = (getattr(getattr(state, "binance", None), "recent", {}) or {}).get(coin, [])[-60:]
+    if len(rows) >= 30 and rows[0][6] and rows[-1][6]:
+        oi = rows[-1][6] / rows[0][6] - 1
+        lc0 = next((r[11] for r in rows if r[11] != ""), None)
+        lc1 = next((r[11] for r in reversed(rows) if r[11] != ""), None)
+        if oi > 0.003 and lc0 is not None and lc1 is not None and lc1 != lc0:
+            votos["binance"] = -1 if lc1 > lc0 else 1
+            det.append(f"Binance: interés abierto {oi * 100:+.1f} % y las cuentas más {'largas' if lc1 > lc0 else 'cortas'}")
+    z = state.zones.get(coin)
+    px = state.price.get(coin)
+    if z and px:
+        below = sum(l.usd for l in z[0] if px * 0.97 <= l.center < px)
+        above = sum(s.usd for s in z[1] if px < s.center <= px * 1.03)
+        if below > 1.5 * above or above > 1.5 * below:
+            votos["imán"] = -1 if below > above else 1
+            det.append(f"imán de liquidez {'abajo' if below > above else 'arriba'}")
+    total = sum(votos.values())
+    n = len(votos)
+    if total < 0:
+        txt = f"🎯 Confirmación BAJISTA {sum(v < 0 for v in votos.values())}/{n}"
+    elif total > 0:
+        txt = f"🎯 Confirmación ALCISTA {sum(v > 0 for v in votos.values())}/{n}"
+    else:
+        txt = f"🎯 Sin confirmación (0 de {n})"
+    return {"votos": votos, "total": total, "n": n, "texto": txt + (": " + "; ".join(det) if det else "")}
+
+
 def check_squeeze(state: State, coin: str) -> None:
     """Aviso 🗜 cuando el precio lleva 60 minutos apretado (como el triángulo del 9 nov), con lo que hacen
     las cuentas mientras tanto: así se ve quién se posiciona antes de la ruptura. `copytrading episodios`
@@ -508,13 +564,15 @@ def check_squeeze(state: State, coin: str) -> None:
                 f"{'ABAJO' if crowd > 0 else 'ARRIBA'}")
     elif oi_txt:
         hint = f"\n👥 Público equilibrado{oi_txt}"
+    conf = confirmation(state, coin)
     up, down = nearest_zone(state, coin, True), nearest_zone(state, coin, False)
     who = (f"las que ganan {'compran' if wnet > 0 else 'venden'} neto ${abs(wnet) / 1e6:.1f}M en 30 min"
            if state.winners and wnet else "las que ganan quietas")
     alert(state, f"compresion-{coin}", f"🗜 {coin}: precio comprimido (se gesta un movimiento)",
-          f"Rango 60 min {rng * 100:.2f} % en {px:,.0f} · {who}{lib}{hint}\nArriba{up or ': sin pool cercano'}\n"
+          f"Rango 60 min {rng * 100:.2f} % en {px:,.0f} · {who}{lib}{hint}\n{conf['texto']}\nArriba{up or ': sin pool cercano'}\n"
           f"Abajo{down or ': sin pool cercano'}\nNo entrar en la ruptura: esperar la zona del plan.",
-          {"moneda": coin, "precio": px, "rango": rng, "ganadoras_30m": wnet, "publico_30m": round(crowd)})
+          {"moneda": coin, "precio": px, "rango": rng, "ganadoras_30m": wnet, "publico_30m": round(crowd),
+           "confirmacion": conf["total"], "votos": conf["votos"]})
 
 
 BOX_BARS = 12            # caja = últimas 12 velas de 1H
@@ -566,14 +624,18 @@ def check_breakouts(state: State, source) -> None:
             continue
         short = card["lado"] == "short"
         lo, hi = card["caja"]
+        conf = confirmation(state, coin)
+        agree = (conf["total"] < 0) if short else (conf["total"] > 0)
         alert(state, f"ruptura-{coin}-{card['lado']}",
               f"{'📉' if short else '📈'} {coin}: rompe la compresión {'hacia abajo' if short else 'hacia arriba'} "
               f"a favor de la tendencia",
               f"Caja de 12 h {lo:,.0f}–{hi:,.0f}; cierre 1H en {card['entrada']:,.0f}\n"
               f"📋 FICHA {'CORTO' if short else 'LARGO'} {coin}: entrada ~{card['entrada']:,.0f} · stop {card['stop']:,.0f} · "
               f"TP1 {card['tp1']:,.0f} (1R, cierra la mitad y stop a la entrada) · TP2 {card['tp2']:,.0f} (2R)"
-              f"{nearest_zone(state, coin, not short)}",
-              {"moneda": coin, "precio": card["entrada"],
+              f"{nearest_zone(state, coin, not short)}\n{conf['texto']}\n"
+              f"{'✅ Los datos confirman la ruptura' if agree else '⚠ Los datos NO la confirman: más riesgo de falsa ruptura'}",
+              {"moneda": coin, "precio": card["entrada"], "confirmada": agree, "confirmacion": conf["total"],
+               "votos": conf["votos"],
                "ficha": {k: card[k] for k in ("lado", "entrada", "stop", "tp1")} | {"r": 1.0}})
 
 
@@ -589,6 +651,28 @@ def refresh_zones(state: State, source) -> None:
             state.trend[coin] = trend_state(c4)[0]
         except Exception as exc:
             log.error("zonas %s: %s", coin, exc)
+    refresh_whales(state, source)
+
+
+def refresh_whales(state: State, source) -> None:
+    """Posición neta (USD; corto en negativo) de las cuentas que ganan en BTC y ETH, cada 15 min, con
+    historia de 6 h para saber si aumentan o reducen."""
+    if not state.winners:
+        return
+    tot = {c: 0.0 for c in COINS}
+    for a in state.winners:
+        try:
+            st = source._info({"type": "clearinghouseState", "user": a}) or {}
+        except Exception:
+            return                                   # mejor sin dato que con dato a medias
+        for ap in st.get("assetPositions", []):
+            p = ap.get("position", {})
+            if p.get("coin") in tot:
+                tot[p["coin"]] += float(p.get("szi") or 0) * float(p.get("entryPx") or 0)
+    now = time.time()
+    for c in COINS:
+        h = state.whale_pos.setdefault(c, deque(maxlen=25))       # 25 × 15 min ≈ 6 h
+        h.append((now, tot[c]))
 
 
 async def run(minutes: float | None = None) -> None:

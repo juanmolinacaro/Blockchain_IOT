@@ -192,3 +192,19 @@ def test_compression_break_with_the_trend():
     assert card and card["lado"] == "short" and round(card["stop"], 2) == round(100.3 * 1.001, 2)
     assert card["tp1"] < card["entrada"] < card["stop"]
     assert esc.compression_break(wide + box + [brk], "ALCISTA") is None     # en contra de la tendencia: nada
+
+
+def test_confirmation_votes():
+    from collections import deque
+    from types import SimpleNamespace
+    import copytrading.escucha as esc
+    st = esc.State({})
+    st.trend["BTC"] = "BAJISTA"
+    st.price["BTC"] = 74000
+    for _ in range(30):
+        st.crowd_hist["BTC"].append(100_000)                      # el público compra $3M
+    st.whale_pos["BTC"] = deque([(0, -10e6), (1, -16e6)])           # las que ganan en corto y aumentan
+    st.zones["BTC"] = ([SimpleNamespace(center=73200, usd=900e6)], [SimpleNamespace(center=74900, usd=300e6)])
+    c = esc.confirmation(st, "BTC")
+    assert c["votos"] == {"tendencia": -1, "público": -1, "ballenas": -1, "imán": -1}
+    assert c["texto"].startswith("🎯 Confirmación BAJISTA 4/4") and "aumentan" in c["texto"]
