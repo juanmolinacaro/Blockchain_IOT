@@ -237,3 +237,21 @@ def test_plan_watch_zone_sweep_and_activation(monkeypatch, tmp_path):
     st.price["BTC"] = 75000
     esc.check_plans(st, "BTC")                                       # ya terminado: no avisa más
     assert "anulado" not in (tmp_path / "ev.jsonl").read_text()
+
+
+def test_watch_only_zone_never_activates(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.watch = [{"plan": "S", "moneda": "BTC", "lado": "short", "solo_vigilar": True, "zona": [74700, 75100],
+                 "barrido": 74868, "gatillo": 74500, "stop": 75250, "tp1": 72766}]
+    for px in (74800, 74900):
+        st.price["BTC"] = px
+        esc.check_plans(st, "BTC")
+    st.price["BTC"] = 74400
+    esc.check_plans(st, "BTC", hour_close=True)
+    st.price["BTC"] = 75300
+    esc.check_plans(st, "BTC")
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "plan-S-zona" in ev and "plan-S-barrido" in ev and "activado" not in ev and "anulado" not in ev

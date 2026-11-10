@@ -532,7 +532,7 @@ def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
         conf = confirmation(state, coin)
         ok, verdict = coordinates(conf, short)
         info = f"\n{conf['texto']}\n{verdict}"
-        if beyond_stop:
+        if beyond_stop and not p.get("solo_vigilar"):
             st["fin"] = True
             alert(state, f"plan-{name}-anulado", f"❌ {name} {coin}: anulado, el precio superó el stop {p['stop']:,.0f}",
                   f"Precio {px:,.0f}. No entrar.", {"moneda": coin, "precio": px, "plan": name})
@@ -548,6 +548,8 @@ def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
             alert(state, f"plan-{name}-barrido", f"🧹 {name} {coin}: barrió {p['barrido']:,.0f}",
                   f"Precio {px:,.0f}. Ahora falta el cierre de 1H {'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
+        if p.get("solo_vigilar"):                 # zona de seguimiento: solo avisa, no activa operación
+            continue
         if hour_close and st["barrido"] and (px < p["gatillo"] if short else px > p["gatillo"]):
             st["fin"] = True
             risk = abs(p["stop"] - px)
