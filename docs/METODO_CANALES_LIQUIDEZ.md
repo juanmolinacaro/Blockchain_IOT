@@ -941,3 +941,35 @@ Ventaja pequeña pero positiva y, otra vez, solo a favor de la tendencia. No es 
 cierre de la ruptura con el stop en la estructura. Las comisiones (~0,1 % ida y vuelta) se comen parte
 cuando la caja es estrecha. La escucha avisa al cerrar cada hora ("📉 BTC: rompe la compresión hacia
 abajo a favor de la tendencia") con la ficha, y `avisos` la mide aparte como "ruptura".
+
+### Primera semana completa de datos (revisión del 10 nov)
+
+Archivos del PC hasta el 10 nov 14:33 (`data/escucha_pc/2026-11-10/`: Binance continuo desde el 8 nov
+11:04, Nasdaq desde el 2 nov, 171 avisos). Falta `hft_flujo.csv` para la biblioteca de episodios.
+
+**¿La bolsa o la disculpa?** (`causa`, movimientos de BTC ≥ 1,2 % en < 60 min, 5 con datos del Nasdaq):
+la bolsa se movió primero en 2 y a la vez en 3; solo cripto, 0. La caída del 5 nov **sí vino de la
+bolsa**: el Nasdaq ya caía −2,17 % en los 30 min anteriores y −3,0 % durante (la venta de tecnológicas
+fue real, no disculpa). El barrido del domingo 8 nov fue con la bolsa cerrada (sin datos del futuro).
+
+**Avisos** (`avisos`, precio 60 min después):
+
+| Aviso | Casos | Acierto 15 min | Acierto 60 min |
+|---|---|---|---|
+| 💰 las que ganan (todas) | 21 | 57 % | 43 % |
+| 💰 … abren posición | 7 | 29 % | 43 % |
+| 💰 … solo cierran | 5 | 60 % | 40 % |
+| 🏦 retiro de un lado | 35 | 43 % | 42 % |
+| 💥 liquidaciones Binance (sigue el barrido) | 8 | 62 % | 75 % |
+
+Retiro de los dos lados: 15 de 30 con movimiento > 1,5× lo normal. **La dirección del aviso 💰 no
+acierta más que una moneda al aire**; lo de los primeros días (4 de 5) fue suerte de muestra pequeña.
+
+**Fichas** (14, todas cerradas): 4 ganadoras, 10 al stop, **+5,95R** sin comisiones; con comisiones
+(~0,09 % ida y vuelta, stops de 0,3–1 %) ≈ **+3,4R**. El resultado depende de una sola: ETH 9 nov 10:51
+(+8,3R); sin ella, −2,4R. Lo que ayuda es la forma (a favor de la tendencia, stop corto, objetivo en el
+pool ≥ 1,5R), no acertar la dirección. Con stops tan cortos, las comisiones pesan 0,1–0,3R por operación.
+
+**Rendimiento**: la alerta 💰 queda en 2 cuentas: `0xecb6…` (+$5,8M en el estudio) y `0xfc66…`
+(+$2,0M; su pico fue +$3,2M). `0xbf73…` salió (devolvió más de la mitad de su pico), como prevé la
+regla de tolerancia.
