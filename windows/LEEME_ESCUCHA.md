@@ -50,6 +50,11 @@ enchufado. La pantalla sí se puede apagar.
   12 horas apretados y la vela de 1H cierra fuera de esa caja a favor de la tendencia. Trae ficha:
   entrada al cierre, stop al otro lado de la caja, TP1 a 1R (cierra la mitad y stop a la entrada) y TP2
   a 2R. Medido en 208 días de BTC, ETH y SOL: +0,11 a +0,17R por operación a favor de la tendencia.
+* **👀 / 🧹 / ✅ / ❌ Planes vigilados (K3, K2…)**: la escucha lee de GitHub, cada 15 minutos, los
+  planes de `data/vigilar.json` (se añaden sin reiniciar). Avisa cuando el precio **llega a la zona**,
+  cuando **barre el pool**, cuando el plan se **activa** (cierre de 1H al otro lado del gatillo) o se
+  **anula** (supera el stop). Cada aviso trae la confirmación (tendencia, la mayoría, las ballenas,
+  Binance, imán) y dice "✅ TODO COORDINA" o "⚠ NO todo coordina (falta: …)".
 * **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
   (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un

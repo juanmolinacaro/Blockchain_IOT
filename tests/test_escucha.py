@@ -211,3 +211,29 @@ def test_confirmation_votes():
     st.binance = SimpleNamespace(recent={"BTC": [["t", "BTC", 74000, 0, 0, 0, 100000.0, 0.0001, 0, 0, 2.1, 3.08]]})
     c = esc.confirmation(st, "BTC")
     assert c["votos"]["mayoría"] == -1 and "sobreapalancada en largos" in c["texto"]
+
+
+def test_plan_watch_zone_sweep_and_activation(monkeypatch, tmp_path):
+    from collections import deque
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.trend["BTC"] = "BAJISTA"
+    for _ in range(30):
+        st.crowd_hist["BTC"].append(100_000)                       # la mayoría compra
+    st.whale_pos["BTC"] = deque([(0, -11e6), (1, -12e6)])
+    st.watch = [{"plan": "K3", "moneda": "BTC", "lado": "short", "zona": [73950, 74300], "barrido": 74124,
+                 "gatillo": 73900, "stop": 74900, "tp1": 72230}]
+    st.price["BTC"] = 74000
+    esc.check_plans(st, "BTC")                                       # entra en la zona
+    st.price["BTC"] = 74150
+    esc.check_plans(st, "BTC")                                       # barre 74.124
+    st.price["BTC"] = 73850
+    esc.check_plans(st, "BTC", hour_close=True)                      # cierra 1H bajo 73.900
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "plan-K3-zona" in ev and "plan-K3-barrido" in ev and "plan-K3-activado" in ev
+    assert '"coordina": true' in ev
+    st.price["BTC"] = 75000
+    esc.check_plans(st, "BTC")                                       # ya terminado: no avisa más
+    assert "anulado" not in (tmp_path / "ev.jsonl").read_text()

@@ -71,6 +71,8 @@ class State:
         self.win_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}      # empuje neto de las ganadoras/min
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
         self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
+        self.watch: list[dict] = []                              # planes vigilados (vigilar.json)
+        self.watch_state: dict[str, dict] = {}
         self.trades_seen = 0
         self.trades_at_last_beat = 0
         self.alerts_since_beat = 0
@@ -239,6 +241,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
                               g("ganadoras|compra"), g("ganadoras|venta")])
         check_signals(state, coin)
         check_squeeze(state, coin)
+        check_plans(state, coin)
     flush_rows(state)
 
 
@@ -477,6 +480,86 @@ SQUEEZE_RANGE = 0.004       # 60 min con rango < 0,4 %: el precio se comprime (s
 SQUEEZE_COOLDOWN_S = 3 * 3600
 
 
+WATCH_URL = ("https://raw.githubusercontent.com/juanmolinacaro/Blockchain_IOT/"
+             "claude/onchain-replication-strategy-8naui6/data/vigilar.json")
+WATCH_LOCAL = Path("data/vigilar.json")
+
+
+def load_watch() -> list[dict]:
+    """Planes a vigilar: primero de GitHub (así se añaden sin reiniciar), si no, el archivo local."""
+    import urllib.request
+    try:
+        with urllib.request.urlopen(WATCH_URL, timeout=15) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception:
+        try:
+            data = json.loads(WATCH_LOCAL.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    now = datetime.now(COT).strftime("%Y-%m-%d %H:%M")
+    return [p for p in data.get("planes", []) if p.get("caduca", "9999") > now]
+
+
+def coordinates(conf: dict, short: bool) -> tuple[bool, str]:
+    """¿Todo coordina con la operación? Confirmación a favor con al menos 3 votos netos y que la mayoría
+    (empuje del público o sobreapalancamiento) esté del lado contrario, que es el combustible."""
+    sign = -1 if short else 1
+    net = conf["total"] * sign
+    crowd = conf["votos"].get("público", 0) * sign > 0 or conf["votos"].get("mayoría", 0) * sign > 0
+    whales = conf["votos"].get("ballenas", 0) * sign > 0
+    ok = net >= 3 and crowd
+    falta = [x for x, cond in (("confirmación ≥ 3", net >= 3), ("la mayoría del lado contrario", crowd),
+                               ("ballenas a favor", whales)) if not cond]
+    return ok, ("✅ TODO COORDINA" if ok else "⚠ NO todo coordina (falta: " + ", ".join(falta) + ")")
+
+
+def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
+    """Vigila los planes de `vigilar.json`: avisa al llegar a la zona, al barrer el pool y, al cerrar la hora,
+    si se activa (cierre de 1H al otro lado del gatillo tras el barrido) o se anula (supera el stop).
+    Cada aviso trae la confirmación del radar: qué hace la mayoría, las ballenas y si todo coordina."""
+    px = state.price.get(coin)
+    if not px:
+        return
+    for p in getattr(state, "watch", []):
+        if p.get("moneda") != coin:
+            continue
+        name, short = p["plan"], p.get("lado") == "short"
+        st = state.watch_state.setdefault(name, {"barrido": False, "fin": False})
+        if st["fin"]:
+            continue
+        lo, hi = p["zona"]
+        beyond_stop = px >= p["stop"] if short else px <= p["stop"]
+        conf = confirmation(state, coin)
+        ok, verdict = coordinates(conf, short)
+        info = f"\n{conf['texto']}\n{verdict}"
+        if beyond_stop:
+            st["fin"] = True
+            alert(state, f"plan-{name}-anulado", f"❌ {name} {coin}: anulado, el precio superó el stop {p['stop']:,.0f}",
+                  f"Precio {px:,.0f}. No entrar.", {"moneda": coin, "precio": px, "plan": name})
+            continue
+        if lo <= px <= hi:
+            alert(state, f"plan-{name}-zona", f"👀 {name} {coin}: el precio está en la zona {lo:,.0f}–{hi:,.0f}",
+                  f"Precio {px:,.0f}. Esperar el barrido de {p['barrido']:,.0f} y el cierre de 1H "
+                  f"{'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
+                  {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
+        swept = px >= p["barrido"] if short else px <= p["barrido"]
+        if swept and not st["barrido"]:
+            st["barrido"] = True
+            alert(state, f"plan-{name}-barrido", f"🧹 {name} {coin}: barrió {p['barrido']:,.0f}",
+                  f"Precio {px:,.0f}. Ahora falta el cierre de 1H {'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
+                  {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
+        if hour_close and st["barrido"] and (px < p["gatillo"] if short else px > p["gatillo"]):
+            st["fin"] = True
+            risk = abs(p["stop"] - px)
+            r = abs(px - p["tp1"]) / risk if risk else 0
+            alert(state, f"plan-{name}-activado",
+                  f"{'✅' if ok else '⚠'} {name} {coin} ACTIVADO: cierre 1H en {px:,.0f}",
+                  f"📋 {'CORTO' if short else 'LARGO'} ~{px:,.0f} · stop {p['stop']:,.0f} · TP1 {p['tp1']:,.0f} ({r:.1f}R) · "
+                  f"en TP1 asegura la mitad y stop a la entrada.{info}",
+                  {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"],
+                   "ficha": {"lado": p.get("lado"), "entrada": px, "stop": p["stop"], "tp1": p["tp1"], "r": round(r, 2)}})
+
+
 CROWD_MIN = 2_000_000
 CROWDED_LONG = 2.0       # cuentas de Binance: ≥ 2 largos por corto y funding positivo = la mayoría cargada de largos
 CROWDED_SHORT = 0.8
@@ -663,6 +746,7 @@ def refresh_zones(state: State, source) -> None:
         except Exception as exc:
             log.error("zonas %s: %s", coin, exc)
     refresh_whales(state, source)
+    state.watch = load_watch()
 
 
 def refresh_whales(state: State, source) -> None:
@@ -825,6 +909,8 @@ async def run(minutes: float | None = None) -> None:
                             hsnap, state.hourly = state.hourly, {}
                             spawn(asyncio.to_thread(close_hour, state, hsnap))
                             spawn(asyncio.to_thread(check_breakouts, state, source))
+                            for coin in COINS:
+                                check_plans(state, coin, hour_close=True)
                     if time.time() - last_zones > 15 * 60:
                         last_zones = time.time()
                         spawn(asyncio.to_thread(refresh_zones, state, source))

@@ -1056,3 +1056,16 @@ cuentas pasaron de 2,8 a **3,08 largos por corto**, el interés abierto de **95.
 posiciones (sobre todo largas) en plena bajada: más combustible abajo. Ojo: dice **hacia dónde** está el
 combustible, no **cuándo** se quema; la mayoría lleva días cargada de largos mientras el precio baja
 por escalones.
+
+## Planes vigilados en tiempo real: que todo coordine (10 nov 2026)
+
+Juan: "la idea de la operación ya está; lo que falta es que cuando el precio llegue a esas zonas todo
+coordine". La escucha lee `data/vigilar.json` de GitHub cada 15 min (los planes se añaden sin reiniciar)
+y, para cada plan, avisa: 👀 el precio entra en la zona; 🧹 barre el pool; ✅/⚠ se activa al cerrar la
+hora al otro lado del gatillo (con la ficha); ❌ se anula si supera el stop. Cada aviso trae la
+confirmación del radar y el veredicto **"✅ TODO COORDINA"** solo si la confirmación va a favor con al
+menos 3 votos netos **y** la mayoría está del lado contrario (el público empujando en contra o
+sobreapalancado), que es el combustible; si no, "⚠ NO todo coordina (falta: …)".
+
+Primer plan vigilado: **K3** (corto BTC): zona 73.950–74.300, barrido 74.124, gatillo cierre 1H < 73.900,
+stop 74.900, TP1 72.230, hasta el 12 nov 15:40. También K2 (zona 76.000–76.600).

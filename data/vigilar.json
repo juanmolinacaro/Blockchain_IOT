@@ -1,0 +1,9 @@
+{
+ "nota": "Planes que la escucha vigila en tiempo real (la escucha lee este archivo de GitHub cada 15 min). Precios de Hyperliquid.",
+ "planes": [
+  {"plan": "K3", "moneda": "BTC", "lado": "short", "zona": [73950, 74300], "barrido": 74124,
+   "gatillo": 73900, "stop": 74900, "tp1": 72230, "caduca": "2026-11-12 15:40"},
+  {"plan": "K2", "moneda": "BTC", "lado": "short", "zona": [76000, 76600], "barrido": 76378,
+   "gatillo": 76200, "stop": 77400, "tp1": 73497, "caduca": "2026-11-12 14:00"}
+ ]
+}
