@@ -999,3 +999,26 @@ interés abierto subía +0,62 % y las cuentas se ponían más largas (+0,10)… 
 **Decisión (10 nov):** el aviso 💰 ya no trae ficha de operación (su dirección acertó 43 % a 60 min en 21
 casos). Sigue como información de qué hacen las cuentas que ganan. Las fichas quedan en las rupturas de
 compresión a favor de la tendencia (📉/📈), que sí tienen ventaja medida.
+
+### Tipos de ruptura, medidos por separado (10 nov)
+
+Idea de Juan: "hay varias rupturas: de canal, de acumulación…". `copytrading/method/rupturas.py` detecta
+cinco tipos solo con velas cerradas y mide cada ruptura en R **ya descontada la comisión** (0,09 % ida y
+vuelta). BTC + ETH + SOL, 5.000 velas por moneda (1H ≈ 208 días; 4H ≈ 2,3 años), 48 velas (1H) o 30 (4H)
+de margen. R por operación con objetivo a 1R (y la regla de Juan: mitad en 1R, stop a la entrada, resto 2R):
+
+| Ruptura | 1H a favor | 1H en contra | 4H a favor | 4H en contra |
+|---|---|---|---|---|
+| compresión (12 velas) | **+0,03 / Juan +0,08** (116) | −0,04 / −0,11 (99) | −0,15 / −0,16 (152) | +0,06 / +0,01 (164) |
+| acumulación (36 velas, 2+2 toques) | +0,03 / −0,04 (27) | −0,05 / −0,18 (30) | +0,15 / +0,11 (12) | +0,19 / +0,09 (19) |
+| canal de regresión (48 velas) | −0,06 / −0,12 (113) | +0,10 / +0,02 (115) | 0,00 / −0,01 (113) | −0,09 / −0,12 (233) |
+| triángulo (pivotes) | **−0,33 / −0,32** (108) | +0,02 / −0,03 (113) | −0,02 / −0,01 (125) | −0,19 / −0,15 (110) |
+| línea de tendencia | −0,23 / −0,23 (215) | −0,11 / −0,13 (251) | **+0,06 / +0,06** (281) | −0,12 / −0,14 (274) |
+
+Lectura honesta: **la ruptura mecánica, sola, casi no tiene ventaja** después de comisiones. Lo único
+positivo con muestra grande es la compresión de 1H a favor de la tendencia (+0,08R con la regla de Juan,
++0,14R con objetivo 1,5R) y la línea de tendencia de 4H a favor (+0,06R). **Los triángulos de 1H que rompen
+a favor de la tendencia pierden −0,33R**: muchos son falsas rupturas (encaja con la idea de Juan de la
+trampa). La acumulación tiene pocos casos. Siguiente paso: combinar la ruptura con el filtro del flujo
+(el público empujando en contra) y con los pools, que es donde la escucha ve ventaja; y probar a operar la
+falsa ruptura del triángulo en vez de la ruptura.
