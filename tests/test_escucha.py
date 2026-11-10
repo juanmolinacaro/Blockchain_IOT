@@ -179,3 +179,15 @@ def test_squeeze_alert(monkeypatch, tmp_path):
     st.px_hist["BTC"].append(76000)                            # ya no está comprimido: no repite
     esc.check_squeeze(st, "BTC")
     assert len((tmp_path / "ev.jsonl").read_text().splitlines()) == 1
+
+
+def test_compression_break_with_the_trend():
+    from types import SimpleNamespace as C
+    import copytrading.escucha as esc
+    wide = [C(t=i, o=100, h=103, l=97, c=100) for i in range(220)]          # historial con rangos amplios
+    box = [C(t=300 + i, o=100, h=100.3, l=99.8, c=100) for i in range(12)]  # 12 h apretadas
+    brk = C(t=400, o=99.9, h=99.9, l=99.0, c=99.2)                          # cierra bajo la caja
+    card = esc.compression_break(wide + box + [brk], "BAJISTA")
+    assert card and card["lado"] == "short" and round(card["stop"], 2) == round(100.3 * 1.001, 2)
+    assert card["tp1"] < card["entrada"] < card["stop"]
+    assert esc.compression_break(wide + box + [brk], "ALCISTA") is None     # en contra de la tendencia: nada

@@ -501,6 +501,66 @@ def check_squeeze(state: State, coin: str) -> None:
           {"moneda": coin, "precio": px, "rango": rng, "ganadoras_30m": wnet})
 
 
+BOX_BARS = 12            # caja = últimas 12 velas de 1H
+BOX_PCT = 0.2            # "comprimida" = su rango está entre el 20 % más estrecho del historial
+
+
+def compression_break(candles_1h: list, trend: str, n: int = BOX_BARS, pct: float = BOX_PCT) -> dict | None:
+    """¿La última vela de 1H CERRADA rompe una caja comprimida a favor de la tendencia? (idea de Juan, 10 nov:
+    "hay estructuras que se repiten; se veía claro el short"). Estudio BTC/ETH/SOL 1H, ~208 días: rupturas a
+    favor de la tendencia 156 casos, +0,11R (TP 1R, 54 % aciertos) a +0,17R (TP 1,5R) por operación antes de
+    comisiones; en contra ~0R. Devuelve la ficha (entrada al cierre, stop al otro lado de la caja)."""
+    if len(candles_1h) < n + 200 or trend not in ("ALCISTA", "BAJISTA"):
+        return None
+    ranges = []
+    for i in range(n, len(candles_1h)):
+        w = candles_1h[i - n:i]
+        ranges.append(max(k.h for k in w) / min(k.l for k in w) - 1)
+    thr = sorted(ranges)[int(len(ranges) * pct)]
+    box = candles_1h[-n - 1:-1]
+    last = candles_1h[-1]
+    hi, lo = max(k.h for k in box), min(k.l for k in box)
+    if hi / lo - 1 > thr:
+        return None
+    if trend == "BAJISTA" and last.c < lo:
+        stop = hi * 1.001
+        return {"lado": "short", "entrada": last.c, "stop": round(stop, 2), "caja": (lo, hi),
+                "tp1": round(last.c - (stop - last.c), 2), "tp2": round(last.c - 2 * (stop - last.c), 2)}
+    if trend == "ALCISTA" and last.c > hi:
+        stop = lo * 0.999
+        return {"lado": "long", "entrada": last.c, "stop": round(stop, 2), "caja": (lo, hi),
+                "tp1": round(last.c + (last.c - stop), 2), "tp2": round(last.c + 2 * (last.c - stop), 2)}
+    return None
+
+
+def check_breakouts(state: State, source) -> None:
+    """Al cerrar cada hora: aviso 📉/📈 si BTC o ETH rompen una compresión de 1H a favor de la tendencia."""
+    from .method.monitor import trading_allowed
+    now = int(time.time() * 1000)
+    if not trading_allowed(now):
+        return
+    for coin in COINS:
+        try:
+            cs = [c for c in source.candles(coin, "1h", now - 2500 * 3_600_000, now) if c.t + 3_600_000 <= now]
+        except Exception as exc:
+            log.error("ruptura %s: %s", coin, exc)
+            continue
+        card = compression_break(cs, state.trend.get(coin, ""))
+        if not card:
+            continue
+        short = card["lado"] == "short"
+        lo, hi = card["caja"]
+        alert(state, f"ruptura-{coin}-{card['lado']}",
+              f"{'📉' if short else '📈'} {coin}: rompe la compresión {'hacia abajo' if short else 'hacia arriba'} "
+              f"a favor de la tendencia",
+              f"Caja de 12 h {lo:,.0f}–{hi:,.0f}; cierre 1H en {card['entrada']:,.0f}\n"
+              f"📋 FICHA {'CORTO' if short else 'LARGO'} {coin}: entrada ~{card['entrada']:,.0f} · stop {card['stop']:,.0f} · "
+              f"TP1 {card['tp1']:,.0f} (1R, cierra la mitad y stop a la entrada) · TP2 {card['tp2']:,.0f} (2R)"
+              f"{nearest_zone(state, coin, not short)}",
+              {"moneda": coin, "precio": card["entrada"],
+               "ficha": {k: card[k] for k in ("lado", "entrada", "stop", "tp1")} | {"r": 1.0}})
+
+
 def refresh_zones(state: State, source) -> None:
     from .method.shortliq import short_term_zones
     now = int(time.time() * 1000)
@@ -653,6 +713,7 @@ async def run(minutes: float | None = None) -> None:
                             last_hour = int(time.time() // 3600)
                             hsnap, state.hourly = state.hourly, {}
                             spawn(asyncio.to_thread(close_hour, state, hsnap))
+                            spawn(asyncio.to_thread(check_breakouts, state, source))
                     if time.time() - last_zones > 15 * 60:
                         last_zones = time.time()
                         spawn(asyncio.to_thread(refresh_zones, state, source))

@@ -47,6 +47,10 @@ enchufado. La pantalla sí se puede apagar.
 * **🗜 Precio comprimido (se gesta un movimiento)**: BTC o ETH llevan 60 minutos con un rango menor
   al 0,4 %. Dice qué hacen las cuentas que ganan, cómo está el libro de los creadores y qué pools hay
   arriba y abajo. No es para entrar en la ruptura: es para estar atento a la zona del plan.
+* **📉 / 📈 Rompe la compresión a favor de la tendencia**: al cerrar cada hora, si BTC o ETH llevaban
+  12 horas apretados y la vela de 1H cierra fuera de esa caja a favor de la tendencia. Trae ficha:
+  entrada al cierre, stop al otro lado de la caja, TP1 a 1R (cierra la mitad y stop a la entrada) y TP2
+  a 2R. Medido en 208 días de BTC, ETH y SOL: +0,11 a +0,17R por operación a favor de la tendencia.
 * **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
   (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un

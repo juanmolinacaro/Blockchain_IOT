@@ -923,3 +923,21 @@ Primera foto (4–8 nov): 3 caídas fuertes, 3 rebotes tras caída, 1 compresió
 sin ruptura. **Aún no hay ninguna subida fuerte propia ni compresión → arriba**: justo lo que falta.
 En los rebotes tras caída, los creadores ya habían quitado liquidez (libro ×0,46 y ×0,11) y en Binance el
 interés abierto bajaba (−1 % a −2 %): rebota cuando se limpian los apalancados.
+
+## Ruptura de compresión a favor de la tendencia (10 nov 2026)
+
+Crítica de Juan: "no podemos secarnos en no perseguir el precio; hay estructuras que se repiten y se veía
+claro el short" (el triángulo de 1H del 9 nov rompió hacia abajo y cayó −2,7 % sin que ningún plan
+entrara, porque todos esperaban un retesteo). Medido en velas de 1H de BTC, ETH y SOL (~208 días):
+caja = 12 velas con el rango entre el 20 % más estrecho; entrada al cierre de la vela que rompe la
+caja; stop al otro lado de la caja; 48 h de margen; sin comisiones.
+
+| Ruptura | Casos | TP 1R | TP 1,5R | TP 2R | Regla de Juan (mitad en 1R, stop a la entrada, resto 2R) |
+|---|---|---|---|---|---|
+| **a favor de la tendencia** | 156 | **+0,11R** (54 %) | **+0,17R** | +0,13R | **+0,13R** |
+| en contra | 123 | +0,02R (48 %) | 0,00R | −0,10R | −0,02R |
+
+Ventaja pequeña pero positiva y, otra vez, solo a favor de la tendencia. No es "perseguir": se entra al
+cierre de la ruptura con el stop en la estructura. Las comisiones (~0,1 % ida y vuelta) se comen parte
+cuando la caja es estrecha. La escucha avisa al cerrar cada hora ("📉 BTC: rompe la compresión hacia
+abajo a favor de la tendencia") con la ficha, y `avisos` la mide aparte como "ruptura".
