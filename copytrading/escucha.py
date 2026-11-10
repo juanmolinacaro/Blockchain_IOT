@@ -478,6 +478,8 @@ SQUEEZE_COOLDOWN_S = 3 * 3600
 
 
 CROWD_MIN = 2_000_000
+CROWDED_LONG = 2.0       # cuentas de Binance: ≥ 2 largos por corto y funding positivo = la mayoría cargada de largos
+CROWDED_SHORT = 0.8
 
 
 def confirmation(state: State, coin: str) -> dict:
@@ -513,6 +515,15 @@ def confirmation(state: State, coin: str) -> dict:
         if oi > 0.003 and lc0 is not None and lc1 is not None and lc1 != lc0:
             votos["binance"] = -1 if lc1 > lc0 else 1
             det.append(f"Binance: interés abierto {oi * 100:+.1f} % y las cuentas más {'largas' if lc1 > lc0 else 'cortas'}")
+    if rows:
+        lc = next((r[11] for r in reversed(rows) if r[11] != ""), None)
+        fund = rows[-1][7]
+        if lc is not None and lc >= CROWDED_LONG and fund > 0:
+            votos["mayoría"] = -1
+            det.append(f"la mayoría sobreapalancada en largos ({lc:.2f} largos por corto, funding +)")
+        elif lc is not None and lc <= CROWDED_SHORT and fund < 0:
+            votos["mayoría"] = 1
+            det.append(f"la mayoría sobreapalancada en cortos ({lc:.2f} largos por corto, funding −)")
     z = state.zones.get(coin)
     px = state.price.get(coin)
     if z and px:

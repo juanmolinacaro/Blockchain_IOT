@@ -208,3 +208,6 @@ def test_confirmation_votes():
     c = esc.confirmation(st, "BTC")
     assert c["votos"] == {"tendencia": -1, "público": -1, "ballenas": -1, "imán": -1}
     assert c["texto"].startswith("🎯 Confirmación BAJISTA 4/4") and "aumentan" in c["texto"]
+    st.binance = SimpleNamespace(recent={"BTC": [["t", "BTC", 74000, 0, 0, 0, 100000.0, 0.0001, 0, 0, 2.1, 3.08]]})
+    c = esc.confirmation(st, "BTC")
+    assert c["votos"]["mayoría"] == -1 and "sobreapalancada en largos" in c["texto"]

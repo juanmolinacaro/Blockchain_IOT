@@ -1047,3 +1047,12 @@ Foto del 10 nov 15:18 (BTC 73.569): tendencia bajista; las que ganan, netas en c
 `0xfc66…` −153 BTC, `0xecb6…` +47 BTC) y las dos en corto en ETH (`0xecb6…` −16.667 ETH, ~$34M); imán
 abajo (largos 72.476 y 71.936 frente a cortos 74.124). Confirmación bajista 3 de 3 sin contar el flujo
 del público ni Binance, que solo ve la escucha.
+
+**Sexto voto: la mayoría sobreapalancada (10 nov).** Juan: "la mayoría sobreapalancada en compras ya
+nos dice hacia dónde va el precio". Si en Binance hay ≥ 2 largos por corto entre todas las cuentas y el
+funding es positivo, vota bajista (≤ 0,8 y funding negativo, alcista). Datos del 8 al 10 nov: las
+cuentas pasaron de 2,8 a **3,08 largos por corto**, el interés abierto de **95.162 a 100.653 BTC
+(+5,8 %)** mientras el precio bajaba de 74.750 a 72.950, y el funding siguió positivo. Se abrieron
+posiciones (sobre todo largas) en plena bajada: más combustible abajo. Ojo: dice **hacia dónde** está el
+combustible, no **cuándo** se quema; la mayoría lleva días cargada de largos mientras el precio baja
+por escalones.
