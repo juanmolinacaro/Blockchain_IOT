@@ -69,6 +69,7 @@ class State:
         self.trend: dict[str, str] = {}                         # moneda -> ALCISTA | BAJISTA (EMA 50 diaria)
         self.px_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}       # cierre por minuto (1 h)
         self.win_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}      # empuje neto de las ganadoras/min
+        self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
         self.trades_seen = 0
         self.trades_at_last_beat = 0
         self.alerts_since_beat = 0
@@ -222,6 +223,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
             state.px_hist[coin].append(px)
         g = lambda k: round(m.get(k, 0.0))
         state.win_hist[coin].append(m.get("ganadoras|compra", 0.0) - m.get("ganadoras|venta", 0.0))
+        state.crowd_hist[coin].append(m.get("otros|compra", 0.0) - m.get("otros|venta", 0.0))
         grp = state.signal_group
         state.net_hist[coin].append(m.get(f"{grp}|compra", 0.0) - m.get(f"{grp}|venta", 0.0))
         bid = ask = ""
@@ -492,13 +494,25 @@ def check_squeeze(state: State, coin: str) -> None:
         avg_b = statistics.fmean(b for b, _ in book[:-1]) or 1
         avg_a = statistics.fmean(a for _, a in book[:-1]) or 1
         lib = f" · libro de los creadores: compras ×{now_b / avg_b:.1f}, ventas ×{now_a / avg_a:.1f} de lo normal"
+    crowd = sum(list(state.crowd_hist.get(coin, []))[-30:])
+    oi_txt = ""
+    rows = (getattr(getattr(state, "binance", None), "recent", {}) or {}).get(coin, [])[-30:]
+    if len(rows) >= 2 and rows[0][6] and rows[-1][6]:
+        oi_txt = f" · interés abierto Binance {(rows[-1][6] / rows[0][6] - 1) * 100:+.2f} % en 30 min"
+    hint = ""
+    if abs(crowd) >= 2_000_000:          # biblioteca de episodios (10 nov): el público suele estar del lado equivocado
+        hint = (f"\n👥 El público {'COMPRA' if crowd > 0 else 'VENDE'} agresivo ${abs(crowd) / 1e6:.1f}M en 30 min{oi_txt}: "
+                f"antes de las caídas fuertes solía comprar y antes de las subidas, vender → ojo ruptura "
+                f"{'ABAJO' if crowd > 0 else 'ARRIBA'}")
+    elif oi_txt:
+        hint = f"\n👥 Público equilibrado{oi_txt}"
     up, down = nearest_zone(state, coin, True), nearest_zone(state, coin, False)
     who = (f"las que ganan {'compran' if wnet > 0 else 'venden'} neto ${abs(wnet) / 1e6:.1f}M en 30 min"
            if state.winners and wnet else "las que ganan quietas")
     alert(state, f"compresion-{coin}", f"🗜 {coin}: precio comprimido (se gesta un movimiento)",
-          f"Rango 60 min {rng * 100:.2f} % en {px:,.0f} · {who}{lib}\nArriba{up or ': sin pool cercano'}\n"
+          f"Rango 60 min {rng * 100:.2f} % en {px:,.0f} · {who}{lib}{hint}\nArriba{up or ': sin pool cercano'}\n"
           f"Abajo{down or ': sin pool cercano'}\nNo entrar en la ruptura: esperar la zona del plan.",
-          {"moneda": coin, "precio": px, "rango": rng, "ganadoras_30m": wnet})
+          {"moneda": coin, "precio": px, "rango": rng, "ganadoras_30m": wnet, "publico_30m": round(crowd)})
 
 
 BOX_BARS = 12            # caja = últimas 12 velas de 1H

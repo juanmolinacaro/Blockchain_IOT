@@ -973,3 +973,25 @@ pool ≥ 1,5R), no acertar la dirección. Con stops tan cortos, las comisiones p
 **Rendimiento**: la alerta 💰 queda en 2 cuentas: `0xecb6…` (+$5,8M en el estudio) y `0xfc66…`
 (+$2,0M; su pico fue +$3,2M). `0xbf73…` salió (devolvió más de la mitad de su pico), como prevé la
 regla de tolerancia.
+
+### Biblioteca de episodios con la primera semana (10 nov): el público llega del lado equivocado
+
+Con `hft_flujo.csv` y Binance del 4 al 10 nov (`episodios`, 30 min antes de cada episodio):
+
+| Antes de… | Casos | Empuje agresivo del resto ("público") | Otros datos |
+|---|---|---|---|
+| **caída fuerte** | 6 | **compra** en 4 de 5 (media +$11M) | largos/cortos de las cuentas de Binance sube en 3 de 4 |
+| **subida fuerte** | 5 | **vende** en 5 de 5 (media −$25M) | el interés abierto de Binance sube en 4 de 5: se abren cortos que luego se exprimen |
+| **compresión → abajo** | 4 | compra en 3 de 4 | L/C de las cuentas sube 4 de 4; libro de compras de los creadores ×1,05 (4/4) |
+| compresión → arriba | 2 | mixto | Binance agresivo vendedor 2 de 2, interés abierto sube 2 de 2 |
+| rebote tras caída | 4 | vende fuerte (−$120M) | creadores quitan liquidez de los dos lados; interés abierto cae (limpieza) |
+
+Antes de los movimientos fuertes, el empuje agresivo del público fue **en contra** del movimiento que
+venía en 12 de 14 casos: compra y es absorbido antes de caer, vende y es absorbido antes de subir. Es la
+idea de los pools vista en el flujo: el público es el combustible. (No es ir contra una ballena; es leer
+dónde queda atrapado el apalancamiento.) Pocos casos: se sigue midiendo. El aviso 🗜 de compresión
+muestra desde ahora el empuje del público y el cambio del interés abierto de Binance en 30 minutos, con la
+pista "ojo ruptura ABAJO/ARRIBA" cuando el público empuja ≥ $2M hacia un lado.
+
+La caída de Juan del 10 nov encaja: a las 11:19 el resto compraba +$13M, Binance agresivo +$116M, el
+interés abierto subía +0,62 % y las cuentas se ponían más largas (+0,10)… y cayó −1,1 % más.

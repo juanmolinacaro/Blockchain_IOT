@@ -173,9 +173,10 @@ def test_squeeze_alert(monkeypatch, tmp_path):
     for i in range(60):
         st.px_hist["BTC"].append(75000 + (i % 5) * 10)        # rango 0,05 %
         st.win_hist["BTC"].append(-50_000)
+        st.crowd_hist["BTC"].append(100_000)               # el público compra $3M en 30 min
     esc.check_squeeze(st, "BTC")
     ev = (tmp_path / "ev.jsonl").read_text()
-    assert "comprimido" in ev and '"ganadoras_30m": -1500000' in ev
+    assert "comprimido" in ev and '"ganadoras_30m": -1500000' in ev and '"publico_30m": 3000000' in ev
     st.px_hist["BTC"].append(76000)                            # ya no está comprimido: no repite
     esc.check_squeeze(st, "BTC")
     assert len((tmp_path / "ev.jsonl").read_text().splitlines()) == 1
