@@ -363,7 +363,9 @@ def check_signals(state: State, coin: str) -> None:
             up = five > 0
             side = "COMPRAN" if up else "VENDEN"
             icon = "💰" if state.winners else "🤖"
-            card_text, card = trade_card(state, coin, up) if state.winners else ("", None)
+            # Sin ficha desde el 10 nov (decisión de Juan): la dirección del aviso 💰 acertó 43 % a 60 min
+            # (21 casos). Queda como información; las fichas van en las rupturas de compresión.
+            card_text, card = "", None
             fresh = time.time() - state.last_alert.get(f"empuje-{coin}-{side}", 0) >= COOLDOWN_S
             action = winners_action(state, coin, up) if state.winners and fresh else None
             if action:

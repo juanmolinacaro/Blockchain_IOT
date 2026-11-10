@@ -995,3 +995,7 @@ pista "ojo ruptura ABAJO/ARRIBA" cuando el público empuja ≥ $2M hacia un lado
 
 La caída de Juan del 10 nov encaja: a las 11:19 el resto compraba +$13M, Binance agresivo +$116M, el
 interés abierto subía +0,62 % y las cuentas se ponían más largas (+0,10)… y cayó −1,1 % más.
+
+**Decisión (10 nov):** el aviso 💰 ya no trae ficha de operación (su dirección acertó 43 % a 60 min en 21
+casos). Sigue como información de qué hacen las cuentas que ganan. Las fichas quedan en las rupturas de
+compresión a favor de la tendencia (📉/📈), que sí tienen ventaja medida.

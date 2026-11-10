@@ -42,8 +42,7 @@ enchufado. La pantalla sí se puede apagar.
   del estudio que van ganando dinero está muy por encima de lo normal. Dice hacia qué pool de liquidez
   va el precio. Quién gana se revisa solo cada 6 horas. (Si todavía no se sabe quién gana, sale el
   aviso antiguo **🤖 Los cazadores…**.)
-  Trae una **📋 FICHA** con la operación armada (entrada, stop, TP1 y cuántas veces el riesgo paga),
-  solo si va a favor de la tendencia y no es viernes ni sábado. Si va en contra, dice "no abrir".
+  Desde el 10 nov ya no trae ficha (su dirección no acertó más que una moneda al aire): es información.
 * **🗜 Precio comprimido (se gesta un movimiento)**: BTC o ETH llevan 60 minutos con un rango menor
   al 0,4 %. Dice qué hacen las cuentas que ganan, cómo está el libro de los creadores y qué pools hay
   arriba y abajo. No es para entrar en la ruptura: es para estar atento a la zona del plan.
