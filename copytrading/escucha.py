@@ -68,6 +68,7 @@ class State:
         self.zones: dict[str, tuple[list, list]] = {}
         self.trend: dict[str, str] = {}                         # moneda -> ALCISTA | BAJISTA (EMA 50 diaria)
         self.px_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}       # cierre por minuto (1 h)
+        self.win_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}      # empuje neto de las ganadoras/min
         self.trades_seen = 0
         self.trades_at_last_beat = 0
         self.alerts_since_beat = 0
@@ -220,6 +221,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         if px:
             state.px_hist[coin].append(px)
         g = lambda k: round(m.get(k, 0.0))
+        state.win_hist[coin].append(m.get("ganadoras|compra", 0.0) - m.get("ganadoras|venta", 0.0))
         grp = state.signal_group
         state.net_hist[coin].append(m.get(f"{grp}|compra", 0.0) - m.get(f"{grp}|venta", 0.0))
         bid = ask = ""
@@ -233,6 +235,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
                               round(bid) if bid != "" else "", round(ask) if ask != "" else "",
                               g("ganadoras|compra"), g("ganadoras|venta")])
         check_signals(state, coin)
+        check_squeeze(state, coin)
     flush_rows(state)
 
 
@@ -465,6 +468,39 @@ def trade_card(state: State, coin: str, up: bool, now_ms: int | None = None) -> 
             f"en TP1 asegura y deja correr con stop en la entrada."), card
 
 
+SQUEEZE_RANGE = 0.004       # 60 min con rango < 0,4 %: el precio se comprime (se gesta un movimiento)
+SQUEEZE_COOLDOWN_S = 3 * 3600
+
+
+def check_squeeze(state: State, coin: str) -> None:
+    """Aviso 🗜 cuando el precio lleva 60 minutos apretado (como el triángulo del 9 nov), con lo que hacen
+    las cuentas mientras tanto: así se ve quién se posiciona antes de la ruptura. `copytrading episodios`
+    mide después hacia dónde rompió cada compresión y qué se repite antes de cada lado."""
+    hist = list(state.px_hist[coin])
+    if len(hist) < 60:
+        return
+    rng = max(hist) / min(hist) - 1
+    if rng >= SQUEEZE_RANGE or time.time() - state.last_alert.get(f"compresion-{coin}", 0) < SQUEEZE_COOLDOWN_S:
+        return
+    px = hist[-1]
+    win = list(state.win_hist.get(coin, []))[-30:] if hasattr(state, "win_hist") else []
+    wnet = sum(win)
+    book = list(state.book_hist[coin])
+    lib = ""
+    if len(book) >= 10:
+        now_b, now_a = book[-1]
+        avg_b = statistics.fmean(b for b, _ in book[:-1]) or 1
+        avg_a = statistics.fmean(a for _, a in book[:-1]) or 1
+        lib = f" · libro de los creadores: compras ×{now_b / avg_b:.1f}, ventas ×{now_a / avg_a:.1f} de lo normal"
+    up, down = nearest_zone(state, coin, True), nearest_zone(state, coin, False)
+    who = (f"las que ganan {'compran' if wnet > 0 else 'venden'} neto ${abs(wnet) / 1e6:.1f}M en 30 min"
+           if state.winners and wnet else "las que ganan quietas")
+    alert(state, f"compresion-{coin}", f"🗜 {coin}: precio comprimido (se gesta un movimiento)",
+          f"Rango 60 min {rng * 100:.2f} % en {px:,.0f} · {who}{lib}\nArriba{up or ': sin pool cercano'}\n"
+          f"Abajo{down or ': sin pool cercano'}\nNo entrar en la ruptura: esperar la zona del plan.",
+          {"moneda": coin, "precio": px, "rango": rng, "ganadoras_30m": wnet})
+
+
 def refresh_zones(state: State, source) -> None:
     from .method.shortliq import short_term_zones
     now = int(time.time() * 1000)
@@ -551,6 +587,15 @@ async def run(minutes: float | None = None) -> None:
             log.error("revisión diaria: %s", exc)
             return
         review["winners"] = set(state.winners)
+        try:
+            from collections import Counter
+            from .episodios import build, default_files
+            eps = await asyncio.to_thread(lambda: build(*default_files()))
+            cnt = Counter(e.tipo for e in eps)
+            if cnt:
+                text += "\nEpisodios guardados: " + " · ".join(f"{k} {v}" for k, v in sorted(cnt.items()))
+        except Exception as exc:
+            log.error("episodios: %s", exc)
         log.warning("📊 Revisión del día\n%s", text)
         try:
             with Path("data/revision_diaria.txt").open("a", encoding="utf-8") as fh:

@@ -616,6 +616,13 @@ def cmd_avisos(cfg: Config, args) -> None:
     print("\n".join(report(measure(events, candles), typical)))
 
 
+def cmd_episodios(cfg: Config, args) -> None:
+    from .episodios import build, default_files, report
+
+    flows, bins = default_files(Path(args.datos))
+    print("\n".join(report(build(flows, bins))))
+
+
 def cmd_causa(cfg: Config, args) -> None:
     from .causa import NQ_FILE, btc_series, episodes, read_series, report
 
@@ -711,6 +718,9 @@ def main(argv: list[str] | None = None) -> None:
     av = sub.add_parser("avisos", help="¿aciertan los avisos de la escucha? precio 15 y 60 min después")
     av.add_argument("--archivo", default="data/hft_eventos.jsonl")
 
+    ep = sub.add_parser("episodios", help="qué hacen las cuentas antes de caídas, subidas y rupturas de compresión")
+    ep.add_argument("--datos", default="data", help="carpeta con los CSV de la escucha (y escucha_pc/)")
+
     ca = sub.add_parser("causa", help="¿la bolsa o la disculpa? movimientos fuertes de BTC frente al Nasdaq")
     ca.add_argument("--umbral", type=float, default=1.5, help="movimiento mínimo de BTC, en %%")
     ca.add_argument("--ventana", type=int, default=60, help="en menos de estos minutos")
@@ -748,7 +758,7 @@ def main(argv: list[str] | None = None) -> None:
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
      "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
-     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "avisos": cmd_avisos}[args.cmd](cfg, args)
+     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "avisos": cmd_avisos, "episodios": cmd_episodios}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

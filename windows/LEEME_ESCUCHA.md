@@ -44,6 +44,9 @@ enchufado. La pantalla sí se puede apagar.
   aviso antiguo **🤖 Los cazadores…**.)
   Trae una **📋 FICHA** con la operación armada (entrada, stop, TP1 y cuántas veces el riesgo paga),
   solo si va a favor de la tendencia y no es viernes ni sábado. Si va en contra, dice "no abrir".
+* **🗜 Precio comprimido (se gesta un movimiento)**: BTC o ETH llevan 60 minutos con un rango menor
+  al 0,4 %. Dice qué hacen las cuentas que ganan, cómo está el libro de los creadores y qué pools hay
+  arriba y abajo. No es para entrar en la ruptura: es para estar atento a la zona del plan.
 * **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
   (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un

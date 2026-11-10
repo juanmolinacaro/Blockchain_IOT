@@ -162,3 +162,20 @@ def test_winners_action_distinguishes_opening_from_closing():
     assert "cierran largos" in got["texto"] and "señal más débil" in got["texto"]
     st.source = None
     assert esc.winners_action(st, "BTC", up=False) is None
+
+
+def test_squeeze_alert(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.winners = {"0xw"}
+    for i in range(60):
+        st.px_hist["BTC"].append(75000 + (i % 5) * 10)        # rango 0,05 %
+        st.win_hist["BTC"].append(-50_000)
+    esc.check_squeeze(st, "BTC")
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "comprimido" in ev and '"ganadoras_30m": -1500000' in ev
+    st.px_hist["BTC"].append(76000)                            # ya no está comprimido: no repite
+    esc.check_squeeze(st, "BTC")
+    assert len((tmp_path / "ev.jsonl").read_text().splitlines()) == 1

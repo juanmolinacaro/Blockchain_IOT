@@ -900,3 +900,26 @@ escucha mide los avisos con el precio 60 minutos después, guarda cada aviso med
 `data/avisos_medidos.jsonl` y manda al móvil "📊 Revisión del día": acierto de hoy y acumulado por tipo
 (💰abren, 💰cierran, 🤖, 🏦 un lado, 🏦 dos lados, 💥), resultado de las fichas en R y qué cuentas
 entraron o salieron de las que ganan. El domingo se decide qué umbral ajustar con esos números.
+
+## Biblioteca de episodios: qué hacen antes de cada movimiento (9 nov 2026)
+
+Idea de Juan (con BTC en un triángulo de 1H a 75.100): "se está gestando un movimiento; necesitamos datos
+de lo que hacen en estos casos: acumulaciones antes de subir o bajar, subidas fuertes…". Teníamos sobre
+todo caídas. `python -m copytrading episodios` detecta solo, en los datos por minuto de la escucha:
+
+* **caída fuerte / subida fuerte** (≥ 1 % en < 60 min) y **rebote tras caída / recaída tras subida**
+  (el movimiento contrario que llega en los 30 min siguientes: es reacción, no movimiento propio);
+* **compresión → arriba / abajo / nada**: 60 min con rango < 0,4 % y hacia dónde se aleja 0,7 % en las
+  2 horas siguientes.
+
+Para cada episodio mide los **30 minutos anteriores**: empuje neto de las cuentas que ganan, del resto y
+de los creadores; liquidez de los creadores a cada lado frente a la hora previa; y en Binance, cambio
+del interés abierto, empuje agresivo neto y cambio de la proporción largos/cortos. El resumen por tipo
+da la media y en cuántos casos fue positivo. La revisión diaria (20:00) dice cuántos episodios de cada
+tipo hay guardados, y la escucha avisa **🗜 precio comprimido** en cuanto se aprieta (60 min < 0,4 %),
+con lo que hacen las ganadoras y el libro en ese momento.
+
+Primera foto (4–8 nov): 3 caídas fuertes, 3 rebotes tras caída, 1 compresión → abajo y 7 compresiones
+sin ruptura. **Aún no hay ninguna subida fuerte propia ni compresión → arriba**: justo lo que falta.
+En los rebotes tras caída, los creadores ya habían quitado liquidez (libro ×0,46 y ×0,11) y en Binance el
+interés abierto bajaba (−1 % a −2 %): rebota cuando se limpian los apalancados.
