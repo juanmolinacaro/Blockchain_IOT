@@ -524,6 +524,9 @@ def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
         if p.get("moneda") != coin:
             continue
         name, short = p["plan"], p.get("lado") == "short"
+        if p.get("posicion"):                       # operación ya abierta: proteger y seguir
+            check_position(state, coin, p, px, short)
+            continue
         st = state.watch_state.setdefault(name, {"barrido": False, "fin": False})
         if st["fin"]:
             continue
@@ -560,6 +563,37 @@ def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
                   f"en TP1 asegura la mitad y stop a la entrada.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"],
                    "ficha": {"lado": p.get("lado"), "entrada": px, "stop": p["stop"], "tp1": p["tp1"], "r": round(r, 2)}})
+
+
+def check_position(state: State, coin: str, p: dict, px: float, short: bool) -> None:
+    """Seguimiento de una operación abierta (regla de Juan: primero asegurar en el precio de entrada):
+    🔒 al llegar a `asegurar` → subir el stop a la entrada; 🎯 TP1 → cerrar la mitad; ❌ stop."""
+    name = p["plan"]
+    st = state.watch_state.setdefault(name, {"asegurado": False, "tp1": False, "fin": False})
+    if st["fin"]:
+        return
+    better = (lambda lvl: px <= lvl) if short else (lambda lvl: px >= lvl)
+    worse = (lambda lvl: px >= lvl) if short else (lambda lvl: px <= lvl)
+    stop = p["entrada"] if st["asegurado"] else p["stop"]
+    conf = confirmation(state, coin)
+    info = f"\n{conf['texto']}"
+    if worse(stop):
+        st["fin"] = True
+        alert(state, f"pos-{name}-stop", f"{'⚪' if st['asegurado'] else '❌'} {name} {coin}: tocó el stop {stop:,.0f}",
+              f"Precio {px:,.0f}. {'Sale en cero (ya estaba asegurada).' if st['asegurado'] else 'Pérdida de 1R.'}",
+              {"moneda": coin, "precio": px, "plan": name})
+        return
+    if not st["asegurado"] and p.get("asegurar") and better(p["asegurar"]):
+        st["asegurado"] = True
+        alert(state, f"pos-{name}-asegurar", f"🔒 {name} {coin}: mueve el stop a la entrada {p['entrada']:,.0f}",
+              f"Precio {px:,.0f}: la operación ya no puede perder. TP1 en {p['tp1']:,.0f}.{info}",
+              {"moneda": coin, "precio": px, "plan": name, "votos": conf["votos"]})
+    if not st["tp1"] and better(p["tp1"]):
+        st["tp1"] = True
+        st["asegurado"] = True
+        alert(state, f"pos-{name}-tp1", f"🎯 {name} {coin}: TP1 {p['tp1']:,.0f}",
+              f"Precio {px:,.0f}: cierra la mitad y deja el stop en la entrada {p['entrada']:,.0f}. El resto corre.{info}",
+              {"moneda": coin, "precio": px, "plan": name, "votos": conf["votos"]})
 
 
 CROWD_MIN = 2_000_000

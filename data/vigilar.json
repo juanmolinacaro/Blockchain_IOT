@@ -5,15 +5,13 @@
    "plan": "K3",
    "moneda": "BTC",
    "lado": "short",
-   "zona": [
-    73950,
-    74300
-   ],
-   "barrido": 74124,
-   "gatillo": 73900,
+   "posicion": true,
+   "entrada": 73700,
    "stop": 74900,
+   "asegurar": 73100,
    "tp1": 72230,
-   "caduca": "2026-11-12 15:40"
+   "caduca": "2026-11-13 23:59",
+   "nota": "Abierto el 11 nov 04:00 (cierre 1H 73.700). Al llegar a 73.100 (+0,5R) subir el stop a la entrada."
   },
   {
    "plan": "Seguimiento 74.868",

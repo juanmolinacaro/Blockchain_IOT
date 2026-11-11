@@ -255,3 +255,18 @@ def test_watch_only_zone_never_activates(monkeypatch, tmp_path):
     esc.check_plans(st, "BTC")
     ev = (tmp_path / "ev.jsonl").read_text()
     assert "plan-S-zona" in ev and "plan-S-barrido" in ev and "activado" not in ev and "anulado" not in ev
+
+
+def test_open_position_secure_then_tp1(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.watch = [{"plan": "K3", "moneda": "BTC", "lado": "short", "posicion": True, "entrada": 73700,
+                 "stop": 74900, "asegurar": 73100, "tp1": 72230}]
+    for px in (74100, 73050, 72200, 73750):
+        st.price["BTC"] = px
+        esc.check_plans(st, "BTC")
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "pos-K3-asegurar" in ev and "pos-K3-tp1" in ev and "pos-K3-stop" in ev
+    assert "Sale en cero" in ev                                   # tras asegurar, el stop es la entrada
