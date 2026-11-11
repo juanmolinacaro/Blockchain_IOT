@@ -1069,3 +1069,20 @@ sobreapalancado), que es el combustible; si no, "⚠ NO todo coordina (falta: �
 
 Primer plan vigilado: **K3** (corto BTC): zona 73.950–74.300, barrido 74.124, gatillo cierre 1H < 73.900,
 stop 74.900, TP1 72.230, hasta el 12 nov 15:40. También K2 (zona 76.000–76.600).
+
+## Correcciones tras el K3 (11 nov 2026)
+
+El K3 barrió 74.124 (máximo 74.150) a las 3 am y la vela de 1H cerró en 73.700: entramos 450 puntos
+más abajo, en el **soporte** del canal alcista de 1H, mientras el pool grande seguía arriba (74.868–75.055).
+El precio subió a 74.750. Juan: "fue una muy mala entrada porque solo nos casamos con la liquidez".
+Reglas nuevas (diario y escucha):
+
+1. **Entrar cerca del nivel**: si el cierre de activación queda **más de 0,15 % más allá del gatillo**, no
+   se entra a mercado: **orden límite en el gatillo**; si el precio llega al TP1 sin volver, no hay entrada
+   (no se persigue). (Se mide desde el gatillo y no desde el extremo del barrido porque con barrido 74.124 y
+   gatillo 73.900 cualquier cierre ya estaría a ≥ 0,3 % del barrido.)
+2. **Liquidez + estructura**: cada aviso de plan dice dónde está el precio en el canal de regresión de 1H
+   (48 velas, ±2 desviaciones): parte alta, mitad o baja. Un corto en la parte baja (< 40 %) o un largo en la
+   alta (> 60 %) no da "TODO COORDINA" ("falta: ubicación").
+3. **Confirmación en 15m** cuando el barrido es rápido: los planes de `vigilar.json` aceptan
+   `"intervalo": "15m"` (y el diario `--intervalo 15m`), para no regalar recorrido esperando el cierre de 1H.

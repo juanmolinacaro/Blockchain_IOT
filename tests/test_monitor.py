@@ -164,9 +164,10 @@ def test_sweep_plan_needs_the_sweep_before_the_close_back_inside():
     e = manual_plan("BTC", "short", 78000, "below", 78900, 76300, 75500, sweep=78150, now_ms=0)
     candles = [Candle(0, 77900, 77950, 77800, 77850, 1),        # cierra < 78.000 pero sin barrido: nada
                Candle(h, 77850, 78300, 77850, 78200, 1),        # barre 78.150
-               Candle(2 * h, 78200, 78250, 77700, 77750, 1)]    # vuelve a cerrar dentro: se activa
+               Candle(2 * h, 78200, 78250, 77700, 77750, 1),    # vuelve a cerrar dentro, pero a 0,7 % del barrido
+               Candle(3 * h, 77750, 78050, 77700, 77900, 1)]    # vuelve a 78.000: se llena la orden límite
     activate_plan(e, candles)
-    assert e.status == "abierta" and e.entry == 77750 and e.time == 2 * h
+    assert e.status == "abierta" and e.entry == 78000 and e.time == 3 * h      # regla del 11 nov
 
 
 def test_pending_plan_is_cancelled_when_price_closes_beyond_its_stop():

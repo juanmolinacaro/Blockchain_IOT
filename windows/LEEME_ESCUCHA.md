@@ -55,6 +55,9 @@ enchufado. La pantalla sí se puede apagar.
   cuando **barre el pool**, cuando el plan se **activa** (cierre de 1H al otro lado del gatillo) o se
   **anula** (supera el stop). Cada aviso trae la confirmación (tendencia, la mayoría, las ballenas,
   Binance, imán) y dice "✅ TODO COORDINA" o "⚠ NO todo coordina (falta: …)".
+  Desde el 11 nov: si la vela confirma lejos del nivel planeado, llega **⏳ "confirmado, pero lejos de la
+  entrada: orden límite en …"** (no entrar a mercado); dice si el precio está en la parte alta o baja del
+  canal de 1H; y las operaciones abiertas avisan **🔒 cuándo subir el stop a la entrada**, **🎯 TP1** y stop.
 * **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
   (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un

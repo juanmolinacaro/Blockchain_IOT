@@ -268,7 +268,7 @@ def cmd_monitor(cfg: Config, args) -> None:
 
     # planes y operaciones de Juan: se siguen con velas de su temporalidad (1H o 4H)
     for coin, iv in sorted({(e.coin, e.interval) for e in entries if e.status in ("pendiente", "abierta")
-                            and (e.interval == "1h" or e.source == "juan")}):
+                            and (e.interval in ("1h", "15m") or e.source == "juan")}):
         c1 = closed_candles(src.candles(coin, iv, now - 30 * MS_PER_DAY, now), iv, now)
         for e in entries:
             if e.coin != coin or e.interval != iv or e.status not in ("pendiente", "abierta"):
@@ -745,7 +745,8 @@ def main(argv: list[str] | None = None) -> None:
     di.add_argument("--trigger-dir", choices=["below", "above", "touch_below", "touch_above"],
                     help="plan: cierre por debajo/encima, o toque (orden límite)")
     di.add_argument("--horas", type=float, default=48, help="plan: caduca tras estas horas")
-    di.add_argument("--intervalo", choices=["1h", "4h"], default="1h", help="plan: vela que activa el plan")
+    di.add_argument("--intervalo", choices=["15m", "1h", "4h"], default="1h",
+                    help="plan: vela que activa el plan (15m si el barrido es rápido)")
     di.add_argument("--barrido", type=float, help="plan: el precio debe tocar antes este nivel (trampa)")
     di.add_argument("--desde", help="plan: válido desde 'AAAA-MM-DD HH:MM' hora Colombia")
     di.add_argument("--last", type=int, default=20)

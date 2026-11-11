@@ -270,3 +270,31 @@ def test_open_position_secure_then_tp1(monkeypatch, tmp_path):
     ev = (tmp_path / "ev.jsonl").read_text()
     assert "pos-K3-asegurar" in ev and "pos-K3-tp1" in ev and "pos-K3-stop" in ev
     assert "⚪ K3 BTC: tocó el stop 73,700" in ev                  # tras asegurar, el stop es la entrada
+
+
+def test_plan_far_from_sweep_becomes_limit_and_fills(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.channel["BTC"] = (73500, 74800)
+    st.watch = [{"plan": "K9", "moneda": "BTC", "lado": "short", "zona": [73950, 74300], "barrido": 74124,
+                 "gatillo": 73900, "stop": 74900, "tp1": 72230, "intervalo": "15m"}]
+    for px in (74150, 73700):
+        st.price["BTC"] = px
+        esc.check_plans(st, "BTC")
+    esc.check_plans(st, "BTC", closed=("15m",))          # cierra 15m en 73.700: a 0,61 % del barrido
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "plan-K9-limite" in ev and "plan-K9-activado" not in ev
+    st.price["BTC"] = 73910                               # vuelve al gatillo: se llena la orden límite
+    esc.check_plans(st, "BTC")
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "plan-K9-activado" in ev and '"entrada": 73900' in ev
+
+
+def test_location_in_channel():
+    import copytrading.escucha as esc
+    st = esc.State({})
+    st.channel["BTC"] = (73500, 74800)
+    pos, txt = esc.channel_location(st, "BTC", 73700)
+    assert pos < 0.4 and "parte BAJA" in txt

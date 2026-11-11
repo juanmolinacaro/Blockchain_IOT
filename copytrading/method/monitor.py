@@ -22,7 +22,11 @@ from .emas import compute_emas, ema_series, parse_spec
 from .liqmodel import LiquidationModel
 from .pools import _zones, config_for
 
-BAR_MS = {"1h": 3_600_000, "4h": 14_400_000, "1d": 86_400_000}
+BAR_MS = {"15m": 900_000, "1h": 3_600_000, "4h": 14_400_000, "1d": 86_400_000}
+# Regla del 11 nov (lección del K3: barrió 74.150, el gatillo era 73.900 y la vela de confirmación cerró en
+# 73.700, en el soporte del canal): si el cierre de activación queda más de 0,15 % más allá del gatillo, NO se
+# entra a mercado; se pone una orden límite en el gatillo y solo se entra si el precio vuelve a él.
+MAX_BEYOND_TRIGGER = 0.0015
 
 VARIANTS = {
     "sistema-A": MethodConfig(stop_mode="close", trend="channel", ema="1d:50,1d:200", ema_mode="confluence"),
@@ -217,8 +221,12 @@ def record_signals(entries: list[JournalEntry], st: CoinStatus, interval: str) -
 
 
 def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
-    """Un plan pendiente se abre al cierre de la primera vela que cruza su nivel de activación."""
+    """Un plan pendiente se abre al cierre de la primera vela que cruza su nivel de activación. Si el plan es
+    "tras barrido" y ese cierre queda lejos del gatillo (> MAX_BEYOND_TRIGGER), pasa a orden límite
+    en el nivel de activación (no se vende en el soporte ni se compra en la resistencia)."""
     swept = False
+    extreme = 0.0
+    limit_mode = False
     for c in candles:
         if c.t < e.time:
             continue
@@ -229,10 +237,23 @@ def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
             # el precio cerró más allá del stop antes de activarse: la idea quedó invalidada
             e.status, e.exit_reason = "anulada", "invalidado: el precio cerró más allá del stop antes de activarse"
             return e
+        if limit_mode:                   # esperando que el precio vuelva al nivel de activación
+            filled = c.h >= e.trigger if e.side == "short" else c.l <= e.trigger
+            ran_away = c.l <= e.tp1 if e.side == "short" else c.h >= e.tp1
+            if filled:
+                e.time, e.entry, e.status = c.t, e.trigger, "abierta"
+                e.note += " | entrada por orden límite (el cierre quedó lejos del gatillo)"
+                return e
+            if ran_away:
+                e.status, e.exit_reason = "anulada", "confirmó lejos del gatillo y llegó al TP1 sin volver a la entrada"
+                return e
+            continue
         if e.sweep:                      # primero barre el nivel; luego un cierre de vuelta activa el plan
-            swept = swept or (c.h >= e.sweep if e.sweep > e.trigger else c.l <= e.sweep)
+            up = e.sweep > e.trigger
+            swept = swept or (c.h >= e.sweep if up else c.l <= e.sweep)
             if not swept:
                 continue
+            extreme = max(extreme, c.h) if up else (min(extreme, c.l) if extreme else c.l)
         if e.trigger_dir.startswith("touch"):
             filled = c.l <= e.trigger if e.trigger_dir == "touch_below" else c.h >= e.trigger
             ran_away = c.h >= e.tp1 if e.side == "long" else c.l <= e.tp1
@@ -243,6 +264,10 @@ def activate_plan(e: JournalEntry, candles: list[Candle]) -> JournalEntry:
         else:
             crossed = c.c < e.trigger if e.trigger_dir == "below" else c.c > e.trigger
             fill_px = c.c
+        if crossed and e.sweep and not e.trigger_dir.startswith("touch") \
+                and abs(fill_px - e.trigger) / e.trigger > MAX_BEYOND_TRIGGER:
+            limit_mode = True            # confirmado, pero lejos del barrido: orden límite en el nivel
+            continue
         if crossed:
             e.time, e.entry = c.t, fill_px
             valid = ((e.stop > e.entry > e.tp1 and (not e.tp2 or e.tp1 >= e.tp2)) if e.side == "short"
@@ -262,12 +287,12 @@ def update_outcome(e: JournalEntry, candles: list[Candle], cfg: MethodConfig = V
         activate_plan(e, candles)
     if e.status != "abierta":
         return e
-    if e.interval == "1h":
-        # el límite de tiempo del método es ~5 días: 30 velas de 4H equivalen a 120 de 1H
-        cfg = replace(cfg, max_bars=cfg.max_bars * 4)
+    if e.interval in ("1h", "15m"):
+        # el límite de tiempo del método es ~5 días: 30 velas de 4H equivalen a 120 de 1H (480 de 15m)
+        cfg = replace(cfg, max_bars=cfg.max_bars * (16 if e.interval == "15m" else 4))
     # "asegurar y dejar correr" (Juan): mitad en TP1, stop a la entrada, y la otra mitad con stop móvil
     # sobre el extremo de las últimas 6 velas de 1H (≈ 6 h) o 3 de 4H (12 h) si el plan no tiene TP2
-    cfg = replace(cfg, trail_bars=6 if e.interval == "1h" else 3)
+    cfg = replace(cfg, trail_bars={"15m": 24, "1h": 6}.get(e.interval, 3))
     idx = next((k for k, c in enumerate(candles) if c.t >= e.time), None)
     if idx is None:
         return e
@@ -318,7 +343,7 @@ def manual_plan(coin: str, side: str, trigger: float, trigger_dir: str, stop: fl
         raise ValueError("Para un corto: stop > activación > TP1 >= TP2")
     if side == "long" and not (stop < trigger < tp1 and (not tp2 or tp1 <= tp2)):
         raise ValueError("Para un largo: stop < activación < TP1 <= TP2")
-    bar_ms = {"1h": 3_600_000, "4h": 4 * 3_600_000}[interval]
+    bar_ms = BAR_MS[interval]
     start = now_ms - now_ms % bar_ms      # cuenta desde la vela en curso (aún sin cerrar)
     if start_ms is not None:              # o desde un momento futuro (p. ej. después de un evento)
         start = start_ms

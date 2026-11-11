@@ -72,6 +72,7 @@ class State:
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
         self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
         self.watch: list[dict] = []                              # planes vigilados (vigilar.json)
+        self.channel: dict[str, tuple[float, float]] = {}       # canal de regresión de 1H (suelo, techo) ahora
         self.watch_state: dict[str, dict] = {}
         self.trades_seen = 0
         self.trades_at_last_beat = 0
@@ -513,13 +514,30 @@ def coordinates(conf: dict, short: bool) -> tuple[bool, str]:
     return ok, ("✅ TODO COORDINA" if ok else "⚠ NO todo coordina (falta: " + ", ".join(falta) + ")")
 
 
-def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
-    """Vigila los planes de `vigilar.json`: avisa al llegar a la zona, al barrer el pool y, al cerrar la hora,
-    si se activa (cierre de 1H al otro lado del gatillo tras el barrido) o se anula (supera el stop).
-    Cada aviso trae la confirmación del radar: qué hace la mayoría, las ballenas y si todo coordina."""
+MAX_BEYOND_TRIGGER = 0.0015  # regla del 11 nov: cierre > 0,15 % más allá del gatillo → orden límite en el gatillo
+
+
+def channel_location(state: State, coin: str, px: float) -> tuple[float | None, str]:
+    """Dónde está el precio dentro del canal de 1H (0 = suelo, 1 = techo). Regla del 11 nov: el corto se
+    toma en la parte alta de la estructura y el largo en la baja, nunca al revés (lección del K3)."""
+    ch = state.channel.get(coin)
+    if not ch or ch[1] <= ch[0]:
+        return None, ""
+    pos = (px - ch[0]) / (ch[1] - ch[0])
+    zona = "parte ALTA" if pos >= 0.6 else "parte BAJA" if pos <= 0.4 else "mitad"
+    return pos, f"Ubicación: {zona} del canal de 1H ({pos * 100:.0f} %; suelo {ch[0]:,.0f}, techo {ch[1]:,.0f})"
+
+
+def check_plans(state: State, coin: str, hour_close: bool = False, closed: tuple = ()) -> None:
+    """Vigila los planes de `vigilar.json`: avisa al llegar a la zona, al barrer el pool y, al cerrar la vela
+    del plan (`intervalo`: 15m o 1h), si se activa (cierre al otro lado del gatillo tras el barrido) o se anula
+    (supera el stop). Reglas del 11 nov: si el cierre queda más de 0,15 % más allá del gatillo, no se
+    entra a mercado: orden límite en el gatillo; y se dice si la entrada está en la parte alta o baja del
+    canal. Cada aviso trae la confirmación del radar y si todo coordina."""
     px = state.price.get(coin)
     if not px:
         return
+    closed = set(closed) | ({"1h", "15m"} if hour_close else set())
     for p in getattr(state, "watch", []):
         if p.get("moneda") != coin:
             continue
@@ -527,42 +545,72 @@ def check_plans(state: State, coin: str, hour_close: bool = False) -> None:
         if p.get("posicion"):                       # operación ya abierta: proteger y seguir
             check_position(state, coin, p, px, short)
             continue
-        st = state.watch_state.setdefault(name, {"barrido": False, "fin": False})
+        st = state.watch_state.setdefault(name, {"barrido": False, "fin": False, "extremo": 0.0, "limite": False})
         if st["fin"]:
             continue
         lo, hi = p["zona"]
+        iv = p.get("intervalo", "1h")
         beyond_stop = px >= p["stop"] if short else px <= p["stop"]
         conf = confirmation(state, coin)
         ok, verdict = coordinates(conf, short)
-        info = f"\n{conf['texto']}\n{verdict}"
+        pos, loc = channel_location(state, coin, px)
+        bad_loc = pos is not None and ((short and pos < 0.4) or (not short and pos > 0.6))
+        if bad_loc:
+            ok = False
+            verdict = verdict.replace("✅ TODO COORDINA", "⚠ NO todo coordina (falta: ubicación)")
+            if "falta:" in verdict and "ubicación" not in verdict:
+                verdict = verdict.replace(")", ", ubicación)")
+        info = f"\n{conf['texto']}" + (f"\n{loc}" if loc else "") + f"\n{verdict}"
         if beyond_stop and not p.get("solo_vigilar"):
             st["fin"] = True
             alert(state, f"plan-{name}-anulado", f"❌ {name} {coin}: anulado, el precio superó el stop {p['stop']:,.0f}",
                   f"Precio {px:,.0f}. No entrar.", {"moneda": coin, "precio": px, "plan": name})
             continue
-        if lo <= px <= hi:
+        if lo <= px <= hi and not st["limite"]:
             alert(state, f"plan-{name}-zona", f"👀 {name} {coin}: el precio está en la zona {lo:,.0f}–{hi:,.0f}",
-                  f"Precio {px:,.0f}. Esperar el barrido de {p['barrido']:,.0f} y el cierre de 1H "
+                  f"Precio {px:,.0f}. Esperar el barrido de {p['barrido']:,.0f} y el cierre de {iv} "
                   f"{'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
         swept = px >= p["barrido"] if short else px <= p["barrido"]
         if swept and not st["barrido"]:
             st["barrido"] = True
             alert(state, f"plan-{name}-barrido", f"🧹 {name} {coin}: barrió {p['barrido']:,.0f}",
-                  f"Precio {px:,.0f}. Ahora falta el cierre de 1H {'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
+                  f"Precio {px:,.0f}. Ahora falta el cierre de {iv} {'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
+        if st["barrido"]:
+            st["extremo"] = max(st["extremo"], px) if short else (min(st["extremo"], px) if st["extremo"] else px)
         if p.get("solo_vigilar"):                 # zona de seguimiento: solo avisa, no activa operación
             continue
-        if hour_close and st["barrido"] and (px < p["gatillo"] if short else px > p["gatillo"]):
+
+        def activate(entry: float, how: str) -> None:
             st["fin"] = True
-            risk = abs(p["stop"] - px)
-            r = abs(px - p["tp1"]) / risk if risk else 0
-            alert(state, f"plan-{name}-activado",
-                  f"{'✅' if ok else '⚠'} {name} {coin} ACTIVADO: cierre 1H en {px:,.0f}",
-                  f"📋 {'CORTO' if short else 'LARGO'} ~{px:,.0f} · stop {p['stop']:,.0f} · TP1 {p['tp1']:,.0f} ({r:.1f}R) · "
+            risk = abs(p["stop"] - entry)
+            r = abs(entry - p["tp1"]) / risk if risk else 0
+            alert(state, f"plan-{name}-activado", f"{'✅' if ok else '⚠'} {name} {coin} ACTIVADO: {how}",
+                  f"📋 {'CORTO' if short else 'LARGO'} ~{entry:,.0f} · stop {p['stop']:,.0f} · TP1 {p['tp1']:,.0f} ({r:.1f}R) · "
                   f"en TP1 asegura la mitad y stop a la entrada.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"],
-                   "ficha": {"lado": p.get("lado"), "entrada": px, "stop": p["stop"], "tp1": p["tp1"], "r": round(r, 2)}})
+                   "ficha": {"lado": p.get("lado"), "entrada": entry, "stop": p["stop"], "tp1": p["tp1"], "r": round(r, 2)}})
+
+        if st["limite"]:                          # orden límite esperando que vuelva al gatillo
+            if (px >= p["gatillo"]) if short else (px <= p["gatillo"]):
+                activate(p["gatillo"], f"se llenó la orden límite en {p['gatillo']:,.0f}")
+            elif (px <= p["tp1"]) if short else (px >= p["tp1"]):
+                st["fin"] = True
+                alert(state, f"plan-{name}-sinllenar", f"⌛ {name} {coin}: se fue al TP1 sin volver a la entrada",
+                      "No se entró: no se persigue.", {"moneda": coin, "precio": px, "plan": name})
+            continue
+        if iv in closed and st["barrido"] and (px < p["gatillo"] if short else px > p["gatillo"]):
+            far = abs(px - p["gatillo"]) / p["gatillo"] > MAX_BEYOND_TRIGGER
+            if far:
+                st["limite"] = True
+                alert(state, f"plan-{name}-limite", f"⏳ {name} {coin}: confirmado, pero lejos de la entrada",
+                      f"Cierre de {iv} en {px:,.0f}, a {abs(px - p['gatillo']) / p['gatillo'] * 100:.2f} % del gatillo "
+                      f"(barrido hasta {st['extremo']:,.0f}). No entrar a mercado: orden límite de {'venta' if short else 'compra'} en "
+                      f"{p['gatillo']:,.0f}.{info}",
+                      {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
+            else:
+                activate(px, f"cierre de {iv} en {px:,.0f}")
 
 
 def check_position(state: State, coin: str, p: dict, px: float, short: bool) -> None:
@@ -776,6 +824,7 @@ def refresh_zones(state: State, source) -> None:
         try:
             cs = [c for c in source.candles(coin, "1h", now - 8 * 86_400_000, now) if c.t + 3_600_000 <= now]
             state.zones[coin] = short_term_zones(cs)
+            state.channel[coin] = regression_channel(cs)
             from .method.monitor import trend_state
             c4 = source.candles(coin, "4h", now - 830 * 86_400_000, now)
             state.trend[coin] = trend_state(c4)[0]
@@ -783,6 +832,20 @@ def refresh_zones(state: State, source) -> None:
             log.error("zonas %s: %s", coin, exc)
     refresh_whales(state, source)
     state.watch = load_watch()
+
+
+def regression_channel(candles_1h: list, n: int = 48, k_sd: float = 2.0) -> tuple[float, float]:
+    """Suelo y techo actuales del canal de regresión de las últimas `n` velas de 1H (±k desviaciones)."""
+    ys = [c.c for c in candles_1h[-n:]]
+    if len(ys) < 10:
+        return (0.0, 0.0)
+    xs = list(range(len(ys)))
+    mx, my = statistics.fmean(xs), statistics.fmean(ys)
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sum((x - mx) ** 2 for x in xs)
+    a = my - b * mx
+    sd = statistics.pstdev([y - (a + b * x) for x, y in zip(xs, ys)])
+    mid = a + b * len(ys)
+    return (mid - k_sd * sd, mid + k_sd * sd)
 
 
 def refresh_whales(state: State, source) -> None:
@@ -937,6 +1000,9 @@ async def run(minutes: float | None = None) -> None:
                             last_phone_beat = time.time()
                             spawn(phone_beat())
                         now_cot = datetime.now(COT)
+                        if now_cot.minute % 15 == 0 and int(time.time() // 3600) == last_hour:
+                            for coin in COINS:
+                                check_plans(state, coin, closed=("15m",))
                         if now_cot.hour == REVIEW_HOUR and review["day"] != now_cot.strftime("%Y-%m-%d"):
                             review["day"] = now_cot.strftime("%Y-%m-%d")
                             spawn(review_job())
