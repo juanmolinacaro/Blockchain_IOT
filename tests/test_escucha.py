@@ -269,4 +269,4 @@ def test_open_position_secure_then_tp1(monkeypatch, tmp_path):
         esc.check_plans(st, "BTC")
     ev = (tmp_path / "ev.jsonl").read_text()
     assert "pos-K3-asegurar" in ev and "pos-K3-tp1" in ev and "pos-K3-stop" in ev
-    assert "Sale en cero" in ev                                   # tras asegurar, el stop es la entrada
+    assert "⚪ K3 BTC: tocó el stop 73,700" in ev                  # tras asegurar, el stop es la entrada
