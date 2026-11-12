@@ -318,3 +318,16 @@ def test_top_liquidity_fallback():
     import copytrading.escucha as esc
     snap = {"0xa": [5, 1e6, 0, 0, 3e6], "0xb": [5, 1e6, 0, 0, 9e6], "0xc": [5, 1e6, 1e6, 0, 0]}
     assert esc.top_liquidity(snap) == ["0xb", "0xa"]
+
+
+def test_limit_plan_fills_then_is_managed(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.watch = [{"plan": "K5", "moneda": "BTC", "lado": "short", "limite": 72538, "stop": 73250, "tp1": 71826}]
+    for px in (72100, 72560, 72150, 71800):
+        st.price["BTC"] = px
+        esc.check_plans(st, "BTC")
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "plan-K5-llena" in ev and "pos-K5-asegurar" in ev and "pos-K5-tp1" in ev

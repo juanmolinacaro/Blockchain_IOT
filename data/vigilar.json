@@ -2,16 +2,14 @@
  "nota": "Planes que la escucha vigila en tiempo real (la escucha lee este archivo de GitHub cada 15 min). Precios de Hyperliquid.",
  "planes": [
   {
-   "plan": "K3",
+   "plan": "K5",
    "moneda": "BTC",
    "lado": "short",
-   "posicion": true,
-   "entrada": 73700,
-   "stop": 74900,
-   "asegurar": 73100,
-   "tp1": 72230,
-   "caduca": "2026-11-13 23:59",
-   "nota": "Abierto el 11 nov 04:00 (cierre 1H 73.700). Al llegar a 73.100 (+0,5R) subir el stop a la entrada."
+   "limite": 72538,
+   "stop": 73250,
+   "tp1": 71826,
+   "caduca": "2026-11-14 13:48",
+   "nota": "Vender el rebote al 50 % de la caída 73.850→71.227 (estudio pausa tras liquidación: +0,15R/op en cortos, +0,46R en largos). Stop sobre el 70 % (73.063) y el pool de cortos 73.021. TP1 1R 71.826, resto 2R 71.114 → pool de largos 70.689."
   },
   {
    "plan": "Seguimiento 74.868",

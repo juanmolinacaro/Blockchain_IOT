@@ -626,6 +626,30 @@ def check_plans(state: State, coin: str, hour_close: bool = False, closed: tuple
         if p.get("posicion"):                       # operación ya abierta: proteger y seguir
             check_position(state, coin, p, px, short, hi_px, lo_px)
             continue
+        if p.get("limite"):                         # orden límite (p. ej. vender el rebote al 50 %)
+            stl = state.watch_state.setdefault(name + "-limite", {"llena": False, "fin": False})
+            if stl["fin"]:
+                continue
+            if not stl["llena"]:
+                if (hi_px >= p["limite"]) if short else (lo_px <= p["limite"]):
+                    stl["llena"] = True
+                    conf = confirmation(state, coin)
+                    ok, verdict = coordinates(conf, short)
+                    alert(state, f"plan-{name}-llena", f"✅ {name} {coin}: se llenó la orden límite en {p['limite']:,.0f}",
+                          f"{'CORTO' if short else 'LARGO'} {p['limite']:,.0f} · stop {p['stop']:,.0f} · TP1 {p['tp1']:,.0f}\n"
+                          f"{conf['texto']}\n{verdict}",
+                          {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"],
+                           "ficha": {"lado": p.get("lado"), "entrada": p["limite"], "stop": p["stop"], "tp1": p["tp1"], "r": 1.0}})
+                elif (lo_px <= p["tp1"]) if short else (hi_px >= p["tp1"]):
+                    stl["fin"] = True
+                    alert(state, f"plan-{name}-sinllenar", f"⌛ {name} {coin}: se fue sin volver a la orden límite",
+                          "No se entra: no se persigue.", {"moneda": coin, "precio": px, "plan": name})
+                continue
+            risk = abs(p["stop"] - p["limite"])
+            pos = {"plan": name, "entrada": p["limite"], "stop": p["stop"], "tp1": p["tp1"],
+                   "asegurar": p["limite"] - 0.5 * risk if short else p["limite"] + 0.5 * risk}
+            check_position(state, coin, pos, px, short, hi_px, lo_px)
+            continue
         st = state.watch_state.setdefault(name, {"barrido": False, "fin": False, "extremo": 0.0, "limite": False})
         if st["fin"]:
             continue

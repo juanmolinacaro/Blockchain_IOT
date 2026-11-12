@@ -1189,3 +1189,28 @@ llenar. ETH — compresión corto sáb 7 +1,42R; trampas: +0,53R en 3. Con solo 
 cortos, los 4 ganadores (+5,4R). **Ojo:** las cuatro fueron el sábado o el domingo antes de las 13:00, que
 la regla de Juan no opera; con esa regla, el semáforo no habría dado ninguna entrada en estas dos semanas.
 La M del 11 nov no la detectó: los dos techos (12:00 y 16:00) estaban a 4 velas y la regla pide ≥ 5.
+
+## Dónde entrar después de la liquidación (13 nov 2026)
+
+Juan: "cuando el precio cae, se frena cuando liquida, empieza a acumular o hacer rango; ahí revisamos
+dónde entrar según la estructura". `estudios/pausa_liquidacion.py` (1H, BTC+ETH+SOL, ~208 días; a favor
+de la tendencia; espejo para las subidas): impulso ≥ 2 % hasta un mínimo de 48 velas en ≤ 6 velas, luego
+≥ 6 velas de pausa sin mínimo nuevo y rebote < 60 % de la caída. Gestión de Juan y comisión.
+
+| Entrada tras la pausa | Caída → corto (45 casos) | Subida → largo (39 casos) |
+|---|---|---|
+| E1 límite en el techo del rango | +0,05R (5 entradas) | +0,25R (10) |
+| E4 trampa en el techo del rango | **−0,36R** (25) | **−0,49R** (18) |
+| E2 al cierre que rompe el rango a favor | **−0,43R** (20) | +0,32R (18) |
+| E3 límite en el retesteo del rango roto | −0,41R (11) | +0,23R (14) |
+| **E5 límite en el 50 % del rebote** (stop sobre el 70 %) | **+0,15R** (24, se llena el 53 %) | **+0,46R** (25, 64 %) |
+| E6 contra la tendencia en el borde del rango | +0,04R (30) | +0,34R (23) |
+
+Lectura: después de una caída con liquidación, **vender dentro del rango o en su ruptura pierde**: el
+precio, ya limpio de largos, suele rebotar primero. Lo que funciona es **esperar el rebote y vender en el
+50 % de la caída** (en las subidas, comprar el retroceso al 50 %), que además suele coincidir con el
+siguiente pool de cortos. El K3 entró en 73.700, cerca del 50 % de la caída del 10 nov (74.850 → 72.668).
+
+Primer plan con esta regla, **K5**: caída 73.850 → 71.227 (12 nov); límite de venta en el 50 % = **72.538**,
+stop 73.250 (sobre el 70 % = 73.063 y el pool de cortos 73.021), TP1 71.826 (1R), resto hacia 71.114 y el
+pool de largos 70.689. La escucha vigila las órdenes límite de `vigilar.json` (✅ llenada, 🔒, 🎯, stop).
