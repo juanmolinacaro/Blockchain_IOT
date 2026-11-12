@@ -191,6 +191,12 @@ def nearest_zone(state: State, coin: str, up: bool) -> str:
     return f" → va hacia el pool de {kind} 25-100x en {zz.center:,.0f} ({abs(zz.center / px - 1):.1%})"
 
 
+# 13 nov: al móvil solo lo que lleva a decidir (semáforo, planes, posiciones, liquidaciones de Binance).
+# El resto se sigue guardando en hft_eventos.jsonl para estudiarlo, pero sin distraer: su dirección no
+# acertó más que una moneda al aire (💰 43 %, 🏦 un lado 42 %, 🤖 33–50 %) o ya lo cubre el semáforo.
+SILENT = ("retiro-", "empuje-", "compresion-", "ruptura-")
+
+
 def alert(state: State, key: str, title: str, body: str, data: dict) -> None:
     now = time.time()
     if now - state.last_alert.get(key, 0) < COOLDOWN_S:
@@ -205,7 +211,7 @@ def alert(state: State, key: str, title: str, body: str, data: dict) -> None:
         log.warning("No pude guardar el aviso en %s (archivo abierto)", EVENTS)
     log.warning("%s | %s", title, body)
     topic = os.environ.get("NTFY_TOPIC")
-    if topic:
+    if topic and not key.startswith(SILENT):
         try:
             from .notify import send_ntfy
             send_ntfy(title, body, "VIGILAR", topic)
@@ -247,6 +253,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         check_signals(state, coin)
         check_squeeze(state, coin)
         check_plans(state, coin)
+        update_paper(state, coin)
         state.extremes.pop(coin, None)
     flush_rows(state)
 
@@ -275,6 +282,67 @@ def heartbeat(state: State, minutes: int) -> str:
     if getattr(state, "binance", None) is not None:
         line += "\n   " + state.binance.summary(minutes)
     return line
+
+
+def update_paper(state: State, coin: str) -> None:
+    """Cuenta de papel del semáforo: llena órdenes límite, TP1/stop a la entrada, TP2, stop y 48 h."""
+    from . import semaforo
+    items = getattr(state, "paper", None)
+    px = state.price.get(coin)
+    if not items or not px:
+        return
+    hi, lo = state.extremes.get(coin, [px, px])
+    changed = False
+    for p in items:
+        if p.coin != coin or p.status not in ("pendiente", "abierta"):
+            continue
+        what = semaforo.update(p, hi, lo, int(time.time() * 1000))
+        if what:
+            changed = True
+            if p.filtro:
+                alert(state, f"senal-{p.id}-{what[:12]}", f"🚦 {p.setup} {coin} {'CORTO' if p.side == 'short' else 'LARGO'}: {what}",
+                      f"Entrada {p.entry:,.0f} · stop {p.stop:,.0f} · ahora {px:,.0f}" + (f" · resultado {p.r:+.2f}R" if p.status == "cerrada" else ""),
+                      {"moneda": coin, "precio": px, "setup": p.setup, "id": p.id, "r": p.r})
+    if changed:
+        try:
+            semaforo.save(items)
+        except OSError:
+            pass
+
+
+def check_semaforo(state: State, source) -> None:
+    """Al cerrar cada hora: busca los setups del semáforo en BTC y ETH, aplica el filtro de confirmación y
+    los registra en la cuenta de papel. Solo los que pasan el filtro llegan al móvil."""
+    from . import semaforo
+    from .method.monitor import trading_allowed
+    now = int(time.time() * 1000)
+    if getattr(state, "paper", None) is None:
+        state.paper = semaforo.load()
+    for coin in COINS:
+        try:
+            cs = [c for c in source.candles(coin, "1h", now - 400 * 3_600_000, now) if c.t + 3_600_000 <= now]
+        except Exception as exc:
+            log.error("semáforo %s: %s", coin, exc)
+            continue
+        for sig in semaforo.detect_all(cs, state.trend.get(coin, "")):
+            conf = confirmation(state, coin)
+            ok = semaforo.passes_filter(conf, sig.side) and trading_allowed(now)
+            p = semaforo.open_signal(state.paper, sig, coin, now, ok, conf["votos"])
+            if not p:
+                continue
+            short = sig.side == "short"
+            t1, t2 = p.level(1), p.level(2)
+            alert(state, f"senal-{p.id}", f"🚦 SEÑAL {sig.setup} {coin}: {'CORTO' if short else 'LARGO'}"
+                  + ("" if ok else " (no pasa el filtro: solo registro)"),
+                  f"{sig.note}\n📋 {'Orden límite' if sig.limit else 'Entrada'} {p.entry:,.0f} · stop {p.stop:,.0f} · "
+                  f"TP1 {t1:,.0f} (1R, mitad y stop a la entrada) · TP2 {t2:,.0f} (2R)\n{conf['texto']}",
+                  {"moneda": coin, "precio": cs[-1].c, "setup": sig.setup, "filtro": ok, "votos": conf["votos"],
+                   "ficha": {"lado": sig.side, "entrada": p.entry, "stop": p.stop, "tp1": t1, "r": 1.0}}
+                  ) if ok else log.warning("semáforo (sin filtro) %s %s %s %.0f", sig.setup, coin, sig.side, p.entry)
+    try:
+        semaforo.save(state.paper)
+    except OSError:
+        pass
 
 
 def top_liquidity(snap: dict, n: int = 6) -> list[str]:
@@ -901,6 +969,8 @@ async def run(minutes: float | None = None) -> None:
             log.error("No pude actualizar el radar (%s); uso la lista guardada", exc)
     state = State(kinds)
     state.source = source
+    from . import semaforo as _sem
+    state.paper = _sem.load()
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
     await asyncio.to_thread(refresh_zones, state, source)
     try:
@@ -966,6 +1036,11 @@ async def run(minutes: float | None = None) -> None:
                 text += "\nEpisodios guardados: " + " · ".join(f"{k} {v}" for k, v in sorted(cnt.items()))
         except Exception as exc:
             log.error("episodios: %s", exc)
+        try:
+            from .semaforo import scoreboard
+            text += "\nCuenta de papel del semáforo:\n" + "\n".join(scoreboard(getattr(state, "paper", []) or []))
+        except Exception as exc:
+            log.error("papel: %s", exc)
         log.warning("📊 Revisión del día\n%s", text)
         try:
             with Path("data/revision_diaria.txt").open("a", encoding="utf-8") as fh:
@@ -1028,6 +1103,7 @@ async def run(minutes: float | None = None) -> None:
                             hsnap, state.hourly = state.hourly, {}
                             spawn(asyncio.to_thread(close_hour, state, hsnap))
                             spawn(asyncio.to_thread(check_breakouts, state, source))
+                            spawn(asyncio.to_thread(check_semaforo, state, source))
                             for coin in COINS:
                                 check_plans(state, coin, hour_close=True)
                     if time.time() - last_zones > 15 * 60:

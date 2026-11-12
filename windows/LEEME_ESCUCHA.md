@@ -38,6 +38,11 @@ enchufado. La pantalla sí se puede apagar.
 
 ## Qué avisos llegan
 
+**Desde el 13 nov al móvil solo llega lo que sirve para decidir:** las 🚦 SEÑALES del semáforo (y si se
+llenan, TP1, stop o TP2), los planes vigilados (👀 🧹 ✅ ⏳ ❌), las posiciones abiertas (🔒 🎯) y las
+💥 liquidaciones de Binance. Lo demás (💰, 🏦, 🤖, 🗜, rupturas) se sigue guardando para estudiarlo, pero ya
+no suena. La cuenta de papel de las señales queda en `data/papel.jsonl` (mándala con los demás archivos).
+
 * **💰 Las cuentas que ganan COMPRAN / VENDEN agresivo**: lo que empujan, en 5 minutos, las cuentas
   del estudio que van ganando dinero está muy por encima de lo normal. Dice hacia qué pool de liquidez
   va el precio. Quién gana se revisa solo cada 6 horas. (Si todavía no se sabe quién gana, sale el

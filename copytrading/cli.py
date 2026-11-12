@@ -623,6 +623,16 @@ def cmd_episodios(cfg: Config, args) -> None:
     print("\n".join(report(build(flows, bins))))
 
 
+def cmd_papel(cfg: Config, args) -> None:
+    from .semaforo import load, scoreboard
+
+    items = load(Path(args.archivo))
+    print("\n".join(scoreboard(items)))
+    for p in items[-args.last:]:
+        print(f"  {p.id:38} {p.status:10} {p.side:5} entrada {p.entry:,.0f} stop {p.stop:,.0f} {p.r:+.2f}R "
+              f"{'🚦' if p.filtro else '  '} {p.exit_reason} {p.note}")
+
+
 def cmd_causa(cfg: Config, args) -> None:
     from .causa import NQ_FILE, btc_series, episodes, read_series, report
 
@@ -721,6 +731,10 @@ def main(argv: list[str] | None = None) -> None:
     ep = sub.add_parser("episodios", help="qué hacen las cuentas antes de caídas, subidas y rupturas de compresión")
     ep.add_argument("--datos", default="data", help="carpeta con los CSV de la escucha (y escucha_pc/)")
 
+    pa = sub.add_parser("papel", help="cuenta de papel del semáforo: resultado por setup, con y sin filtro")
+    pa.add_argument("--archivo", default="data/papel.jsonl")
+    pa.add_argument("--last", type=int, default=15)
+
     ca = sub.add_parser("causa", help="¿la bolsa o la disculpa? movimientos fuertes de BTC frente al Nasdaq")
     ca.add_argument("--umbral", type=float, default=1.5, help="movimiento mínimo de BTC, en %%")
     ca.add_argument("--ventana", type=int, default=60, help="en menos de estos minutos")
@@ -759,7 +773,7 @@ def main(argv: list[str] | None = None) -> None:
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
      "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
-     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "avisos": cmd_avisos, "episodios": cmd_episodios}[args.cmd](cfg, args)
+     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "avisos": cmd_avisos, "episodios": cmd_episodios, "papel": cmd_papel}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

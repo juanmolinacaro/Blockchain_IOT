@@ -1169,3 +1169,23 @@ stop a las 10:30 (74.478): el stop debe ir fuera del pool, no pegado a la mecha.
 minuto: el TP1 se tocó con una mecha a las 8:10 y el aviso llegó a las 9:11; ahora usan el máximo y mínimo
 del minuto. (2) Desde el 12 nov 05:50 la liquidez de los creadores salía en 0 porque el radar no confirmó
 ningún creador; ahora, si no hay confirmados, se usan las 6 cuentas que más liquidez pusieron la hora anterior.
+
+## Semáforo y cuenta de papel (13 nov 2026)
+
+Juan: "llevamos una semana con el radar; hay que ver que los datos sirvan para decidir". `copytrading/
+semaforo.py` junta en una sola forma de decidir lo que ha mostrado ventaja (M/W con 2.º pico flojo a favor
+de la tendencia; trampa de 24 h con orden límite en el nivel; ruptura de compresión a favor), con el filtro
+de confirmación (≥ 3 votos netos, tendencia a favor, mayoría no en contra) y la gestión de Juan. La escucha
+lo evalúa al cerrar cada hora y lleva una **cuenta de papel** (`data/papel.jsonl`) con cada señal y su R,
+también las que no pasan el filtro (para medir si el filtro ayuda). Al móvil solo llegan las "🚦 SEÑAL"
+que pasan el filtro y sus novedades (llenada, TP1, stop, TP2). Se silenciaron al móvil los avisos que no
+acertaron (💰, 🏦, 🤖) y los que ya cubre el semáforo (🗜, ruptura); siguen guardados. `copytrading papel`
+muestra el marcador por setup; la revisión diaria de las 20:00 lo incluye.
+
+Repaso de las últimas dos semanas con velas de 1H de Hyperliquid (sin el filtro de confirmación, que no
+tiene historia): BTC — M/W corto sáb 7 nov +1,39R; trampa corto dom 8 09:00 +1,20R; compresión corto dom 8
+12:00 +1,36R; trampas en largo del 12 nov (contra la tendencia) −1,29R y −1,58R; 3 órdenes límite sin
+llenar. ETH — compresión corto sáb 7 +1,42R; trampas: +0,53R en 3. Con solo la tendencia como filtro: 4
+cortos, los 4 ganadores (+5,4R). **Ojo:** las cuatro fueron el sábado o el domingo antes de las 13:00, que
+la regla de Juan no opera; con esa regla, el semáforo no habría dado ninguna entrada en estas dos semanas.
+La M del 11 nov no la detectó: los dos techos (12:00 y 16:00) estaban a 4 velas y la regla pide ≥ 5.
