@@ -1246,3 +1246,11 @@ semáforo piden puntaje ≥ 2. Votos nuevos medidos: **interés abierto subiendo
 medición (8–12 nov): interés abierto 79 % (126 casos, peso 1,14), mayoría 69 % (604, 0,75), liquidaciones
 64 % (56, 0,57), público 56 % (500, 0,22); tendencia 72 %, ballenas 68 % e imán 25 % con menos de 30 casos
 (peso neutro hasta tener más). `copytrading pesos --datos <carpeta>` lo muestra.
+
+**Pesos por régimen (13 nov).** Juan: "en tendencia bajista ya la tenemos medio clara; vendrá tendencia
+alcista o rango y también vamos a tener datos para trabajarlo". Cada muestra se etiqueta por el cambio del
+precio en las 72 h previas (≤ −2 % bajista, ≥ +2 % alcista, en medio rango) y los pesos se miden por
+separado en cada régimen; la confirmación usa los del régimen actual y, para los votos con menos de 30
+casos en ese régimen, los de todos los datos. Con la primera semana: en **bajista** la mayoría sobreapalancada
+acertó 84 % (89 casos, peso 1,37) y el público 47 % (no vota); en **rango** la mayoría 99 % (71) y el
+público 31 % (no vota); **alcista**: todavía sin datos. `copytrading pesos` lo muestra por régimen.

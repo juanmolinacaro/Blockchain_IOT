@@ -75,6 +75,7 @@ class State:
         self.extremes: dict[str, list[float]] = {}              # [máximo, mínimo] del minuto: mechas (12 nov: el TP1
                                                                  # se tocó con una mecha a las 8:10 y el aviso llegó a las 9:11)
         self.channel: dict[str, tuple[float, float]] = {}       # canal de regresión de 1H (suelo, techo) ahora
+        self.regime: dict[str, str] = {}                         # bajista / alcista / rango (72 h, pesos.regime)
         self.watch_state: dict[str, dict] = {}
         self.trades_seen = 0
         self.trades_at_last_beat = 0
@@ -814,7 +815,10 @@ def confirmation(state: State, coin: str) -> dict:
     total = sum(votos.values())
     n = len(votos)
     # 13 nov: cada voto pesa según su acierto medido con los datos (data/pesos.json, se recalcula cada noche)
-    pesos = getattr(state, "pesos", None) or {}
+    from .pesos import for_regime
+    allp = getattr(state, "pesos", None) or {}
+    reg = state.regime.get(coin, "") if hasattr(state, "regime") else ""
+    pesos = for_regime(allp, reg, getattr(state, "pesos_full", None)) if "todos" in allp else allp
     puntaje = round(sum(v * pesos.get(k, 1.0) for k, v in votos.items()), 2)
     if puntaje < 0:
         txt = f"🎯 Confirmación BAJISTA {sum(v < 0 for v in votos.values())}/{n} · puntaje {puntaje:+.1f}"
@@ -941,6 +945,9 @@ def refresh_zones(state: State, source) -> None:
             cs = [c for c in source.candles(coin, "1h", now - 8 * 86_400_000, now) if c.t + 3_600_000 <= now]
             state.zones[coin] = short_term_zones(cs)
             state.channel[coin] = regression_channel(cs)
+            if len(cs) > 72:
+                from .pesos import regime
+                state.regime[coin] = regime(cs[-1].c / cs[-73].c - 1)
             from .method.monitor import trend_state
             c4 = source.candles(coin, "4h", now - 830 * 86_400_000, now)
             state.trend[coin] = trend_state(c4)[0]
@@ -1008,11 +1015,11 @@ async def run(minutes: float | None = None) -> None:
     if not state.pesos:                          # primera vez: medirlos ya con lo que haya guardado
         try:
             w = await asyncio.to_thread(_pesos.compute, sorted(Path("data").glob("hft_flujo*.csv")),
-                                        [Path("data/binance_minuto.csv")], EVENTS)
+                                        [Path("data/binance_minuto.csv")], EVENTS, ("BTC", "ETH"), True)
             if w:
                 _pesos.save(w)
-                state.pesos = {k: v["peso"] for k, v in w.items()}
-                log.warning("Pesos de los votos medidos: %s", ", ".join(f"{k} {v['peso']:.2f}" for k, v in w.items()))
+                state.pesos, state.pesos_full = _pesos.load(), w
+                log.warning("Pesos de los votos medidos: %s", ", ".join(f"{k} {v['peso']:.2f}" for k, v in w["todos"].items()))
         except Exception as exc:
             log.error("pesos: %s", exc)
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
@@ -1083,12 +1090,13 @@ async def run(minutes: float | None = None) -> None:
         try:
             from . import pesos as _pw
             flows = sorted(Path("data").glob("hft_flujo*.csv"))
-            w = await asyncio.to_thread(_pw.compute, flows, [Path("data/binance_minuto.csv")], EVENTS)
+            w = await asyncio.to_thread(_pw.compute, flows, [Path("data/binance_minuto.csv")], EVENTS, ("BTC", "ETH"), True)
             if w:
                 _pw.save(w)
-                state.pesos = {k: v["peso"] for k, v in w.items()}
-                text += "\nPesos de los votos (acierto a 4 h): " + " · ".join(
-                    f"{k} {v['peso']:.2f}" for k, v in sorted(w.items(), key=lambda kv: -kv[1]["peso"]))
+                state.pesos, state.pesos_full = _pw.load(), w
+                for reg, ws in w.items():
+                    text += f"\nPesos {reg} (acierto a 4 h): " + " · ".join(
+                        f"{k} {v['peso']:.2f} ({v['n']})" for k, v in sorted(ws.items(), key=lambda kv: -kv[1]["peso"]))
         except Exception as exc:
             log.error("pesos: %s", exc)
         try:

@@ -638,7 +638,7 @@ def cmd_pesos(cfg: Config, args) -> None:
 
     d = Path(args.datos)
     flows = sorted(d.glob("hft_flujo*.csv"))
-    w = compute(flows, [d / "binance_minuto.csv"], d / "hft_eventos.jsonl")
+    w = compute(flows, [d / "binance_minuto.csv"], d / "hft_eventos.jsonl", ("BTC", "ETH"), True)
     print("\n".join(report(w)))
     if args.guardar:
         save(w)

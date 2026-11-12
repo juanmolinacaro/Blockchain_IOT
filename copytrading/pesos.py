@@ -29,6 +29,19 @@ CROWDED_LONG, CROWDED_SHORT = 2.0, 0.8
 DEFAULT = 1.0
 
 
+REGIME_MOVE = 0.02             # régimen por el cambio de precio de las últimas 72 h: ±2 %
+
+
+def regime(change_72h: float) -> str:
+    """bajista / alcista / rango según cuánto se movió el precio en 72 h (idea de Juan, 13 nov: cada
+    tendencia tiene sus datos; los pesos se miden por separado en cada una)."""
+    if change_72h <= -REGIME_MOVE:
+        return "bajista"
+    if change_72h >= REGIME_MOVE:
+        return "alcista"
+    return "rango"
+
+
 def weight(acc: float, n: int) -> float:
     if n < MIN_N:
         return DEFAULT
@@ -56,7 +69,7 @@ def _f(r, k):
         return 0.0
 
 
-def votes_from_csv(flow: dict, binance: dict, coin: str) -> list[tuple[dict, float]]:
+def votes_from_csv(flow: dict, binance: dict, coin: str) -> list[tuple[dict, float, str]]:
     """(votos, cambio de precio a 4 h) cada 15 min, reproduciendo los votos que salen de los CSV."""
     px = {t: _f(r, "precio") for t, r in flow.items() if _f(r, "precio")}
     if not px:
@@ -86,12 +99,13 @@ def votes_from_csv(flow: dict, binance: dict, coin: str) -> list[tuple[dict, flo
                 v["mayoría"] = -1
             elif 0 < lc <= CROWDED_SHORT and fund < 0:
                 v["mayoría"] = 1
+        p72 = next((px[t - timedelta(minutes=72 * 60 + d)] for d in range(5) if t - timedelta(minutes=72 * 60 + d) in px), None)
         if v:
-            out.append((v, fut / px[t] - 1))
+            out.append((v, fut / px[t] - 1, regime(px[t] / p72 - 1) if p72 else "?"))
     return out
 
 
-def votes_from_events(events: list[dict], flow: dict, coin: str) -> list[tuple[dict, float]]:
+def votes_from_events(events: list[dict], flow: dict, coin: str) -> list[tuple[dict, float, str]]:
     """Votos guardados en los avisos (tendencia, ballenas, imán…) con el precio 4 h después (del flujo)."""
     px = {t: _f(r, "precio") for t, r in flow.items() if _f(r, "precio")}
     out = []
@@ -104,13 +118,18 @@ def votes_from_events(events: list[dict], flow: dict, coin: str) -> list[tuple[d
         p0 = next((px[t - timedelta(minutes=d)] for d in range(3) if t - timedelta(minutes=d) in px), None)
         p1 = next((px[t + timedelta(minutes=HORIZON_MIN + d)] for d in range(3)
                    if t + timedelta(minutes=HORIZON_MIN + d) in px), None)
+        p72 = next((px[t - timedelta(minutes=72 * 60 + d)] for d in range(5) if t - timedelta(minutes=72 * 60 + d) in px), None)
         if p0 and p1:
-            out.append(({k: v for k, v in e["votos"].items() if k in ("tendencia", "ballenas", "imán")}, p1 / p0 - 1))
+            out.append(({k: v for k, v in e["votos"].items() if k in ("tendencia", "ballenas", "imán")}, p1 / p0 - 1,
+                        regime(p0 / p72 - 1) if p72 else "?"))
     return out
 
 
-def compute(flow_paths: list[Path], binance_paths: list[Path], events_path: Path | None, coins=("BTC", "ETH")) -> dict:
+def compute(flow_paths: list[Path], binance_paths: list[Path], events_path: Path | None, coins=("BTC", "ETH"),
+            by_regime: bool = False) -> dict:
+    """Pesos de todos los datos juntos; con `by_regime`, {régimen: pesos} medidos por separado."""
     tally: dict[str, list[int]] = {}
+    tallies: dict[str, dict[str, list[int]]] = {}
     for coin in coins:
         flow: dict = {}
         binance: dict = {}
@@ -127,33 +146,59 @@ def compute(flow_paths: list[Path], binance_paths: list[Path], events_path: Path
                 except ValueError:
                     continue
             samples += votes_from_events(evs, flow, coin)
-        for votes, ch in samples:
+        for votes, ch, reg in samples:
             for k, v in votes.items():
-                a = tally.setdefault(k, [0, 0])
-                a[0] += int(v * ch > 0)
-                a[1] += 1
-    out = {}
-    for k, (hit, n) in tally.items():
-        acc = hit / n if n else 0.0
-        out[k] = {"peso": weight(acc, n), "acierto": round(acc, 3), "n": n}
-    return out
+                for t in (tally, tallies.setdefault(reg, {})):
+                    a = t.setdefault(k, [0, 0])
+                    a[0] += int(v * ch > 0)
+                    a[1] += 1
+
+    def to_w(t):
+        return {k: {"peso": weight(h / n if n else 0.0, n), "acierto": round(h / n, 3) if n else 0.0, "n": n}
+                for k, (h, n) in t.items()}
+    if by_regime:
+        return {"todos": to_w(tally), **{r: to_w(t) for r, t in tallies.items() if r != "?"}}
+    return to_w(tally)
 
 
 def save(weights: dict, path: Path = PESOS) -> None:
+    """`weights`: {régimen: {voto: {...}}} (con "todos") o, por compatibilidad, {voto: {...}}."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    if weights and "todos" not in weights:
+        weights = {"todos": weights}
     path.write_text(json.dumps({"fecha": datetime.now().strftime("%Y-%m-%d %H:%M"), "horizonte_min": HORIZON_MIN,
-                                "votos": weights}, ensure_ascii=False, indent=1), encoding="utf-8")
+                                "regimenes": weights}, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
-def load(path: Path = PESOS) -> dict[str, float]:
+def load(path: Path = PESOS) -> dict[str, dict[str, float]]:
+    """{régimen: {voto: peso}}; incluye "todos"."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        return {k: float(v["peso"]) for k, v in data.get("votos", {}).items()}
+        regs = data.get("regimenes") or {"todos": data.get("votos", {})}
+        # en cada régimen solo cuentan los votos con casos suficientes; el resto usa los de "todos"
+        return {r: {k: float(v["peso"]) for k, v in w.items() if r == "todos" or v.get("n", 0) >= MIN_N}
+                for r, w in regs.items()}
     except (OSError, ValueError, KeyError, TypeError):
         return {}
 
 
+def for_regime(pesos: dict[str, dict], reg: str, full: dict | None = None) -> dict[str, float]:
+    """Pesos del régimen actual; para cada voto con pocos casos en ese régimen, los de "todos"."""
+    base = dict(pesos.get("todos", {}))
+    if reg in pesos:
+        if full and reg in full:
+            base.update({k: v["peso"] for k, v in full[reg].items() if v["n"] >= MIN_N})
+        else:
+            base.update(pesos[reg])
+    return base
+
+
 def report(weights: dict) -> list[str]:
+    if "todos" in weights:
+        lines = []
+        for reg, w in weights.items():
+            lines += [f"— {reg.upper()}"] + report(w) + [""]
+        return lines
     lines = [f"{'voto':18} {'acierto a 4 h':>14} {'casos':>6} {'peso':>5}"]
     for k, v in sorted(weights.items(), key=lambda kv: -kv[1]["peso"]):
         lines.append(f"{k:18} {v['acierto']:14.0%} {v['n']:6} {v['peso']:5.2f}"
