@@ -585,11 +585,11 @@ def coordinates(conf: dict, short: bool) -> tuple[bool, str]:
     """¿Todo coordina con la operación? Confirmación a favor con al menos 3 votos netos y que la mayoría
     (empuje del público o sobreapalancamiento) esté del lado contrario, que es el combustible."""
     sign = -1 if short else 1
-    net = conf["total"] * sign
+    net = conf.get("puntaje", conf["total"]) * sign          # votos pesados por su acierto medido
     crowd = conf["votos"].get("público", 0) * sign > 0 or conf["votos"].get("mayoría", 0) * sign > 0
     whales = conf["votos"].get("ballenas", 0) * sign > 0
-    ok = net >= 3 and crowd
-    falta = [x for x, cond in (("confirmación ≥ 3", net >= 3), ("la mayoría del lado contrario", crowd),
+    ok = net >= 2.0 and crowd
+    falta = [x for x, cond in (("puntaje ≥ 2", net >= 2.0), ("la mayoría del lado contrario", crowd),
                                ("ballenas a favor", whales)) if not cond]
     return ok, ("✅ TODO COORDINA" if ok else "⚠ NO todo coordina (falta: " + ", ".join(falta) + ")")
 
@@ -785,11 +785,15 @@ def confirmation(state: State, coin: str) -> dict:
     rows = (getattr(getattr(state, "binance", None), "recent", {}) or {}).get(coin, [])[-60:]
     if len(rows) >= 30 and rows[0][6] and rows[-1][6]:
         oi = rows[-1][6] / rows[0][6] - 1
-        lc0 = next((r[11] for r in rows if r[11] != ""), None)
-        lc1 = next((r[11] for r in reversed(rows) if r[11] != ""), None)
-        if oi > 0.003 and lc0 is not None and lc1 is not None and lc1 != lc0:
-            votos["binance"] = -1 if lc1 > lc0 else 1
-            det.append(f"Binance: interés abierto {oi * 100:+.1f} % y las cuentas más {'largas' if lc1 > lc0 else 'cortas'}")
+        if oi > 0.003:                           # 13 nov: se abren posiciones → combustible para bajar (79 % a 4 h)
+            votos["interés abierto"] = -1
+            det.append(f"interés abierto Binance {oi * 100:+.1f} % en 1 h (combustible)")
+    if rows:
+        from .pesos import LIQ_MIN
+        liq = sum(r[8] or 0 for r in rows)
+        if liq >= LIQ_MIN.get(coin, 5_000_000):  # 13 nov: tras liquidar largos el precio frena o rebota
+            votos["liquidaciones"] = 1
+            det.append(f"Binance liquidó largos ${liq / 1e6:.1f}M en 1 h (freno: no vender aquí)")
     if rows:
         lc = next((r[11] for r in reversed(rows) if r[11] != ""), None)
         fund = rows[-1][7]
@@ -809,13 +813,17 @@ def confirmation(state: State, coin: str) -> dict:
             det.append(f"imán de liquidez {'abajo' if below > above else 'arriba'}")
     total = sum(votos.values())
     n = len(votos)
-    if total < 0:
-        txt = f"🎯 Confirmación BAJISTA {sum(v < 0 for v in votos.values())}/{n}"
-    elif total > 0:
-        txt = f"🎯 Confirmación ALCISTA {sum(v > 0 for v in votos.values())}/{n}"
+    # 13 nov: cada voto pesa según su acierto medido con los datos (data/pesos.json, se recalcula cada noche)
+    pesos = getattr(state, "pesos", None) or {}
+    puntaje = round(sum(v * pesos.get(k, 1.0) for k, v in votos.items()), 2)
+    if puntaje < 0:
+        txt = f"🎯 Confirmación BAJISTA {sum(v < 0 for v in votos.values())}/{n} · puntaje {puntaje:+.1f}"
+    elif puntaje > 0:
+        txt = f"🎯 Confirmación ALCISTA {sum(v > 0 for v in votos.values())}/{n} · puntaje {puntaje:+.1f}"
     else:
         txt = f"🎯 Sin confirmación (0 de {n})"
-    return {"votos": votos, "total": total, "n": n, "texto": txt + (": " + "; ".join(det) if det else "")}
+    return {"votos": votos, "total": total, "puntaje": puntaje, "n": n,
+            "texto": txt + (": " + "; ".join(det) if det else "")}
 
 
 def check_squeeze(state: State, coin: str) -> None:
@@ -995,6 +1003,18 @@ async def run(minutes: float | None = None) -> None:
     state.source = source
     from . import semaforo as _sem
     state.paper = _sem.load()
+    from . import pesos as _pesos
+    state.pesos = _pesos.load()
+    if not state.pesos:                          # primera vez: medirlos ya con lo que haya guardado
+        try:
+            w = await asyncio.to_thread(_pesos.compute, sorted(Path("data").glob("hft_flujo*.csv")),
+                                        [Path("data/binance_minuto.csv")], EVENTS)
+            if w:
+                _pesos.save(w)
+                state.pesos = {k: v["peso"] for k, v in w.items()}
+                log.warning("Pesos de los votos medidos: %s", ", ".join(f"{k} {v['peso']:.2f}" for k, v in w.items()))
+        except Exception as exc:
+            log.error("pesos: %s", exc)
     makers = [a for a, k in kinds.items() if k == "creador de mercado"][:12]
     await asyncio.to_thread(refresh_zones, state, source)
     try:
@@ -1060,6 +1080,17 @@ async def run(minutes: float | None = None) -> None:
                 text += "\nEpisodios guardados: " + " · ".join(f"{k} {v}" for k, v in sorted(cnt.items()))
         except Exception as exc:
             log.error("episodios: %s", exc)
+        try:
+            from . import pesos as _pw
+            flows = sorted(Path("data").glob("hft_flujo*.csv"))
+            w = await asyncio.to_thread(_pw.compute, flows, [Path("data/binance_minuto.csv")], EVENTS)
+            if w:
+                _pw.save(w)
+                state.pesos = {k: v["peso"] for k, v in w.items()}
+                text += "\nPesos de los votos (acierto a 4 h): " + " · ".join(
+                    f"{k} {v['peso']:.2f}" for k, v in sorted(w.items(), key=lambda kv: -kv[1]["peso"]))
+        except Exception as exc:
+            log.error("pesos: %s", exc)
         try:
             from .semaforo import scoreboard
             text += "\nCuenta de papel del semáforo:\n" + "\n".join(scoreboard(getattr(state, "paper", []) or []))

@@ -14,8 +14,8 @@ Setups (velas de 1H cerradas, BTC y ETH):
 * **Ruptura de compresión**: 12 velas apretadas y cierre fuera a favor de la tendencia; stop al otro lado
   de la caja. Estudio: +0,08R/op (+0,14R con objetivo 1,5R).
 
-Filtro (no medido aún en historia; por eso se registran también las señales que NO lo pasan, para
-comparar): confirmación del radar a favor con ≥ 3 votos netos, la tendencia a favor y la mayoría no en
+Filtro (se registran también las señales que NO lo pasan, para comparar): puntaje de la confirmación
+(votos pesados por su acierto medido, `pesos.py`) a favor ≥ 2, la tendencia a favor y la mayoría no en
 contra. Solo las que pasan el filtro llegan al móvil como "🚦 SEÑAL".
 
 Gestión de Juan: mitad en 1R y stop a la entrada; resto a 2R; cierre por tiempo a las 48 h; comisión
@@ -149,7 +149,8 @@ def detect_all(c, trend: str) -> list[Signal]:
 def passes_filter(conf: dict, side: str) -> bool:
     sign = -1 if side == "short" else 1
     v = conf.get("votos", {})
-    return (conf.get("total", 0) * sign >= 3 and v.get("tendencia", 0) * sign > 0
+    score = conf.get("puntaje", conf.get("total", 0))       # votos pesados por su acierto medido
+    return (score * sign >= 2.0 and v.get("tendencia", 0) * sign > 0
             and v.get("mayoría", 0) * sign >= 0)
 
 

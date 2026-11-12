@@ -1236,3 +1236,13 @@ Coinciden en BTC y ETH: **el público empujando (en contra), las liquidaciones c
 abierto subiendo como combustible**. Es una sola semana y en tendencia bajista: hay que repetirlo cada
 semana y en otros regímenes antes de darle peso fijo. Siguiente paso: pesar los votos de la confirmación
 con esta ventaja medida (y actualizarla sola cada semana) en vez de que todos voten igual.
+
+**Pesos medidos de los votos (13 nov).** `copytrading/pesos.py` reproduce cada voto sobre los datos de la
+escucha (cada 15 min) y mira si acertó la dirección 4 h después; peso = (acierto − 50 %) / 25 %, entre 0 y 2
+(≤ 50 % = no vota), con al menos 30 casos (si no, peso 1). La escucha los mide al arrancar y cada noche
+(`data/pesos.json`), y la confirmación suma votos × peso ("puntaje"); "TODO COORDINA" y el filtro del
+semáforo piden puntaje ≥ 2. Votos nuevos medidos: **interés abierto subiendo** (bajista) y
+**liquidaciones de largos** (freno, alcista); se quitó el voto "binance" (interés abierto + L/C). Primera
+medición (8–12 nov): interés abierto 79 % (126 casos, peso 1,14), mayoría 69 % (604, 0,75), liquidaciones
+64 % (56, 0,57), público 56 % (500, 0,22); tendencia 72 %, ballenas 68 % e imán 25 % con menos de 30 casos
+(peso neutro hasta tener más). `copytrading pesos --datos <carpeta>` lo muestra.
