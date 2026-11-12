@@ -1214,3 +1214,25 @@ siguiente pool de cortos. El K3 entró en 73.700, cerca del 50 % de la caída de
 Primer plan con esta regla, **K5**: caída 73.850 → 71.227 (12 nov); límite de venta en el 50 % = **72.538**,
 stop 73.250 (sobre el 70 % = 73.063 y el pool de cortos 73.021), TP1 71.826 (1R), resto hacia 71.114 y el
 pool de largos 70.689. La escucha vigila las órdenes límite de `vigilar.json` (✅ llenada, 🔒, 🎯, stop).
+
+## ¿Qué ventaja da cada dato del radar? (13 nov 2026)
+
+Juan: "no es lo que yo diga; es tomar los datos que tenemos y medir qué ventaja nos dan".
+`python -I estudios/ventaja_datos.py <carpeta> BTC|ETH`: muestra cada 15 min (8–12 nov, 371 muestras), cada
+dato partido en tercios; "ventaja" = subida media posterior cuando el dato está ALTO menos cuando está BAJO.
+Resultado a 4 horas (pb = 0,01 %; t aproximado, inflado porque las ventanas de 4 h se solapan):
+
+| Dato | BTC | ETH | Lectura |
+|---|---|---|---|
+| **Empuje neto del público (60 min)** alto | **−35 pb** (t −3,6) | **−66 pb** (t −4,0) | cuando el público compra fuerte, después baja |
+| **Liquidaciones de largos (60 min)** altas | **+26 pb** (t 2,7) | **+55 pb** (t 3,2) | tras liquidar, frena/rebota (no vender ahí) |
+| **Interés abierto subiendo (60 min)** | **−21 pb** (t −2,4) | **−41 pb** (t −2,7) | se abren posiciones → combustible para bajar |
+| Largos/cortos de los top traders alto | −51 pb (t −5,2) | −143 pb (t −8,6) | fuerte, pero creció toda la semana mientras el precio bajaba: puede ser solo la tendencia |
+| Precio subiendo la última hora | −31 pb (t −3,3) | −31 pb (t −1,9) | los rebotes cortos se devolvieron |
+| Empuje de las cuentas que ganan | +24 pb (t 2,3) | −34 pb (t −2,6) | contradictorio: sin ventaja clara |
+| Libro de los creadores, funding, L/C de cuentas | — | — | sin ventaja consistente en las dos |
+
+Coinciden en BTC y ETH: **el público empujando (en contra), las liquidaciones como freno y el interés
+abierto subiendo como combustible**. Es una sola semana y en tendencia bajista: hay que repetirlo cada
+semana y en otros regímenes antes de darle peso fijo. Siguiente paso: pesar los votos de la confirmación
+con esta ventaja medida (y actualizarla sola cada semana) en vez de que todos voten igual.
