@@ -1133,3 +1133,39 @@ cuello; stop 0,1 % más allá del techo más alto; gestión de Juan; comisión d
 
 La M a favor de la tendencia con el segundo techo **más flojo** es lo mejor que hemos medido hasta ahora
 (+0,29R por operación), aunque con solo 38 casos. En contra de la tendencia, no sirve.
+
+## Revisión con los datos del PC hasta el 12 nov 10:55
+
+`data/escucha_pc/2026-11-12/` (flujo, Binance, Nasdaq, cuentas por hora, rendimiento y 300 avisos; sin
+huecos desde el 10 nov salvo 6 minutos).
+
+**El techo en M (11 nov), hora a hora:** 11:00 el "resto" compró agresivo +$64M (incluye a `0xbf73…`
+recomprando cortos por $37M) y Binance +$47M → 1.er techo a las 12:19 con **$7,1M de cortos liquidados en
+Binance** y aviso 👀 de la zona 74.868 con **"TODO COORDINA"** (5 votos: tendencia, público, ballenas y
+mayoría bajistas; imán arriba). Entre techos, la proporción largos/cortos de las cuentas bajó de 2,79 a
+2,55 y el interés abierto cayó (−2.000 BTC): cierres, no compras nuevas. 2.º techo (16:30): el resto vendió
+−$42M y **los creadores multiplicaron su liquidez a ±1 % (×4–5, de ~$2M a $8–13M por lado)**: absorbían.
+Los dos avisos de zona del 2.º techo dieron "NO coordina". Ruptura del cuello 17:16–18:00.
+
+**La caída hasta 71.400 (12 nov 06:00–10:00):** Binance agresivo −$103M, −$170M y −$171M por hora;
+**largos liquidados en Binance ~$52M** (≥ mínimo); el interés abierto **subió** +3.000 BTC y las cuentas
+pasaron a 3,07 largos por corto: se abrían posiciones metiéndose en la caída. El Nasdaq no tuvo que ver:
+los tres movimientos fuertes medidos fueron "solo cripto".
+
+**Votos de la confirmación** (22 avisos con votos, dirección 60 min después): tendencia 16/22, mayoría
+sobreapalancada 15/21, público (en contra de su empuje) 10/15, ballenas 9/18, imán 2/6; **la suma acertó 15
+de 20**. Las ballenas son el voto flojo: `0xecb6…` es creadora de mercado y cambia de lado a menudo.
+
+**Episodios (actualizado):** antes de las **subidas fuertes el público vendía en 6 de 6**; antes de las
+caídas ya no hay patrón (compraba en 4 de 8): en esta caída el público vendía y acertó. Antes de las
+compresiones que rompieron abajo, los creadores tenían el libro de compras ×2 (6 de 6).
+
+**K3 con la regla nueva:** la confirmación cerró en 73.700, 0,27 % más allá del gatillo → orden límite en
+73.900, que se habría llenado a las 5 am (máximo 74.170) → TP1 72.230 = **+1,67R** en vez de +1,23R. Con la
+entrada B del estudio (límite en el nivel barrido 74.124 y stop pegado a la mecha, 74.224) habría salido en
+stop a las 10:30 (74.478): el stop debe ir fuera del pool, no pegado a la mecha.
+
+**Fallos corregidos en la escucha:** (1) los planes y posiciones solo miraban el último precio de cada
+minuto: el TP1 se tocó con una mecha a las 8:10 y el aviso llegó a las 9:11; ahora usan el máximo y mínimo
+del minuto. (2) Desde el 12 nov 05:50 la liquidez de los creadores salía en 0 porque el radar no confirmó
+ningún creador; ahora, si no hay confirmados, se usan las 6 cuentas que más liquidez pusieron la hora anterior.

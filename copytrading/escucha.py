@@ -72,6 +72,8 @@ class State:
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
         self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
         self.watch: list[dict] = []                              # planes vigilados (vigilar.json)
+        self.extremes: dict[str, list[float]] = {}              # [máximo, mínimo] del minuto: mechas (12 nov: el TP1
+                                                                 # se tocó con una mecha a las 8:10 y el aviso llegó a las 9:11)
         self.channel: dict[str, tuple[float, float]] = {}       # canal de regresión de 1H (suelo, techo) ahora
         self.watch_state: dict[str, dict] = {}
         self.trades_seen = 0
@@ -86,6 +88,8 @@ class State:
         coin = t["coin"]
         usd = float(t["sz"]) * float(t["px"])
         self.price[coin] = float(t["px"])
+        ext = self.extremes.setdefault(coin, [float(t["px"]), float(t["px"])])     # máximo y mínimo desde el último chequeo
+        ext[0], ext[1] = max(ext[0], float(t["px"])), min(ext[1], float(t["px"]))
         buyer, seller = t.get("users", ["", ""])
         taker = (buyer if t["side"] == "B" else seller).lower()
         for who in {buyer.lower(), seller.lower()}:            # actividad de cada cuenta de la cohorte
@@ -243,6 +247,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         check_signals(state, coin)
         check_squeeze(state, coin)
         check_plans(state, coin)
+        state.extremes.pop(coin, None)
     flush_rows(state)
 
 
@@ -272,12 +277,19 @@ def heartbeat(state: State, minutes: int) -> str:
     return line
 
 
+def top_liquidity(snap: dict, n: int = 6) -> list[str]:
+    """Cuentas que más liquidez pusieron (órdenes en el libro) en la última hora: respaldo cuando el radar no
+    confirma ningún creador de mercado (desde el 12 nov 05:50 la liquidez salía en 0 por eso)."""
+    return [a for a, v in sorted(snap.items(), key=lambda kv: -kv[1][4]) if v[4] > 0][:n]
+
+
 def close_hour(state: State, snap: dict | None = None) -> None:
     """Guarda, por cuenta de la cohorte y hora: operaciones, volumen, cuánto empujó comprando/vendiendo
     (taker) y cuánta liquidez puso (maker). Con un mes de esto se ve quién es más activo y quién mueve el precio."""
     hour = (datetime.now(COT) - timedelta(hours=1)).strftime("%Y-%m-%d %H:00")
     if snap is None:
         snap, state.hourly = state.hourly, {}
+    state.top_makers = top_liquidity(snap)
     for addr, kind in state.kinds.items():
         n, usd, tb, ts, mk = snap.get(addr, [0, 0.0, 0.0, 0.0, 0.0])
         state.hour_pending.append([hour, addr, kind, n, round(usd), round(tb), round(ts), round(mk),
@@ -537,20 +549,21 @@ def check_plans(state: State, coin: str, hour_close: bool = False, closed: tuple
     px = state.price.get(coin)
     if not px:
         return
+    hi_px, lo_px = state.extremes.get(coin, [px, px])
     closed = set(closed) | ({"1h", "15m"} if hour_close else set())
     for p in getattr(state, "watch", []):
         if p.get("moneda") != coin:
             continue
         name, short = p["plan"], p.get("lado") == "short"
         if p.get("posicion"):                       # operación ya abierta: proteger y seguir
-            check_position(state, coin, p, px, short)
+            check_position(state, coin, p, px, short, hi_px, lo_px)
             continue
         st = state.watch_state.setdefault(name, {"barrido": False, "fin": False, "extremo": 0.0, "limite": False})
         if st["fin"]:
             continue
         lo, hi = p["zona"]
         iv = p.get("intervalo", "1h")
-        beyond_stop = px >= p["stop"] if short else px <= p["stop"]
+        beyond_stop = hi_px >= p["stop"] if short else lo_px <= p["stop"]
         conf = confirmation(state, coin)
         ok, verdict = coordinates(conf, short)
         pos, loc = channel_location(state, coin, px)
@@ -571,14 +584,14 @@ def check_plans(state: State, coin: str, hour_close: bool = False, closed: tuple
                   f"Precio {px:,.0f}. Esperar el barrido de {p['barrido']:,.0f} y el cierre de {iv} "
                   f"{'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
-        swept = px >= p["barrido"] if short else px <= p["barrido"]
+        swept = hi_px >= p["barrido"] if short else lo_px <= p["barrido"]
         if swept and not st["barrido"]:
             st["barrido"] = True
             alert(state, f"plan-{name}-barrido", f"🧹 {name} {coin}: barrió {p['barrido']:,.0f}",
                   f"Precio {px:,.0f}. Ahora falta el cierre de {iv} {'bajo' if short else 'sobre'} {p['gatillo']:,.0f}.{info}",
                   {"moneda": coin, "precio": px, "plan": name, "coordina": ok, "votos": conf["votos"]})
         if st["barrido"]:
-            st["extremo"] = max(st["extremo"], px) if short else (min(st["extremo"], px) if st["extremo"] else px)
+            st["extremo"] = max(st["extremo"], hi_px) if short else (min(st["extremo"], lo_px) if st["extremo"] else lo_px)
         if p.get("solo_vigilar"):                 # zona de seguimiento: solo avisa, no activa operación
             continue
 
@@ -593,9 +606,9 @@ def check_plans(state: State, coin: str, hour_close: bool = False, closed: tuple
                    "ficha": {"lado": p.get("lado"), "entrada": entry, "stop": p["stop"], "tp1": p["tp1"], "r": round(r, 2)}})
 
         if st["limite"]:                          # orden límite esperando que vuelva al gatillo
-            if (px >= p["gatillo"]) if short else (px <= p["gatillo"]):
+            if (hi_px >= p["gatillo"]) if short else (lo_px <= p["gatillo"]):
                 activate(p["gatillo"], f"se llenó la orden límite en {p['gatillo']:,.0f}")
-            elif (px <= p["tp1"]) if short else (px >= p["tp1"]):
+            elif (lo_px <= p["tp1"]) if short else (hi_px >= p["tp1"]):
                 st["fin"] = True
                 alert(state, f"plan-{name}-sinllenar", f"⌛ {name} {coin}: se fue al TP1 sin volver a la entrada",
                       "No se entró: no se persigue.", {"moneda": coin, "precio": px, "plan": name})
@@ -613,15 +626,18 @@ def check_plans(state: State, coin: str, hour_close: bool = False, closed: tuple
                 activate(px, f"cierre de {iv} en {px:,.0f}")
 
 
-def check_position(state: State, coin: str, p: dict, px: float, short: bool) -> None:
+def check_position(state: State, coin: str, p: dict, px: float, short: bool,
+                   hi_px: float | None = None, lo_px: float | None = None) -> None:
     """Seguimiento de una operación abierta (regla de Juan: primero asegurar en el precio de entrada):
     🔒 al llegar a `asegurar` → subir el stop a la entrada; 🎯 TP1 → cerrar la mitad; ❌ stop."""
     name = p["plan"]
     st = state.watch_state.setdefault(name, {"asegurado": False, "tp1": False, "fin": False})
     if st["fin"]:
         return
-    better = (lambda lvl: px <= lvl) if short else (lambda lvl: px >= lvl)
-    worse = (lambda lvl: px >= lvl) if short else (lambda lvl: px <= lvl)
+    hi_px = px if hi_px is None else hi_px
+    lo_px = px if lo_px is None else lo_px
+    better = (lambda lvl: lo_px <= lvl) if short else (lambda lvl: hi_px >= lvl)     # mechas incluidas
+    worse = (lambda lvl: hi_px >= lvl) if short else (lambda lvl: lo_px <= lvl)
     stop = p["entrada"] if st["asegurado"] else p["stop"]
     conf = confirmation(state, coin)
     info = f"\n{conf['texto']}"
@@ -992,7 +1008,8 @@ async def run(minutes: float | None = None) -> None:
                     if int(time.time() // 60) != last_minute:
                         last_minute = int(time.time() // 60)
                         snap, state.minute = state.minute, {}
-                        spawn(asyncio.to_thread(close_minute, state, source, list(makers), snap))
+                        spawn(asyncio.to_thread(close_minute, state, source,
+                                                list(makers) or list(getattr(state, "top_makers", [])), snap))
                         if time.time() - last_beat >= BEAT_MIN * 60:      # señal de vida en la ventana
                             last_beat = time.time()
                             log.warning(heartbeat(state, BEAT_MIN))

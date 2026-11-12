@@ -298,3 +298,23 @@ def test_location_in_channel():
     st.channel["BTC"] = (73500, 74800)
     pos, txt = esc.channel_location(st, "BTC", 73700)
     assert pos < 0.4 and "parte BAJA" in txt
+
+
+def test_wick_reaches_tp1_within_the_minute(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.watch = [{"plan": "K3", "moneda": "BTC", "lado": "short", "posicion": True, "entrada": 73700,
+                 "stop": 74900, "asegurar": 73100, "tp1": 72230}]
+    for px in (72500, 72187, 72450):                                   # mecha a 72.187 y cierra 72.450
+        st.add_trade({"coin": "BTC", "side": "A", "px": str(px), "sz": "0.1", "users": ["0xa", "0xb"]})
+    esc.check_plans(st, "BTC")
+    ev = (tmp_path / "ev.jsonl").read_text()
+    assert "pos-K3-tp1" in ev and "pos-K3-asegurar" in ev
+
+
+def test_top_liquidity_fallback():
+    import copytrading.escucha as esc
+    snap = {"0xa": [5, 1e6, 0, 0, 3e6], "0xb": [5, 1e6, 0, 0, 9e6], "0xc": [5, 1e6, 1e6, 0, 0]}
+    assert esc.top_liquidity(snap) == ["0xb", "0xa"]
