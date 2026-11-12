@@ -1107,3 +1107,29 @@ Esperar "más confirmación" de estructura (D) entra tarde con stop ancho y pier
 orden límite solo se llena en ~4 de cada 10 trampas (las demás se van sin nosotros, sin pérdida).
 La ubicación en el canal no se pudo medir así: casi todos los barridos de máximos de 24 h ya están en la
 parte alta del canal (295 de 310). El flujo (mayoría, ballenas) no tiene historia suficiente: se mide en vivo.
+
+## La "M" (doble techo) y la "W" (doble suelo) (12 nov 2026)
+
+Juan marcó el techo del 11 nov (74.750 a las 12:22 y 74.778 a las 16:30) y dijo que esa "M" se repite
+antes de los movimientos fuertes. Qué pasó ahí (operaciones públicas de las 30 cuentas, Hyperliquid):
+
+* 11:00: `0xbf73…` **cerró cortos agresivo por $37M**: esa recompra empujó la subida a 74.300.
+* 1.er techo (12:15, volumen 1.218 BTC en 15 min): la cohorte casi no empujó; `0x7b7f…` **abrió cortos
+  con órdenes en el libro** (pasivo, ~$1M): vendían la subida sin perseguirla.
+* 2.º techo (16:30, volumen **458**, menos de la mitad): nadie de la cohorte compró. Subida sin fuerza.
+* Cuello en 74.157 (mínimo entre techos, 14:15). Lo rompió a las 17:30 (895 BTC); 18:00 bajó a 73.432 y
+  `0xbf73…`/`0x4b62…` recompraron cortos con ganancia ($15,9M); al día siguiente, 72.187.
+
+Medición (`estudios/doble_techo.py`, BTC+ETH+SOL, 1H, ~208 días): dos techos (o suelos) de pivote a ±0,2 %,
+con al menos 5 velas entre ellos y un valle ≥ 0,4 %; entrada cuando una vela cierra al otro lado del
+cuello; stop 0,1 % más allá del techo más alto; gestión de Juan; comisión descontada.
+
+| M/W | Casos | Sigue ≥ 1,5 % en 24 h | Entrada al cierre | Límite en el cuello |
+|---|---|---|---|---|
+| **a favor de la tendencia** | 57 | 56 % | **+0,14R/op** | +0,10R/op (40 se llenan) |
+| … **2.º techo con MENOS volumen** (como el 11 nov) | 38 | **61 %** | **+0,29R/op** | **+0,24R/op** |
+| … 2.º techo con más volumen | 19 | 47 % | −0,14R/op | −0,13R/op |
+| en contra de la tendencia | 49 | 31 % | −0,13R/op | −0,14R/op |
+
+La M a favor de la tendencia con el segundo techo **más flojo** es lo mejor que hemos medido hasta ahora
+(+0,29R por operación), aunque con solo 38 casos. En contra de la tendencia, no sirve.
