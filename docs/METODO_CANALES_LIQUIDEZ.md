@@ -1086,3 +1086,24 @@ Reglas nuevas (diario y escucha):
    alta (> 60 %) no da "TODO COORDINA" ("falta: ubicación").
 3. **Confirmación en 15m** cuando el barrido es rápido: los planes de `vigilar.json` aceptan
    `"intervalo": "15m"` (y el diario `--intervalo 15m`), para no regalar recorrido esperando el cierre de 1H.
+
+## ¿Cómo entrar en la trampa? (12 nov 2026)
+
+Juan: "tenemos que mejorar la entrada, con los datos y con la estructura". `estudios/entradas_trampa.py`:
+BTC + ETH + SOL, 5.000 velas de 1H (~208 días). Trampa = la vela barre el máximo (o mínimo) de las 24
+velas anteriores y cierra de vuelta dentro. Stop 0,1 % más allá del extremo de la mecha; gestión de Juan
+(mitad en 1R, stop a la entrada, resto a 2R); 48 velas; comisión 0,09 % descontada.
+
+| Entrada | A favor de la tendencia | En contra |
+|---|---|---|
+| A) al cierre de la vela trampa | 267 entradas, **−0,14R/op** (−38R) | 305, −0,14R/op |
+| B) **orden límite en el nivel barrido** (espera hasta 6 velas) | 115 (43 % se llenan), **+0,08R/op** | 128 (42 %), **+0,11R/op** |
+| C) **orden límite a media mecha** | 76 (28 %), **+0,13R/op** | 79 (26 %), +0,09R/op |
+| D) esperar que rompa el mínimo de la vela trampa | 166 (62 %), −0,12R/op | 184, −0,06R/op |
+
+Conclusión: **entrar al cierre (lo que hicimos en el K3) pierde; esperar con una orden límite a que el
+precio vuelva al nivel barrido (o a media mecha) gana**, con stop más corto (0,24–0,42 % frente a 0,73 %).
+Esperar "más confirmación" de estructura (D) entra tarde con stop ancho y pierde. La contrapartida: la
+orden límite solo se llena en ~4 de cada 10 trampas (las demás se van sin nosotros, sin pérdida).
+La ubicación en el canal no se pudo medir así: casi todos los barridos de máximos de 24 h ya están en la
+parte alta del canal (295 de 310). El flujo (mayoría, ballenas) no tiene historia suficiente: se mide en vivo.
