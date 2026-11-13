@@ -70,6 +70,8 @@ class State:
         self.px_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}       # cierre por minuto (1 h)
         self.win_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}      # empuje neto de las ganadoras/min
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
+        self.leader_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}   # empuje neto de la cuenta líder/min
+        self.leader: str = ""
         self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
         self.watch: list[dict] = []                              # planes vigilados (vigilar.json)
         self.extremes: dict[str, list[float]] = {}              # [máximo, mínimo] del minuto: mechas (12 nov: el TP1
@@ -111,6 +113,8 @@ class State:
         m[key] = m.get(key, 0.0) + usd
         if taker in self.winners:                              # aparte: lo que empujan las cuentas que ganan
             m[f"ganadoras|{side}"] = m.get(f"ganadoras|{side}", 0.0) + usd
+        if taker and taker == getattr(self, "leader", ""):     # la cuenta líder (la más eficiente que gana)
+            m[f"lider|{side}"] = m.get(f"lider|{side}", 0.0) + usd
         self.trades_seen += 1
 
     @property
@@ -239,6 +243,8 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         g = lambda k: round(m.get(k, 0.0))
         state.win_hist[coin].append(m.get("ganadoras|compra", 0.0) - m.get("ganadoras|venta", 0.0))
         state.crowd_hist[coin].append(m.get("otros|compra", 0.0) - m.get("otros|venta", 0.0))
+        state.leader_hist[coin].append(m.get("lider|compra", 0.0) - m.get("lider|venta", 0.0))
+        check_leader(state, coin)
         grp = state.signal_group
         state.net_hist[coin].append(m.get(f"{grp}|compra", 0.0) - m.get(f"{grp}|venta", 0.0))
         bid = ask = ""
@@ -406,6 +412,12 @@ def refresh_winners(state: State) -> None:
         return
     previous = state.winners or last_winners()            # al reiniciar, las de la última revisión guardada
     state.winners = select_winners(rows, previous)
+    # líder = la que gana con más eficiencia (por cada $10.000 movidos) y mueve de verdad (≥ $1.000M en 30 días).
+    # 13 nov: las horas en que 0xfc66 empujó ≥ $1M acertaron la dirección a 4 h en 10 de 12 (+0,43 % de media);
+    # el resto de cuentas seguidas, ~50 %.
+    cands = [r for r in rows if r.estudio > 0 and r.volumen_mes >= 1e9 and r.por_10k is not None]
+    if cands:
+        state.leader = max(cands, key=lambda r: r.por_10k).cuenta
     try:
         save(rows, winners=state.winners)
     except OSError:
@@ -754,6 +766,7 @@ def check_position(state: State, coin: str, p: dict, px: float, short: bool,
 
 
 CROWD_MIN = 2_000_000
+LEADER_MIN = 1_000_000     # la líder empujando ≥ $1M en 60 min (10 de 12 a 4 h, 4–12 nov)
 CROWDED_LONG = 2.0       # cuentas de Binance: ≥ 2 largos por corto y funding positivo = la mayoría cargada de largos
 CROWDED_SHORT = 0.8
 
@@ -774,6 +787,10 @@ def confirmation(state: State, coin: str) -> dict:
         votos["público"] = -1 if crowd > 0 else 1
         det.append(f"el público {'compra' if crowd > 0 else 'vende'} ${abs(crowd) / 1e6:.1f}M (combustible "
                    f"{'abajo' if crowd > 0 else 'arriba'})")
+    lead = sum(list(state.leader_hist.get(coin, []))[-60:])
+    if abs(lead) >= LEADER_MIN:
+        votos["líder"] = 1 if lead > 0 else -1
+        det.append(f"la cuenta líder {'compra' if lead > 0 else 'vende'} agresivo ${abs(lead) / 1e6:.1f}M en 1 h")
     wp = list(state.whale_pos.get(coin, []))
     if wp:
         now_v = wp[-1][1]
@@ -828,6 +845,23 @@ def confirmation(state: State, coin: str) -> dict:
         txt = f"🎯 Sin confirmación (0 de {n})"
     return {"votos": votos, "total": total, "puntaje": puntaje, "n": n,
             "texto": txt + (": " + "; ".join(det) if det else "")}
+
+
+def check_leader(state: State, coin: str) -> None:
+    """🐋 Aviso cuando la cuenta líder empuja fuerte (≥ $1M agresivo en 60 min): es una cuenta que casi
+    siempre pone órdenes en el libro; si de pronto compra o vende a mercado, tiene prisa. Medido: 10 de 12
+    horas así acertaron la dirección a 4 h (no a 1 h: 7 de 14). Se guarda con la confirmación para medirlo."""
+    lead = sum(list(state.leader_hist.get(coin, []))[-60:])
+    if abs(lead) < LEADER_MIN or not state.leader:
+        return
+    up = lead > 0
+    px = state.price.get(coin, 0.0)
+    conf = confirmation(state, coin)
+    alert(state, f"lider-{coin}-{'compra' if up else 'vende'}",
+          f"🐋 {coin}: la cuenta líder {'COMPRA' if up else 'VENDE'} agresivo ${abs(lead) / 1e6:.1f}M en 1 h",
+          f"A {px:,.0f}. Cuando esta cuenta empuja así, la dirección se ha cumplido a 4 h en 10 de 12 casos "
+          f"(no en la hora siguiente). No es entrada por sí sola: mira la zona y el semáforo.\n{conf['texto']}",
+          {"moneda": coin, "precio": px, "lider": state.leader, "empuje_60m": round(lead), "votos": conf["votos"]})
 
 
 def check_squeeze(state: State, coin: str) -> None:

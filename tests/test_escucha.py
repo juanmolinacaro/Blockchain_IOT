@@ -331,3 +331,18 @@ def test_limit_plan_fills_then_is_managed(monkeypatch, tmp_path):
         esc.check_plans(st, "BTC")
     ev = (tmp_path / "ev.jsonl").read_text()
     assert "plan-K5-llena" in ev and "pos-K5-asegurar" in ev and "pos-K5-tp1" in ev
+
+
+def test_leader_push_alert_and_vote(monkeypatch, tmp_path):
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.leader = "0xlead"
+    st.add_trade({"coin": "BTC", "side": "A", "px": "70000", "sz": "20", "users": ["0xmm", "0xlead"]})   # vende $1,4M
+    assert st.minute["BTC"]["lider|venta"] == 1_400_000
+    st.leader_hist["BTC"].append(-1_400_000)
+    st.price["BTC"] = 70000
+    esc.check_leader(st, "BTC")
+    assert "lider-BTC-vende" in (tmp_path / "ev.jsonl").read_text()
+    assert esc.confirmation(st, "BTC")["votos"]["líder"] == -1

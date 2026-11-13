@@ -1268,3 +1268,25 @@ lento". BTC 1H, ~208 días, rango medio por vela (y volumen medio por hora) en h
 La mañana del viernes es tan activa como la del jueves; el viernes por la noche y el sábado, la mitad.
 Regla nueva (`trading_allowed`): **viernes se opera hasta las 12:00**; viernes por la tarde y sábado, no;
 domingo desde las 13:00. Aplica a las fichas, al semáforo y a los avisos.
+
+## ¿Anticipan las cuentas que seguimos cuando empujan rápido? (13 nov 2026)
+
+Datos por cuenta y hora de la escucha (4–12 nov): horas en que una cuenta empujó fuerte (compras menos
+ventas agresivas) y dónde estaba el precio de BTC 1 h y 4 h después.
+
+| Cuenta | Horas con empuje fuerte | Acierta a 1 h | Acierta a 4 h | Movimiento medio a favor (4 h) |
+|---|---|---|---|---|
+| **`0xfc66…` ≥ $1M** | 16 | 7/14 | **10/12** | **+0,43 %** |
+| `0xfc66…` ≥ $0,5M | 25 | 10/23 | 14/21 | +0,25 % |
+| `0x4b62…` ≥ $2M | 23 | 9/20 | 6/17 | −0,13 % |
+| `0xbf73…` ≥ $2M | 18 | 9/17 | 7/17 | +0,03 % |
+| `0xf5d8…`, `0x3bca…`, `0xf71a…`, `0xecb6…` | 8–11 | ~50 % | ~50–78 % | ±0,1 % |
+
+Solo `0xfc66…` anticipa, y solo cuando empuja fuerte (≥ $1M en la hora) y **a 4 horas, no a 1**: casi
+siempre pone órdenes en el libro, y cuando de pronto compra o vende a mercado tiene prisa. Por eso el aviso
+💰 (todas las ganadoras juntas, 5 min, mirado a 1 h) no servía. Pocos casos (12): se mide en vivo.
+
+Cambios: la escucha elige sola la **cuenta líder** (la que gana con más eficiencia por cada $10.000 movidos
+y mueve ≥ $1.000M en 30 días; hoy `0xfc66…`), sigue su empuje agresivo minuto a minuto y avisa **🐋 "la
+cuenta líder COMPRA/VENDE agresivo $X M en 1 h"** cuando pasa de $1M; es además un voto ("líder") de la
+confirmación, con peso medido por `pesos.py`. `avisos` lo mide ahora también a 4 h.

@@ -120,7 +120,7 @@ def votes_from_events(events: list[dict], flow: dict, coin: str) -> list[tuple[d
                    if t + timedelta(minutes=HORIZON_MIN + d) in px), None)
         p72 = next((px[t - timedelta(minutes=72 * 60 + d)] for d in range(5) if t - timedelta(minutes=72 * 60 + d) in px), None)
         if p0 and p1:
-            out.append(({k: v for k, v in e["votos"].items() if k in ("tendencia", "ballenas", "imán")}, p1 / p0 - 1,
+            out.append(({k: v for k, v in e["votos"].items() if k in ("tendencia", "ballenas", "imán", "líder")}, p1 / p0 - 1,
                         regime(p0 / p72 - 1) if p72 else "?"))
     return out
 

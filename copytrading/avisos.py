@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 COT = timezone(timedelta(hours=-5))
-HORIZONS = (15, 60)
+HORIZONS = (15, 60, 240)
 PAIR_S = 10          # retiros de compras y ventas a menos de 10 s: "los dos lados"
 
 
@@ -68,6 +68,8 @@ def classify(events: list[dict]) -> list[tuple[dict, str, int]]:
             if grupo == "ganadoras" and ("abren_usd" in e or "cierran_usd" in e):     # desde el 9 nov
                 grupo += "-abren" if e.get("abren_usd", 0) >= e.get("cierran_usd", 0) else "-cierran"
             out.append((e, f"empuje-{grupo}", 1 if tipo.endswith("COMPRAN") else -1))
+        elif tipo.startswith("lider-"):
+            out.append((e, "líder", 1 if tipo.endswith("compra") else -1))
         elif tipo.startswith("ruptura-"):
             sub = "" if "confirmada" not in e else ("-confirmada" if e["confirmada"] else "-sin-confirmar")
             out.append((e, "ruptura" + sub, -1 if tipo.endswith("short") else 1))
@@ -143,14 +145,15 @@ NAMES = {"empuje-ganadoras": "💰 empuje de las cuentas que ganan",
          "liq-binance": "💥 liquidaciones de Binance (¿sigue el barrido?)",
          "ruptura": "📉📈 ruptura de compresión a favor de la tendencia",
          "ruptura-confirmada": "📉📈 ruptura CONFIRMADA por los datos",
-         "ruptura-sin-confirmar": "📉📈 ruptura SIN confirmar"}
+         "ruptura-sin-confirmar": "📉📈 ruptura SIN confirmar",
+         "líder": "🐋 la cuenta líder empuja fuerte"}
 
 
 def report(medidas: list[Medida], typical: dict[str, float]) -> list[str]:
     lines = [f"{'aviso (hora Colombia)':51}  {'precio':>9}  {'15 min':>8}  {'60 min':>8}  acierto 15/60"]
     for m in medidas:
         when = datetime.fromtimestamp(m.t / 1000, COT).strftime("%a %d %H:%M")
-        c15, c60 = (m.cambios.get(h) for h in HORIZONS)
+        c15, c60 = m.cambios.get(15), m.cambios.get(60)
         f = lambda c: "     —" if c is None else f"{c * 100:+7.2f}%"
         hit = lambda h: {True: "sí", False: "no", None: "—"}[m.acierto(h)]
         lines.append(f"{when} {m.moneda:3} {NAMES[m.clase][:34]:34}  {m.precio:>9,.1f}  {f(c15):>8}  {f(c60):>8}  "
@@ -188,7 +191,7 @@ def report(medidas: list[Medida], typical: dict[str, float]) -> list[str]:
 MEASURED = Path("data/avisos_medidos.jsonl")
 SHORT = {"empuje-ganadoras": "💰", "empuje-ganadoras-abren": "💰abren", "empuje-ganadoras-cierran": "💰cierran",
          "empuje-cazadores": "🤖", "retiro-un-lado": "🏦1lado", "retiro-ambos": "🏦2lados", "liq-binance": "💥",
-         "ruptura": "📉📈ruptura", "ruptura-confirmada": "✅ruptura", "ruptura-sin-confirmar": "⚠ruptura"}
+         "ruptura": "📉📈ruptura", "ruptura-confirmada": "✅ruptura", "ruptura-sin-confirmar": "⚠ruptura", "líder": "🐋líder"}
 
 
 def _record(m: Medida) -> dict:
