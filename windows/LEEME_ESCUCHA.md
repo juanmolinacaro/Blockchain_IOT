@@ -66,6 +66,9 @@ no suena. La cuenta de papel de las señales queda en `data/papel.jsonl` (mánda
 * **🐋 La cuenta líder COMPRA / VENDE agresivo**: la cuenta que gana con más eficiencia (hoy 0xfc66)
   empujó más de $1M en una hora. Medido: la dirección se cumplió a 4 horas en 10 de 12 casos (no en la
   hora siguiente). No es entrada por sí sola: mira la zona y el semáforo.
+* **☕ Mapa de la mañana** (lunes a viernes 7:45) y **📅 En 30 min: …** antes de cada noticia grande de
+  EE. UU. (empleo, inflación, la Fed): pools a cada lado, qué lado está más cargado, la confirmación y
+  las noticias del día. Plan: no entrar antes de la noticia; esperar el barrido.
 * **💥 Binance liquidó largos / cortos $X M en 1 minuto**: barrido confirmado en Binance
   (≥ $5M en BTC o ≥ $2M en ETH en un minuto).
 * **🏦 Los creadores de mercado retiran compras / ventas**: quitan gran parte de sus órdenes de un

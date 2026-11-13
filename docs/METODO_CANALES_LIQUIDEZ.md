@@ -1306,3 +1306,11 @@ barridos. La escucha manda de lunes a viernes a las 7:45 **"☕ Mapa de la maña
 cortos más cercanos de BTC y ETH con su tamaño y distancia, qué lado está más cargado y la confirmación
 del radar, con el plan: no entrar antes; si barre un pool y vuelve dentro, orden límite en el nivel barrido
 a favor de la tendencia (la entrada que el estudio de la trampa midió con ventaja).
+
+**Calendario de noticias (13 nov).** `data/calendario.json` (la escucha lo lee de GitHub cada 15 min y pasa
+la hora de Nueva York a la de Colombia con el horario de verano de EE. UU.): próximos eventos grandes —
+empleo de noviembre vie 4 dic 8:30; Fed (FOMC) mié 9 dic 14:00 y conferencia 14:30; inflación (IPC) de
+noviembre jue 10 dic 8:30; empleo de diciembre vie 8 ene 2027 8:30 — y cada jueves 8:30 las solicitudes de
+desempleo. Fuentes: calendarios de la BLS y de la Fed (confirmar en las páginas oficiales). El mapa de la
+mañana dice qué noticias hay ese día, y 30 minutos antes de cada noticia grande llega "📅 En 30 min: …" con
+el mapa de pools: no entrar antes; esperar el barrido y entrar con orden límite en el nivel barrido.

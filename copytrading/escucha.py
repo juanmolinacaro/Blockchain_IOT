@@ -891,6 +891,12 @@ def morning_map(state: State) -> str:
                       if a else " · arriba: sin pool cercano")
         if side:
             lines.append(f"   Más cargado: {side}. {conf['texto']}")
+    try:
+        from . import calendario
+        lines.append(calendario.describe(calendario.events_for(getattr(state, "calendar", {}) or {},
+                                                               datetime.now(COT).date())))
+    except Exception:
+        pass
     lines.append("Ventana de barridos: 8:00–11:00 (datos de EE. UU. 8:30, apertura 9:30). Plan: no entrar antes; "
                  "si barre un pool y vuelve dentro, orden límite en el nivel barrido a favor de la tendencia.")
     return "\n".join(lines)
@@ -1021,6 +1027,11 @@ def refresh_zones(state: State, source) -> None:
             log.error("zonas %s: %s", coin, exc)
     refresh_whales(state, source)
     state.watch = load_watch()
+    try:
+        from . import calendario
+        state.calendar = calendario.load()
+    except Exception:
+        pass
 
 
 def regression_channel(candles_1h: list, n: int = 48, k_sd: float = 2.0) -> tuple[float, float]:
@@ -1221,6 +1232,19 @@ async def run(minutes: float | None = None) -> None:
                             last_phone_beat = time.time()
                             spawn(phone_beat())
                         now_cot = datetime.now(COT)
+                        try:                                 # 📅 aviso 30 min antes de cada noticia grande
+                            from . import calendario
+                            for ev in calendario.events_for(getattr(state, "calendar", {}) or {}, now_cot.date()):
+                                mins = (ev["cot"] - now_cot).total_seconds() / 60
+                                if ev.get("impacto") == "alto" and 29 <= mins < 30:
+                                    alert(state, f"noticia-{ev['cot']:%Y%m%d%H%M}",
+                                          f"📅 En 30 min ({ev['cot']:%H:%M}): {ev['nombre']}",
+                                          "Noticia grande: el precio suele ir a barrer el pool más cercano. No entrar antes; "
+                                          "esperar el barrido y entrar con orden límite en el nivel barrido a favor de la "
+                                          "tendencia.\n" + morning_map(state),
+                                          {"moneda": "BTC", "precio": state.price.get("BTC", 0.0), "evento": ev["nombre"]})
+                        except Exception as exc:
+                            log.error("calendario: %s", exc)
                         if ((now_cot.hour, now_cot.minute) == MORNING_MAP and now_cot.weekday() < 5
                                 and review.get("map") != now_cot.strftime("%Y-%m-%d")):
                             review["map"] = now_cot.strftime("%Y-%m-%d")
