@@ -135,7 +135,8 @@ def test_weekend_rule_colombia_time():
     from copytrading.method.monitor import trading_allowed
     ms = lambda y, mo, d, h: int(datetime(y, mo, d, h, tzinfo=timezone.utc).timestamp() * 1000)
     assert trading_allowed(ms(2026, 10, 29, 20))          # jueves
-    assert not trading_allowed(ms(2026, 10, 30, 12))      # viernes 7 h Colombia
+    assert trading_allowed(ms(2026, 10, 30, 12))          # viernes 7 h Colombia (mañana: sí, desde el 13 nov)
+    assert not trading_allowed(ms(2026, 10, 30, 17))      # viernes 12 h Colombia (tarde: no)
     assert not trading_allowed(ms(2026, 10, 31, 20))      # sábado
     assert not trading_allowed(ms(2026, 11, 1, 17))       # domingo 12 h Colombia
     assert trading_allowed(ms(2026, 11, 1, 18))           # domingo 13 h Colombia

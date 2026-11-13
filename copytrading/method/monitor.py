@@ -186,12 +186,16 @@ COLOMBIA_OFFSET_MS = -5 * 3_600_000
 
 
 def trading_allowed(now_ms: int) -> bool:
-    """Regla de Juan: viernes y sábado no se opera; se vuelve a operar el domingo desde las 13:00
-    (hora de Colombia, UTC-5), antes del tramo más volátil del fin de semana (15-19 h)."""
+    """Regla de Juan (hora de Colombia, UTC-5): el viernes se opera hasta las 12:00; viernes por la tarde
+    y sábado no; se vuelve el domingo desde las 13:00. Ajuste del 13 nov con datos (BTC 1H, ~208 días,
+    rango medio por vela): viernes 6-12 h 0,88 % (tan activo como cualquier mañana), viernes 12-18 h
+    0,53 %, viernes noche 0,33 %, sábado 0,29-0,30 %, domingo 12-18 h 0,50 % y noche 0,67 %."""
     local = (now_ms + COLOMBIA_OFFSET_MS) // 1000
     weekday = (local // 86_400 + 3) % 7          # 0 = lunes (el 1-1-1970 fue jueves)
     hour = (local % 86_400) // 3_600
-    if weekday in (4, 5):
+    if weekday == 4:
+        return hour < 12
+    if weekday == 5:
         return False
     return not (weekday == 6 and hour < 13)
 

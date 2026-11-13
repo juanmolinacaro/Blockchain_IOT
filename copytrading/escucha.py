@@ -536,7 +536,7 @@ def trade_card(state: State, coin: str, up: bool, now_ms: int | None = None) -> 
     if not px:
         return "", None
     if not trading_allowed(now_ms if now_ms is not None else int(time.time() * 1000)):
-        return "\n📋 Hoy no se opera (viernes/sábado hasta el domingo 1 pm).", None
+        return "\n📋 Ahora no se opera (viernes desde las 12 pm, sábado y domingo hasta la 1 pm).", None
     if trend and trend != ("ALCISTA" if up else "BAJISTA"):
         return (f"\n⚠ Contra la tendencia ({trend.lower()}): no abrir {side.lower()}. Si tienes una posición a "
                 f"favor de la tendencia, asegura ganancias."), None

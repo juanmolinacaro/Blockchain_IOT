@@ -1254,3 +1254,17 @@ separado en cada régimen; la confirmación usa los del régimen actual y, para 
 casos en ese régimen, los de todos los datos. Con la primera semana: en **bajista** la mayoría sobreapalancada
 acertó 84 % (89 casos, peso 1,37) y el público 47 % (no vota); en **rango** la mayoría 99 % (71) y el
 público 31 % (no vota); **alcista**: todavía sin datos. `copytrading pesos` lo muestra por régimen.
+
+**Horario de operación ajustado (13 nov).** Juan: "el viernes después del mediodía empieza a ser más
+lento". BTC 1H, ~208 días, rango medio por vela (y volumen medio por hora) en hora de Colombia:
+
+| Día | 0-6 h | 6-12 h | 12-18 h | 18-24 h |
+|---|---|---|---|---|
+| Lun–Jue | 0,49–0,54 % | **0,73–0,87 %** | 0,50–0,61 % | 0,51–0,61 % |
+| **Viernes** | 0,56 % | **0,88 %** ($201M) | 0,53 % | **0,33 %** ($45M) |
+| Sábado | 0,29 % | 0,30 % | 0,30 % | 0,28 % |
+| Domingo | 0,31 % | 0,37 % | 0,50 % | **0,67 %** |
+
+La mañana del viernes es tan activa como la del jueves; el viernes por la noche y el sábado, la mitad.
+Regla nueva (`trading_allowed`): **viernes se opera hasta las 12:00**; viernes por la tarde y sábado, no;
+domingo desde las 13:00. Aplica a las fichas, al semáforo y a los avisos.
