@@ -54,6 +54,7 @@ COOLDOWN_S = 30 * 60         # no repetir el mismo tipo de aviso antes de 30 min
 BEAT_MIN = 15                # línea "✓ Funcionando" en la ventana cada 15 min
 PHONE_BEAT_H = 6             # mensaje silencioso al móvil cada 6 h para saber que sigue viva
 REVIEW_HOUR = 20             # revisión diaria de los avisos (hora Colombia): ajustar cada día, no al mes
+MORNING_MAP = (7, 45)        # mapa de la mañana, antes de los datos de EE. UU. (8:30) y la apertura (9:30)
 
 
 class State:
@@ -864,6 +865,37 @@ def check_leader(state: State, coin: str) -> None:
           {"moneda": coin, "precio": px, "lider": state.leader, "empuje_60m": round(lead), "votos": conf["votos"]})
 
 
+def morning_map(state: State) -> str:
+    """☕ Mapa de la mañana (13 nov, idea de Juan: "la noticia es la chispa; hay que usarla a favor de la
+    liquidez"). De lunes a viernes, BTC+ETH 1H ~208 días: entre las 8 y las 11 (Colombia) el precio barre el
+    máximo o el mínimo de 24 h en el 33–36 % de las horas (frente a 8–15 % el resto del día) y concentra la
+    mayoría de los barridos grandes (> 1,5 %). Antes de esa ventana: dónde está la liquidez a cada lado,
+    hacia qué lado está cargada la mayoría y la confirmación del radar."""
+    lines = []
+    for coin in COINS:
+        px = state.price.get(coin)
+        z = state.zones.get(coin)
+        if not px or not z:
+            continue
+        below = sorted((l for l in z[0] if l.center < px), key=lambda l: px - l.center)
+        above = sorted((s_ for s_ in z[1] if s_.center > px), key=lambda s_: s_.center - px)
+        b = below[0] if below else None
+        a = above[0] if above else None
+        side = ""
+        if a and b:
+            side = ("abajo (largos)" if b.usd > 1.3 * a.usd else "arriba (cortos)" if a.usd > 1.3 * b.usd else "parejo")
+        conf = confirmation(state, coin)
+        lines.append(f"{coin} {px:,.0f} · abajo: largos {b.center:,.0f} (${b.usd / 1e6:,.0f}M, {(1 - b.center / px) * 100:.1f} %)"
+                     if b else f"{coin} {px:,.0f} · abajo: sin pool cercano")
+        lines[-1] += (f" · arriba: cortos {a.center:,.0f} (${a.usd / 1e6:,.0f}M, {(a.center / px - 1) * 100:.1f} %)"
+                      if a else " · arriba: sin pool cercano")
+        if side:
+            lines.append(f"   Más cargado: {side}. {conf['texto']}")
+    lines.append("Ventana de barridos: 8:00–11:00 (datos de EE. UU. 8:30, apertura 9:30). Plan: no entrar antes; "
+                 "si barre un pool y vuelve dentro, orden límite en el nivel barrido a favor de la tendencia.")
+    return "\n".join(lines)
+
+
 def check_squeeze(state: State, coin: str) -> None:
     """Aviso 🗜 cuando el precio lleva 60 minutos apretado (como el triángulo del 9 nov), con lo que hacen
     las cuentas mientras tanto: así se ve quién se posiciona antes de la ruptura. `copytrading episodios`
@@ -1189,6 +1221,14 @@ async def run(minutes: float | None = None) -> None:
                             last_phone_beat = time.time()
                             spawn(phone_beat())
                         now_cot = datetime.now(COT)
+                        if ((now_cot.hour, now_cot.minute) == MORNING_MAP and now_cot.weekday() < 5
+                                and review.get("map") != now_cot.strftime("%Y-%m-%d")):
+                            review["map"] = now_cot.strftime("%Y-%m-%d")
+                            try:
+                                alert(state, f"mapa-{review['map']}", "☕ Mapa de la mañana", morning_map(state),
+                                      {"moneda": "BTC", "precio": state.price.get("BTC", 0.0)})
+                            except Exception as exc:
+                                log.error("mapa de la mañana: %s", exc)
                         if now_cot.minute % 15 == 0 and int(time.time() // 3600) == last_hour:
                             for coin in COINS:
                                 check_plans(state, coin, closed=("15m",))

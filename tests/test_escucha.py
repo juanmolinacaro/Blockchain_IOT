@@ -346,3 +346,13 @@ def test_leader_push_alert_and_vote(monkeypatch, tmp_path):
     esc.check_leader(st, "BTC")
     assert "lider-BTC-vende" in (tmp_path / "ev.jsonl").read_text()
     assert esc.confirmation(st, "BTC")["votos"]["líder"] == -1
+
+
+def test_morning_map_lists_pools():
+    from types import SimpleNamespace
+    import copytrading.escucha as esc
+    st = esc.State({})
+    st.price["BTC"] = 70000
+    st.zones["BTC"] = ([SimpleNamespace(center=69300, usd=500e6)], [SimpleNamespace(center=73000, usd=300e6)])
+    txt = esc.morning_map(st)
+    assert "largos 69,300" in txt and "cortos 73,000" in txt and "Más cargado: abajo" in txt

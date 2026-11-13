@@ -1290,3 +1290,19 @@ Cambios: la escucha elige sola la **cuenta líder** (la que gana con más eficie
 y mueve ≥ $1.000M en 30 días; hoy `0xfc66…`), sigue su empuje agresivo minuto a minuto y avisa **🐋 "la
 cuenta líder COMPRA/VENDE agresivo $X M en 1 h"** cuando pasa de $1M; es además un voto ("líder") de la
 confirmación, con peso medido por `pesos.py`. `avisos` lo mide ahora también a 4 h.
+
+## La noticia es la chispa; la liquidez, el combustible (13 nov 2026)
+
+Juan: "siempre que hay una noticia cae a un pool sobreapalancado y se liquidan millones; hay que usar las
+noticias a favor de la liquidez". ¿A qué hora barre el precio? Lunes a viernes, BTC+ETH 1H ~208 días, % de
+horas cuya vela supera el máximo o el mínimo de las 24 h anteriores (hora Colombia):
+
+* **08:00 35,6 % · 09:00 33,2 % · 10:00 33,9 %** (y 29–37 barridos grandes > 1,5 % en cada una);
+* 07:00 22,5 %; 03:00 19,1 % (apertura de Europa); 11:00–12:00 ~20 %;
+* resto del día 8–15 %, y de 15:00 a 19:00 solo 8–9 %.
+
+La ventana de 8 a 11 (datos de EE. UU. a las 8:30, apertura de Nueva York a las 9:30) concentra los
+barridos. La escucha manda de lunes a viernes a las 7:45 **"☕ Mapa de la mañana"**: pools de largos y
+cortos más cercanos de BTC y ETH con su tamaño y distancia, qué lado está más cargado y la confirmación
+del radar, con el plan: no entrar antes; si barre un pool y vuelve dentro, orden límite en el nivel barrido
+a favor de la tendencia (la entrada que el estudio de la trampa midió con ventaja).
