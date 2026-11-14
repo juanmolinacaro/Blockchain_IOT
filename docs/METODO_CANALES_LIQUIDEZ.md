@@ -1338,3 +1338,10 @@ Archivos: `data/escucha_pc/2026-11-14/` (cuentas por hora, flujo por minuto, Bin
   cambios hasta tener más viernes.
 * **Mapa de liquidez**: los niveles 100× y los bloques del radar se barrieron uno tras otro (68.261 y 67.751
   a las 00:45 del vie 13; 69.812 a las 8:30; bloque 66.578 a las 11 pm → mínimo 66.434).
+* **Cuenta de papel del semáforo (12–14 nov)**: 6 señales, todas "trampa" en largo contra la tendencia; ninguna
+  pasó el filtro. Sin filtro habrían dado −4,28R (1 ganadora de 5). El filtro funcionó, pero el semáforo no
+  dio ninguna señal en corto en una caída del 12 %: los rebotes no llegaron al máximo de 24 h. Candidato a
+  medir: barrido de un nivel 100× de cortos + venta agresiva del líder (vie 13: 69.812 barrido 8:30, 🐋 vende
+  8:39 a 69.987 → 66.434).
+* **Rendimiento del estudio (al 14 nov)**: ganan solo 4 de 30 cuentas: El Cambista +8,5M (creador de mercado),
+  El Paciente +3,6M, 0xdf9e +0,3M y 0x7b7f +0,15M. Las otras 26 pierden.
