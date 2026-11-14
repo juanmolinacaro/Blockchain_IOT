@@ -1359,3 +1359,21 @@ Archivos: `data/escucha_pc/2026-11-14/` (cuentas por hora, flujo por minuto, Bin
   racha no la mete en la alerta ("en observación": 0x7b7f −$24,9M, 0xdf9e −$2,6M). 0xf5d8 (+$0,3M en $81.200M,
   probablemente arbitraje con otro exchange) y 0x3999 (−$264M) salen. Resultado al 14 nov: se quedan 12,
   en observación 2, salen 16. La líder debe ganar también en su historial (El Paciente +$46,9M).
+
+## ¿Se acaba la tendencia bajista? (14 nov 2026, `estudios/tendencia_diaria.py`)
+
+Lectura de Juan: "la tendencia bajista está a pocos días de acabar; luego rango de acumulación y después alcista".
+
+* Contexto: máximo histórico 126.297 (6 oct 2025); hoy 65.951 (−48 %). Todo 2026 es un gran rango 57,8k–98k
+  con mínimos 60.000 (feb), 58.062 (jun) y 57.768 (jul); los rebotes fallaron en 82,8k, 81,5k y 87,5k.
+  Debajo de la EMA200 diaria desde el 5 nov (10 días, −13 %); RSI diario 21; 5 semanas rojas cerradas + la actual −12 %.
+* RSI diario ≤ 22 (5 casos desde 2022): en 4 el piso llegó en 0–2 días (bajó 5–7 % más como mucho) y a 90 días
+  siempre arriba (+4 % a +42 %). La excepción, jun 2026, empezó en el mismo precio (66.732): bajó 13 % más
+  durante 29 días hasta 58k antes de subir +18 %.
+* ≥ 5 semanas rojas: feb 2026 (6 semanas) terminó en el piso de 60k (+17 % a 12 semanas); 2022 (9 semanas) siguió −29 %.
+* En contra de un piso inmediato: la mayoría sigue en largo (Binance 3,1 L/S, funding +), El Paciente subió su corto
+  de BTC de 81 a 138 BTC (entrada media 69.573) con un largo en ETH; el interés abierto baja pero sin capitulación.
+* Conclusión: la sobreventa favorece el piso en días o pocas semanas, y debajo está el pool grande de 57,8k–60k
+  (triple suelo + EMA mensual ~60,2k). Escenario base: barrido de ese suelo o rebote desde aquí → rango
+  60k–76k (EMA200) de acumulación; alcista solo al recuperar la EMA200 diaria. Señales de piso a vigilar:
+  funding negativo, L/S < 2, El Paciente cierra su corto o compra (🐋), varios días sin mínimos nuevos.
