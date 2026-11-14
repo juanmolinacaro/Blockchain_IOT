@@ -1345,3 +1345,10 @@ Archivos: `data/escucha_pc/2026-11-14/` (cuentas por hora, flujo por minuto, Bin
   8:39 a 69.987 → 66.434).
 * **Rendimiento del estudio (al 14 nov)**: ganan solo 4 de 30 cuentas: El Cambista +8,5M (creador de mercado),
   El Paciente +3,6M, 0xdf9e +0,3M y 0x7b7f +0,15M. Las otras 26 pierden.
+* **Nuevo registro "barrido + líder" (14 nov, pedido por Juan)**: el precio barre un pool 100x (niveles vistos
+  en el mapa durante las últimas 6 h, porque el mapa cambia sus 2 niveles de una hora a otra), vuelve dentro
+  en menos de 2 h y la cuenta líder empuja ≥ $1M en 60 min hacia el otro lado → entrada a mercado, stop 0,1 %
+  más allá de la mecha, gestión del semáforo (mitad a 1R y stop a la entrada, resto a 2R). Solo cuenta de
+  papel (`filtro=false`), no suena. Repaso con las horas del líder (4–14 nov, aproximado por hora): 3 casos,
+  +0,71R — vie 13 corto 69.548 → TP2 (+1,38R); mar 10 largo +0,40R; jue 5 largo contra la tendencia −1,07R.
+  Muy pocos casos: se mide unas semanas antes de decidir.

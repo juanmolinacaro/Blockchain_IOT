@@ -356,3 +356,28 @@ def test_morning_map_lists_pools():
     st.zones["BTC"] = ([SimpleNamespace(center=69300, usd=500e6)], [SimpleNamespace(center=73000, usd=300e6)])
     txt = esc.morning_map(st)
     assert "largos 69,300" in txt and "cortos 73,000" in txt and "Más cargado: abajo" in txt
+
+
+def test_sweep_leader_goes_to_paper_only(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    import copytrading.escucha as esc
+    import copytrading.semaforo as sm
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.setattr(sm, "PAPER", tmp_path / "papel.jsonl")
+    monkeypatch.setattr(sm.save, "__defaults__", (tmp_path / "papel.jsonl",))
+    monkeypatch.setattr(sm.load, "__defaults__", (tmp_path / "papel.jsonl",))
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.leader = "0xlead"
+    st.zones["BTC"] = ([SimpleNamespace(center=66578, usd=1)], [SimpleNamespace(center=69812, usd=1)])
+    st.price["BTC"] = 70100
+    st.extremes["BTC"] = [70214, 69900]
+    esc.check_sweep_leader(st, "BTC")                            # barre, sin líder todavía
+    assert not st.paper if getattr(st, "paper", None) is not None else True
+    st.price["BTC"] = 69318
+    st.extremes["BTC"] = [69400, 69300]
+    st.leader_hist["BTC"].append(-2_000_000)
+    esc.check_sweep_leader(st, "BTC")
+    assert st.paper and st.paper[-1].setup == "barrido+líder" and st.paper[-1].side == "short" and not st.paper[-1].filtro
+    assert "barrido+líder" in (tmp_path / "papel.jsonl").read_text()
+    assert not (tmp_path / "ev.jsonl").exists()                  # no suena en el móvil

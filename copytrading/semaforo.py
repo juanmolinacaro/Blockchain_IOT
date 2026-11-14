@@ -27,6 +27,7 @@ import json
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from types import SimpleNamespace
 
 PAPER = Path("data/papel.jsonl")
 FEE = 0.0009
@@ -144,6 +145,72 @@ def detect_all(c, trend: str) -> list[Signal]:
         if s:
             out.append(s)
     return out
+
+
+# ------------------------------------------------------------------ barrido + líder (solo registro, 14 nov)
+SWEEP_WINDOW_MS = 2 * 3_600_000      # el barrido cuenta durante 2 h
+SWEEP_LEADER = "barrido+líder"
+
+
+ZONE_MEMORY_MS = 6 * 3_600_000      # el mapa cambia sus 2 niveles principales de una hora a otra (vie 13: 69.812
+                                    # salía a las 7:00 y a las 8:00 ya no): se recuerdan los de las últimas 6 h
+
+
+def record_sweep(sweeps: dict, zones: tuple | None, hi: float, lo: float, now_ms: int) -> None:
+    """Guarda cuándo el precio barre un pool de corto plazo (25-100x): `sweeps[lado] = [nivel, mecha, t]`.
+    "short" = barrió los cortos de arriba; "long" = barrió los largos de abajo. Los niveles vistos en las últimas
+    6 h se recuerdan en `sweeps["_mem"]` y se olvidan al barrerse."""
+    mem = sweeps.setdefault("_mem", {})
+    for side, zs in zip(("long", "short"), zones or ([], [])):
+        for z in zs or []:
+            mem[(side, round(z.center))] = now_ms
+    for k in [k for k, t in mem.items() if now_ms - t > ZONE_MEMORY_MS]:
+        del mem[k]
+    longs = [SimpleNamespace(center=c) for (s, c) in mem if s == "long"]
+    shorts = [SimpleNamespace(center=c) for (s, c) in mem if s == "short"]
+    s = sweeps.get("short")                                   # la mecha del barrido sigue creciendo (8:30 → 70.214)
+    if s and now_ms - s[2] <= SWEEP_WINDOW_MS and hi > s[1]:
+        s[1] = hi
+    s = sweeps.get("long")
+    if s and now_ms - s[2] <= SWEEP_WINDOW_MS and lo < s[1]:
+        s[1] = lo
+    for side, zs, hit in (("short", shorts, lambda c: hi >= c), ("long", longs, lambda c: lo <= c)):
+        for z in zs:
+            if hit(z.center):
+                mem.pop((side, z.center), None)              # barrido: ya no queda liquidez ahí
+    for z in shorts:
+        if hi >= z.center:
+            s = sweeps.get("short")
+            if s and now_ms - s[2] <= SWEEP_WINDOW_MS and abs(s[0] - z.center) / z.center < 0.004:
+                s[1], s[2] = max(s[1], hi), now_ms
+            else:
+                sweeps["short"] = [z.center, hi, now_ms]
+    for z in longs:
+        if lo <= z.center:
+            s = sweeps.get("long")
+            if s and now_ms - s[2] <= SWEEP_WINDOW_MS and abs(s[0] - z.center) / z.center < 0.004:
+                s[1], s[2] = min(s[1], lo), now_ms
+            else:
+                sweeps["long"] = [z.center, lo, now_ms]
+
+
+def detect_sweep_leader(sweeps: dict, lead_usd: float, px: float, now_ms: int, min_usd: float) -> Signal | None:
+    """Idea medida en la revisión del 14 nov: el precio barre un pool 100x, vuelve dentro, y la cuenta líder
+    empuja hacia el otro lado (vie 13: barre los cortos de 69.812 a las 8:30, la líder vende a las 8:39 → 66.434).
+    Entrada a mercado; stop 0,1 % más allá de la mecha del barrido."""
+    if abs(lead_usd) < min_usd or not px:
+        return None
+    short = lead_usd < 0
+    s = sweeps.get("short" if short else "long")
+    if not s or now_ms - s[2] > SWEEP_WINDOW_MS:
+        return None
+    level, wick, _ = s
+    if (px >= level) if short else (px <= level):          # todavía no volvió dentro
+        return None
+    stop = wick * 1.001 if short else wick * 0.999
+    return Signal(SWEEP_LEADER, "", "short" if short else "long", px, stop,
+                  note=f"barrió los {'cortos' if short else 'largos'} 100x de {level:,.0f} (mecha {wick:,.0f}) y la líder "
+                       f"{'VENDE' if short else 'COMPRA'} ${abs(lead_usd) / 1e6:.1f}M")
 
 
 def passes_filter(conf: dict, side: str) -> bool:

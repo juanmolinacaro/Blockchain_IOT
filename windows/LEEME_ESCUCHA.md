@@ -42,6 +42,9 @@ enchufado. La pantalla sí se puede apagar.
 llenan, TP1, stop o TP2), los planes vigilados (👀 🧹 ✅ ⏳ ❌), las posiciones abiertas (🔒 🎯) y las
 💥 liquidaciones de Binance. Lo demás (💰, 🏦, 🤖, 🗜, rupturas) se sigue guardando para estudiarlo, pero ya
 no suena. La cuenta de papel de las señales queda en `data/papel.jsonl` (mándala con los demás archivos).
+Desde el 14 nov la cuenta de papel también registra, **sin sonar**, el setup **barrido + líder**: el precio barre
+un pool 100x, vuelve dentro y la cuenta líder empuja ≥ $1M hacia el otro lado (entrada a mercado, stop 0,1 % más allá
+de la mecha). Se mide unas semanas antes de decidir si llega al móvil.
 
 * **💰 Las cuentas que ganan COMPRAN / VENDEN agresivo**: lo que empujan, en 5 minutos, las cuentas
   del estudio que van ganando dinero está muy por encima de lo normal. Dice hacia qué pool de liquidez

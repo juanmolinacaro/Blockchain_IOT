@@ -50,3 +50,42 @@ def test_mw_requires_weaker_second_peak():
     c = base + up + top1 + down + valley + up2 + top2 + after + brk
     s = sm.detect_mw(c, "BAJISTA")
     assert s is None or s.side == "short"
+
+
+def test_sweep_then_leader_sells_opens_short_record():
+    z = ([C(center=66_578)], [C(center=69_812)])
+    sw = {}
+    sm.record_sweep(sw, z, 70_214, 69_500, 0)                    # 8:30: barre los cortos de 69.812
+    assert sw["short"] == [69_812, 70_214, 0] and ("short", 69_812) not in sw["_mem"]
+    sm.record_sweep(sw, ([], [C(center=70_337)]), 69_900, 69_400, 60_000)   # el mapa cambia: no se barre
+    assert sw["short"][0] == 69_812 and ("short", 70_337) in sw["_mem"]
+    # la líder vende, pero el precio sigue encima del nivel: todavía no
+    assert sm.detect_sweep_leader(sw, -1.5e6, 69_987, 9 * 60_000, 1e6) is None
+    s = sm.detect_sweep_leader(sw, -2.0e6, 69_318, 39 * 60_000, 1e6)
+    assert s and s.side == "short" and s.entry == 69_318 and round(s.stop) == round(70_214 * 1.001)
+    assert sm.detect_sweep_leader(sw, -0.5e6, 69_318, 40 * 60_000, 1e6) is None          # empuje pequeño
+    assert sm.detect_sweep_leader(sw, -2e6, 69_318, sm.SWEEP_WINDOW_MS + 1, 1e6) is None   # barrido viejo
+    assert sm.detect_sweep_leader(sw, +2e6, 69_318, 60_000, 1e6) is None                # compra sin barrido abajo
+
+
+def test_sweep_of_longs_then_leader_buys():
+    sw = {}
+    sm.record_sweep(sw, ([C(center=68_261)], []), 68_500, 67_474, 0)
+    s = sm.detect_sweep_leader(sw, 1.2e6, 68_776, 30 * 60_000, 1e6)
+    assert s and s.side == "long" and round(s.stop) == round(67_474 * 0.999)
+
+
+def test_zone_memory_keeps_levels_that_left_the_map():
+    sw = {}
+    sm.record_sweep(sw, ([], [C(center=69_812)]), 69_300, 69_100, 0)          # 7:00: el mapa muestra 69.812
+    sm.record_sweep(sw, ([], [C(center=70_337)]), 70_214, 69_500, 3_600_000)  # 8:30: ya no, pero lo recuerda
+    assert sw["short"][0] == 69_812
+    sm.record_sweep(sw, ([], []), 69_000, 68_900, 3_600_000 + sm.ZONE_MEMORY_MS + 1)
+    assert not sw["_mem"]                                                        # olvida después de 6 h
+
+
+def test_sweep_wick_keeps_growing():
+    sw = {}
+    sm.record_sweep(sw, ([], [C(center=69_812)]), 70_000, 69_700, 0)
+    sm.record_sweep(sw, ([], []), 70_214, 69_900, 5 * 60_000)
+    assert sw["short"][1] == 70_214

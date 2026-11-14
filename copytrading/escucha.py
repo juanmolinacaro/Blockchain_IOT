@@ -73,6 +73,7 @@ class State:
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
         self.leader_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}   # empuje neto de la cuenta líder/min
         self.leader: str = ""
+        self.sweeps: dict[str, dict] = {}                         # pools 100x barridos (semaforo.record_sweep)
         self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
         self.watch: list[dict] = []                              # planes vigilados (vigilar.json)
         self.extremes: dict[str, list[float]] = {}              # [máximo, mínimo] del minuto: mechas (12 nov: el TP1
@@ -246,6 +247,7 @@ def close_minute(state: State, source, makers: list[str], snap: dict | None = No
         state.crowd_hist[coin].append(m.get("otros|compra", 0.0) - m.get("otros|venta", 0.0))
         state.leader_hist[coin].append(m.get("lider|compra", 0.0) - m.get("lider|venta", 0.0))
         check_leader(state, coin)
+        check_sweep_leader(state, coin)
         grp = state.signal_group
         state.net_hist[coin].append(m.get(f"{grp}|compra", 0.0) - m.get(f"{grp}|venta", 0.0))
         bid = ask = ""
@@ -863,6 +865,37 @@ def check_leader(state: State, coin: str) -> None:
           f"A {px:,.0f}. Cuando esta cuenta empuja así, la dirección se ha cumplido a 4 h en 10 de 12 casos "
           f"(no en la hora siguiente). No es entrada por sí sola: mira la zona y el semáforo.\n{conf['texto']}",
           {"moneda": coin, "precio": px, "lider": state.leader, "empuje_60m": round(lead), "votos": conf["votos"]})
+
+
+def check_sweep_leader(state: State, coin: str) -> None:
+    """Registro (no suena): barrido de un pool 100x + la cuenta líder empujando hacia el otro lado. Va a la
+    cuenta de papel con filtro=False para medirlo antes de mandarlo al móvil (Juan, 14 nov)."""
+    from . import semaforo
+    px = state.price.get(coin)
+    if not px:
+        return
+    now = int(time.time() * 1000)
+    hi, lo = state.extremes.get(coin, [px, px])
+    sweeps = state.sweeps.setdefault(coin, {})
+    semaforo.record_sweep(sweeps, state.zones.get(coin), hi, lo, now)
+    if not state.leader:
+        return
+    lead = sum(list(state.leader_hist.get(coin, []))[-60:])
+    sig = semaforo.detect_sweep_leader(sweeps, lead, px, now, LEADER_MIN)
+    if not sig:
+        return
+    if getattr(state, "paper", None) is None:
+        state.paper = semaforo.load()
+    conf = confirmation(state, coin)
+    trend = state.trend.get(coin, "")
+    sig.note += f" · tendencia {trend.lower() or '?'}"
+    p = semaforo.open_signal(state.paper, sig, coin, now, False, conf["votos"])
+    if p:
+        log.warning("registro %s %s %s %.0f stop %.0f", sig.setup, coin, sig.side, p.entry, p.stop)
+        try:
+            semaforo.save(state.paper)
+        except OSError:
+            pass
 
 
 def morning_map(state: State) -> str:
