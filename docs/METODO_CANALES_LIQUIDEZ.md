@@ -1314,3 +1314,27 @@ noviembre jue 10 dic 8:30; empleo de diciembre vie 8 ene 2027 8:30 — y cada ju
 desempleo. Fuentes: calendarios de la BLS y de la Fed (confirmar en las páginas oficiales). El mapa de la
 mañana dice qué noticias hay ese día, y 30 minutos antes de cada noticia grande llega "📅 En 30 min: …" con
 el mapa de pools: no entrar antes; esperar el barrido y entrar con orden límite en el nivel barrido.
+
+## Revisión semanal (14 nov 2026) — datos del PC del 4 al 14 nov
+
+Archivos: `data/escucha_pc/2026-11-14/` (cuentas por hora, flujo por minuto, Binance, Nasdaq, 444 avisos).
+
+* **Cuenta líder (El Paciente, 0xfc66)**: horas con empuje ≥ $1M → precio a favor a 4 h en 12 de 15
+  (+0,32 % de media); a 1 h y 12 h, moneda al aire. Avisos 🐋 de la semana: 4 de 4 (compró 00:58 y 01:28
+  del vie 13 a 68,2k → subió a 70,2k; vendió 08:39 y 09:09 a 70,0k/69,3k → cayó a 66,4k).
+* **Resto de la cohorte**: nadie acierta la dirección a 4 h (cazador grande 22/42; las 30 juntas 31/72).
+  Se sigue solo al líder.
+* **Pesos por régimen (acierto a 4 h)**: mayoría sobreapalancada 71 % en bajista (407 casos) y 91 % en
+  rango (124); interés abierto 69 % en total; liquidaciones 59 % en bajista; el empuje del público no vota
+  (49–54 %). Tendencia 79 % y ballenas 64 % en bajista, aún con menos de 30 casos.
+* **Liquidaciones de largos en Binance (≥ $5M BTC en 1 min) en tendencia bajista**: no son el piso por sí
+  solas: en 5 de 8 el precio siguió bajando más de 0,5 % y a 4 h quedó −0,48 % de media. El rebote real
+  (+1,3 %) llegó cuando hubo dos barridos seguidos y la cuenta líder compró (vie 13 00:57). Un solo caso:
+  a vigilar.
+* **Nasdaq**: 11 movimientos fuertes de BTC; con datos de la bolsa, 4 a la vez, 2 solo cripto y 1 en que la
+  bolsa se movió primero.
+* **Horas**: el mayor movimiento por hora es 9–10 am COT (~1 %/h), luego 8 am (dato 8:30) y 4 pm / 10 pm.
+  El viernes 13 la noche también se movió fuerte (68,25k → 66,7k entre 9 y 10 pm). Regla del viernes sin
+  cambios hasta tener más viernes.
+* **Mapa de liquidez**: los niveles 100× y los bloques del radar se barrieron uno tras otro (68.261 y 67.751
+  a las 00:45 del vie 13; 69.812 a las 8:30; bloque 66.578 a las 11 pm → mínimo 66.434).
