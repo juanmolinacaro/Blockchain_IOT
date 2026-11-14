@@ -1,0 +1,246 @@
+{"t": 1794174482195, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.03286, "60": -0.04051}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794174721737, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.01582, "60": -0.0128}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794174724929, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.03988, "60": -0.03299}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794174780713, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00936, "60": -0.00904}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794174782748, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.0284, "60": -0.0262}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794174905259, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.007, "60": -0.00638}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794174961311, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": 0.00726, "60": 0.00863}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794175323219, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": -0.00417, "60": -0.00089}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794176640981, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00276, "60": 0.01424}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794176821732, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00081, "60": 0.0149}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794177720543, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": -0.00102, "60": 0.00813}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794178980650, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.01248, "60": -0.00071}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794182342351, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": 0.00433, "60": 0.00933}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794182400933, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00079, "60": 0.00533}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794184922139, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00389, "60": 0.002}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794186362480, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": -0.00532, "60": 0.00093}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794186420844, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": -0.00542, "60": -0.0015}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794186480896, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00595, "60": -0.00212}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794186781246, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.00334, "60": 0.00112}, "acierto_15": true, "acierto_60": false, "ficha": {"lado": "short", "entrada": 75116.0, "stop": 75518.11, "tp1": 74049.36, "r": 2.65}, "r": -1.0}
+{"t": 1794186842464, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.00309, "60": 0.00464}, "acierto_15": true, "acierto_60": false, "ficha": {"lado": "short", "entrada": 2134.5, "stop": 2151.32, "tp1": 2068.25, "r": 3.94}, "r": -1.0}
+{"t": 1794188461412, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00252, "60": 0.00598}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794197400991, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.00025, "60": -0.00462}, "acierto_15": true, "acierto_60": true, "ficha": {"lado": "short", "entrada": 74970.0, "stop": 75200.63, "tp1": 74049.36, "r": 3.99}, "r": 3.99}
+{"t": 1794200581895, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.00126, "60": -0.00182}, "acierto_15": true, "acierto_60": true, "ficha": {"lado": "short", "entrada": 74654.0, "stop": 75190.62, "tp1": 73496.76, "r": 2.16}, "r": -1.0}
+{"t": 1794202321784, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00044, "60": -0.0023}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794206466416, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00261, "60": -0.00645}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794208441708, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00042, "60": -0.00188}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794208444437, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": 0.00072, "60": 0.0034}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794208444758, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00072, "60": 0.0034}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794208445861, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00072, "60": 0.0034}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794211381794, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00331, "60": 0.01295}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794211384127, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00392, "60": 0.01765}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794214263969, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": 0.0016, "60": -0.00675}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794214321950, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": 0.0028, "60": -0.00284}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794217622333, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 7e-05, "60": -0.00108}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794220502772, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": 0.00013, "60": 0.00734}, "acierto_15": false, "acierto_60": false, "ficha": {"lado": "short", "entrada": 74122.0, "stop": 74398.43, "tp1": 73496.76, "r": 2.26}, "r": -1.0}
+{"t": 1794223024273, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00293, "60": 0.00265}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794225903027, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00257, "60": 0.00673}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794225905356, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00364, "60": 0.00435}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794229741592, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00283, "60": -0.0045}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794229743123, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00207, "60": -0.00231}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794235021531, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": 0.00637, "60": 0.00962}, "acierto_15": false, "acierto_60": false, "ficha": {"lado": "short", "entrada": 74496.0, "stop": 74780.0, "tp1": 73496.76, "r": 3.52}, "r": -1.0}
+{"t": 1794236221161, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": 1, "cambios": {"15": 0.00092, "60": 0.0078}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794244081143, "moneda": "BTC", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.00032, "60": 0.00025}, "acierto_15": true, "acierto_60": false, "ficha": {"lado": "short", "entrada": 74780.0, "stop": 75179.6, "tp1": 73496.76, "r": 3.21}, "r": -1.0}
+{"t": 1794246001690, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": 0.00349, "60": 0.00335}, "acierto_15": false, "acierto_60": false, "ficha": {"lado": "short", "entrada": 2117.9, "stop": 2133.3, "tp1": 2089.01, "r": 1.88}, "r": -1.0}
+{"t": 1794249601963, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.0006, "60": 0.00434}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794253023625, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00372, "60": 0.00038}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794253081752, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.003, "60": 0.00176}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794253084091, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.0042, "60": 0.00231}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794254703295, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00044, "60": 0.00044}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794259800839, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00235, "60": 0.00085}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794259803148, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00431, "60": -0.00253}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794266464425, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00085, "60": -0.00202}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794271625364, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00216, "60": -0.00066}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794239469373, "moneda": "ETH", "clase": "empuje-ganadoras", "esperado": -1, "cambios": {"15": -0.00307, "60": -0.00727}, "acierto_15": true, "acierto_60": true, "ficha": {"lado": "short", "entrada": 2146.6, "stop": 2153.53, "tp1": 2089.01, "r": 8.32}, "r": 8.32}
+{"t": 1794281945622, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00027, "60": 0.00192}, "acierto_15": true, "acierto_60": false, "ficha": {"lado": "short", "entrada": 74543.0, "stop": 74950.26, "tp1": 73496.76, "r": 2.57}, "r": -1.0}
+{"t": 1794282001974, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00011, "60": 0.00192}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794295982000, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.0016, "60": -0.00445}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794301266096, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": -0.00086, "60": 0.00172}, "acierto_15": true, "acierto_60": false, "ficha": {"lado": "short", "entrada": 74393.0, "stop": 74815.05, "tp1": 73496.76, "r": 2.12}, "r": 2.12}
+{"t": 1794301329280, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00167, "60": 0.00257}, "acierto_15": false, "acierto_60": false, "ficha": {"lado": "short", "entrada": 2099.9, "stop": 2120.68, "tp1": 2068.25, "r": 1.52}, "r": 1.52}
+{"t": 1794301862607, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00148, "60": 0.00311}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794301864936, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00172, "60": 0.00239}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794308106236, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00177, "60": 0.00139}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794310623986, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.0023, "60": 0.00011}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794310627279, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.0011, "60": -0.00196}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794310925951, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": 0.00148, "60": -0.00119}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794313684008, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": -0.00145, "60": -0.00051}, "acierto_15": true, "acierto_60": true, "ficha": {"lado": "short", "entrada": 74268.0, "stop": 74501.59, "tp1": 73496.76, "r": 3.3}, "r": -1.0}
+{"t": 1794317102044, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00595, "60": -0.00853}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794317104830, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.01569, "60": -0.01669}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794317465453, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.00151, "60": -0.00509}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794317465757, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00446, "60": 0.00044}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794317592732, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.0092, "60": 0.00302}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794317825650, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00221, "60": 0.00135}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794318125260, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00065, "60": 0.00545}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794318902977, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00039, "60": 0.00622}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794318964195, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00073, "60": 0.00721}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794320764809, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00719, "60": 0.009}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794321125791, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00694, "60": -0.00112}, "acierto_15": false, "acierto_60": true, "ficha": {"lado": "short", "entrada": 2060.0, "stop": 2074.51, "tp1": 2037.5, "r": 1.55}, "r": -1.0}
+{"t": 1794321661492, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.0004, "60": -0.01392}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794322861003, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.0035, "60": -0.01739}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794324841958, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00663, "60": -0.00972}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794324843625, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.0147, "60": -0.01791}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794325084439, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00883, "60": -0.01271}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794325088235, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.00285, "60": -0.00953}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794325264726, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.00282, "60": -0.00514}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794326701372, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00365, "60": -0.00384}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794327361584, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00334, "60": -0.00585}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794328682131, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00264, "60": 0.00194}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794328983751, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00168, "60": 5e-05}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794329221881, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00067, "60": -3e-05}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794330722379, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00064, "60": 0.00392}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794330843624, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00109, "60": 0.00173}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794331201554, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00029, "60": 0.00237}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794332882002, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00201, "60": 0.00561}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794333542509, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00109, "60": 0.00269}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794335102177, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00512, "60": 0.00214}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794336241663, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00015, "60": -0.0014}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794336723053, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00088, "60": 0.00265}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794337022602, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00108, "60": -0.00152}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794338582480, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00074, "60": 0.00642}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794339121511, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00018, "60": 0.00227}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794340201499, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00271, "60": 0.00395}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794340261445, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.0029, "60": 0.00354}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794342181420, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00122, "60": 0.00323}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794352440911, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.0001, "60": 0.00039}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794354661944, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00031, "60": -0.00317}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794354663156, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00151, "60": 0.00049}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794360301494, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00615, "60": 0.00132}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794361261490, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00456, "60": -0.00446}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794364142140, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00443, "60": 0.00584}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794367744443, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00045, "60": -0.00096}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794371403705, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00156, "60": 0.00129}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794380643195, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00192, "60": 0.00657}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794380701730, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00283, "60": 0.00656}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794380703553, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00361, "60": 0.00653}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794384603790, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00254, "60": -0.00381}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794384965273, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00421, "60": -0.00677}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794388323720, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00053, "60": -0.00107}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794400743180, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00086, "60": -0.00477}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794405183927, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00224, "60": 0.00102}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794407282699, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00124, "60": -0.0005}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794409807780, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00292, "60": 0.00983}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794409982181, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00309, "60": 0.0063}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794409984530, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.0045, "60": 0.00688}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794411485914, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00509, "60": -0.00182}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794411901072, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00083, "60": 0.00401}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794412324334, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00232, "60": 0.00297}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794412382671, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00146, "60": 0.00394}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794414121171, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.0019, "60": 0.00375}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794416401652, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00108, "60": 0.00334}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794417542243, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00402, "60": -0.00268}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794417544977, "moneda": "BTC", "clase": "liq-binance", "esperado": 1, "cambios": {"15": -0.00402, "60": -0.00268}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794422762915, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00089, "60": -0.00121}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794422942085, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00407, "60": -0.00426}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794423184887, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": -0.00235, "60": -0.00221}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794423605333, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00423, "60": -0.00254}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794426063037, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00111, "60": 0.00024}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794429603004, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00038, "60": -0.00077}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794430263421, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00067, "60": -0.00288}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794430801626, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00079, "60": -0.00354}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794436383938, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00151, "60": -0.0045}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794436390133, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00387, "60": -0.00619}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794438785087, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.0025, "60": 0.00583}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794438841854, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00299, "60": 0.0046}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794438844946, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00437, "60": 0.00677}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794446894439, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": 0.00029, "60": 0.00366}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794448564409, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00273, "60": 0.00178}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794453182108, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00049, "60": 0.00118}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794453184554, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00078, "60": 0.00049}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794454981729, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00014, "60": -0.00099}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794454984006, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00054, "60": -0.00205}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794459125332, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00287, "60": -0.00273}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794461225645, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00098, "60": 0.00494}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794463383761, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00147, "60": 0.00054}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794463564607, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00112, "60": -0.00034}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794466024165, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00176, "60": 0.00157}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794466263848, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00093, "60": 0.00125}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794468664273, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00024, "60": -0.00083}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794469142640, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -4e-05, "60": -0.00136}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794471785221, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": -0.00048, "60": -0.00375}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794473644104, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00268, "60": -0.00317}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794474184039, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00059, "60": -0.0002}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794475560720, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00041, "60": 0.00255}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794475561855, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00029, "60": 0.00308}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794475862428, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00075, "60": 0.00118}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794476041073, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00044, "60": 0.00093}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794480321495, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00065, "60": -0.00758}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794480338714, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00205, "60": -0.0103}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794481563063, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00144, "60": -0.00707}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794482162358, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00266, "60": -0.00428}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794483722254, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00292, "60": -0.0017}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794488404034, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00637, "60": -0.0056}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794488763082, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00462, "60": -0.00149}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794489005379, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00419, "60": -0.00076}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794489005694, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.01186, "60": 0.0089}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794492726406, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.00457, "60": -0.01047}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794493324304, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00306, "60": -0.00674}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794493324829, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.0118, "60": 0.00607}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794495064911, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": -0.00231, "60": -0.00264}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794495301524, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.00225, "60": 0.00426}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794495361173, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.0004, "60": 0.0007}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794499442580, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00249, "60": -0.00268}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794505505915, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00258, "60": 0.00103}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794505508380, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00338, "60": 0.00368}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794505882659, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -3e-05, "60": -0.00466}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794516963167, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00038, "60": 0.00152}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794516963171, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00038, "60": 0.00152}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794519422086, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.0013, "60": -0.00118}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794519424017, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00084, "60": -0.00471}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794524461690, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.0015, "60": 0.00184}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794524464065, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00214, "60": 0.00373}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794525845137, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00058, "60": 0.00274}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794530227893, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00223, "60": 0.00262, "240": -0.02805}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794530227895, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00223, "60": 0.00262, "240": -0.02805}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794530228030, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00223, "60": 0.00262, "240": -0.02805}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794530234158, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00204, "60": 0.00444, "240": -0.0376}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794530234159, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00204, "60": 0.00444, "240": -0.0376}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794535923761, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": -0.00308, "60": -0.00953, "240": -0.03501}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794535981253, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00192, "60": -0.01048, "240": -0.03457}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794535983193, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00145, "60": -0.00968, "240": -0.04397}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794536344252, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": 0.0002, "60": -0.01123, "240": -0.02706}, "acierto_15": true, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794537724733, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00118, "60": -0.0157, "240": -0.01903}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794538381830, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00116, "60": -0.01716, "240": -0.01594}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794538382952, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00475, "60": -0.02275, "240": -0.02377}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794539887383, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00991, "60": -0.02002, "240": -0.01704}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794540183104, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00282, "60": -0.00927, "240": -0.00415}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794541920847, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00122, "60": -1e-05, "240": -0.00055}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794542043382, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": 0.00205, "60": 0.00105, "240": -0.00063}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794542044301, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.0066, "60": 0.00307, "240": 0.00707}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794546065196, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00339, "60": -0.00782, "240": 0.0038}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794546365196, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00407, "60": -0.00162, "240": 0.01144}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794549361454, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": 0.0027, "60": 0.01295, "240": 0.01373}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794549362252, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00462, "60": 0.01547, "240": 0.0171}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794549420812, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00163, "60": 0.01301, "240": 0.01368}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794549425464, "moneda": "BTC", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.00163, "60": 0.01301, "240": 0.01368}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794549425839, "moneda": "ETH", "clase": "liq-binance", "esperado": -1, "cambios": {"15": 0.0023, "60": 0.01356, "240": 0.01571}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794549480016, "moneda": "BTC", "clase": "líder", "esperado": 1, "cambios": {"15": 0.0007, "60": 0.01286, "240": 0.0128}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794551280236, "moneda": "BTC", "clase": "líder", "esperado": 1, "cambios": {"15": 0.00177, "60": 0.00404, "240": 0.00692}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794552484227, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00773, "60": 0.00763, "240": 0.0125}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794560161143, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00063, "60": 0.004, "240": 0.0067}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794560162135, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00026, "60": 0.00284, "240": 0.01345}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794562442648, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": 0.00057, "60": 0.00425, "240": 0.01387}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794564725802, "moneda": "ETH", "clase": "liq-binance", "esperado": 1, "cambios": {"15": -0.00322, "60": -0.00138, "240": 0.00517}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794564900553, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.0019, "60": -0.00147, "240": -0.00095}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794564901072, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00159, "60": -0.00082, "240": 0.0066}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794569462717, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00225, "60": 0.0023, "240": -0.01718}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794575582296, "moneda": "BTC", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": 0.0009, "60": 0.00149, "240": -0.00619}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794576302049, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.01289, "60": 0.00419, "240": -0.01391}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794576361117, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": 0.00907, "60": -0.00039, "240": -0.00929}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794576782605, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00047, "60": -0.00603, "240": -0.01499}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794576784538, "moneda": "ETH", "clase": "liq-binance", "esperado": 1, "cambios": {"15": -0.00071, "60": -0.0042, "240": -0.02232}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794577140085, "moneda": "BTC", "clase": "líder", "esperado": -1, "cambios": {"15": -0.00533, "60": -0.01502, "240": -0.01555}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794577203887, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00631, "60": -0.00858, "240": -0.02161}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794578940282, "moneda": "BTC", "clase": "líder", "esperado": -1, "cambios": {"15": -0.00075, "60": -0.0073, "240": -0.00632}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794581464201, "moneda": "ETH", "clase": "empuje-ganadoras-abren", "esperado": -1, "cambios": {"15": -0.00159, "60": -0.00539, "240": -0.00359}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794583442141, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": -0.00679, "60": -0.0029, "240": 0.00975}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794583980998, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -3e-05, "60": 0.00395, "240": 0.00827}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794583981758, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": 1, "cambios": {"15": -0.00036, "60": 0.00255, "240": 0.01267}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794585301336, "moneda": "ETH", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00285, "60": -0.00062, "240": 0.01005}, "acierto_15": false, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794586080945, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00243, "60": 0.00143, "240": 0.00489}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794594122412, "moneda": "BTC", "clase": "retiro-un-lado", "esperado": -1, "cambios": {"15": 0.00057, "60": 0.00155, "240": -0.0083}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794602761275, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00109, "60": -0.01168, "240": -0.0094}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794603963487, "moneda": "BTC", "clase": "empuje-ganadoras-abren", "esperado": 1, "cambios": {"15": -0.00263, "60": -0.00454}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
+{"t": 1794604805500, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": -1, "cambios": {"15": -0.00109, "60": -0.00455}, "acierto_15": true, "acierto_60": true, "ficha": null, "r": null}
+{"t": 1794610742174, "moneda": "BTC", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.0062, "60": -0.00104}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794610802318, "moneda": "ETH", "clase": "retiro-ambos", "esperado": 0, "cambios": {"15": -0.00239, "60": 0.00307}, "acierto_15": null, "acierto_60": null, "ficha": null, "r": null}
+{"t": 1794614463758, "moneda": "ETH", "clase": "empuje-ganadoras-cierran", "esperado": 1, "cambios": {"15": -0.00052, "60": -0.00145}, "acierto_15": false, "acierto_60": false, "ficha": null, "r": null}
