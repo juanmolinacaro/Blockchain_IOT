@@ -1377,3 +1377,13 @@ Lectura de Juan: "la tendencia bajista está a pocos días de acabar; luego rang
   (triple suelo + EMA mensual ~60,2k). Escenario base: barrido de ese suelo o rebote desde aquí → rango
   60k–76k (EMA200) de acumulación; alcista solo al recuperar la EMA200 diaria. Señales de piso a vigilar:
   funding negativo, L/S < 2, El Paciente cierra su corto o compra (🐋), varios días sin mínimos nuevos.
+
+## Repaso de la semana 8–14 nov con las señales actuales (`estudios/semana_replay.py`)
+
+Semáforo vela a vela (1H, BTC y ETH) con la tendencia y la mayoría de cada hora; gestión mitad a 1R + stop a la
+entrada, resto a 2R; si una vela toca stop y objetivo, cuenta el stop.
+* Con el filtro completo (tendencia + mayoría + horario): 1 señal (corto trampa BTC mié 11 17:00 a 74.750) que no
+  se llenó → 0R. El horario bloqueó 3 cortos a favor de la tendencia del domingo 8 por la mañana (9:00 y 12:00):
+  +1,20R, +1,36R y +1,39R (los dos de BTC eran el mismo movimiento).
+* Contra la tendencia (largos en trampas): 11 cerradas, 5 ganadoras, −3,10R → el filtro de tendencia evitó pérdidas.
+* Barrido + líder (aprox. por hora): corto vie 13 69.548 → +1,38R.
