@@ -418,7 +418,8 @@ def refresh_winners(state: State) -> None:
     # líder = la que gana con más eficiencia (por cada $10.000 movidos) y mueve de verdad (≥ $1.000M en 30 días).
     # 13 nov: las horas en que 0xfc66 empujó ≥ $1M acertaron la dirección a 4 h en 10 de 12 (+0,43 % de media);
     # el resto de cuentas seguidas, ~50 %.
-    cands = [r for r in rows if r.estudio > 0 and r.volumen_mes >= 1e9 and r.por_10k is not None]
+    # 14 nov: además tiene que ganar en todo su historial (una buena racha de una cuenta perdedora no la hace líder).
+    cands = [r for r in rows if r.estudio > 0 and r.historico > 0 and r.volumen_mes >= 1e9 and r.por_10k is not None]
     if cands:
         state.leader = max(cands, key=lambda r: r.por_10k).cuenta
     try:

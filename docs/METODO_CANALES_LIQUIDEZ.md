@@ -1352,3 +1352,10 @@ Archivos: `data/escucha_pc/2026-11-14/` (cuentas por hora, flujo por minuto, Bin
   papel (`filtro=false`), no suena. Repaso con las horas del líder (4–14 nov, aproximado por hora): 3 casos,
   +0,71R — vie 13 corto 69.548 → TP2 (+1,38R); mar 10 largo +0,40R; jue 5 largo contra la tendencia −1,07R.
   Muy pocos casos: se mide unas semanas antes de decidir.
+* **Revisión de cuentas con todo el historial (14 nov, pedido por Juan)**: "si ya tenemos un historial son más
+  datos para decidir". El veredicto ahora mira también lo ganado desde que existe la cuenta: con más de $1M y
+  ≥ $0,5 por cada $10.000 movidos, una mala racha no la saca ("se queda (mala racha)": El Cambista +$228M,
+  0xbf73 +$21,6M, 0x3bca +$7,8M, 0x7717 +$22,8M, 0xa4de +$20M); con más de $1M perdido en su historial, una buena
+  racha no la mete en la alerta ("en observación": 0x7b7f −$24,9M, 0xdf9e −$2,6M). 0xf5d8 (+$0,3M en $81.200M,
+  probablemente arbitraje con otro exchange) y 0x3999 (−$264M) salen. Resultado al 14 nov: se quedan 12,
+  en observación 2, salen 16. La líder debe ganar también en su historial (El Paciente +$46,9M).

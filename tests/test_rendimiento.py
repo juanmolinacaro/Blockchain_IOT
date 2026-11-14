@@ -63,3 +63,21 @@ def test_peak_and_last_winners(tmp_path):
     save([r, _r("0xb", -5, 0)], p, winners={"0xa"})
     save([r, _r("0xb", -5, 0)], p, winners=set())
     assert last_winners(p) == set()
+
+
+def test_history_keeps_a_good_account_in_a_bad_streak():
+    base = dict(cuenta="0x1", valor=0, semana=0, mes=0, volumen_semana=0, volumen_mes=3e9, estudio=-500_000, pico=0)
+    cambista = Rendimiento(historico=228e6, volumen_historico=324e9, **base)          # +7 por $10k
+    assert cambista.gana_historico and cambista.veredicto() == "se queda (mala racha: gana en su historial)"
+    arbitraje = Rendimiento(historico=0.32e6, volumen_historico=81e9, **base)         # 0xf5d8: en cero
+    assert not arbitraje.gana_historico and arbitraje.veredicto() == "sale (mueve dinero y pierde)"
+    perdedora = Rendimiento(historico=-264e6, volumen_historico=36e9, **base)
+    assert perdedora.veredicto().startswith("sale")
+    assert Rendimiento(historico=0, volumen_historico=0, **base).por_10k_historico is None
+
+
+def test_history_loser_on_a_good_streak_is_only_observed():
+    from copytrading.rendimiento import select_winners
+    r = Rendimiento("0x7b7f", 0, 0, 0, 1_200_000, 0, 6e9, -24.9e6, 1_300_000, 194e9)
+    assert r.veredicto().startswith("en observación")
+    assert select_winners([r]) == set() and select_winners([r], previous={"0x7b7f"}) == set()
