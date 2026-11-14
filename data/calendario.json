@@ -1,0 +1,13 @@
+{
+ "nota": "Noticias grandes de EE. UU. (hora de Nueva York). La escucha las lee de GitHub cada 15 min y las convierte a hora Colombia. Fuentes: calendario de la BLS (empleo, inflación) y calendario de la Fed (FOMC); confirmar en las páginas oficiales.",
+ "recurrentes": [
+  {"dia_semana": 3, "hora_ny": "08:30", "nombre": "Solicitudes semanales de desempleo", "impacto": "medio"}
+ ],
+ "eventos": [
+  {"fecha": "2026-12-04", "hora_ny": "08:30", "nombre": "Empleo de noviembre (nóminas no agrícolas, NFP)", "impacto": "alto"},
+  {"fecha": "2026-12-09", "hora_ny": "14:00", "nombre": "Decisión de tipos de la Fed (FOMC) + proyecciones", "impacto": "alto"},
+  {"fecha": "2026-12-09", "hora_ny": "14:30", "nombre": "Conferencia de prensa de la Fed", "impacto": "alto"},
+  {"fecha": "2026-12-10", "hora_ny": "08:30", "nombre": "Inflación de noviembre (IPC / CPI)", "impacto": "alto"},
+  {"fecha": "2027-01-08", "hora_ny": "08:30", "nombre": "Empleo de diciembre (NFP)", "impacto": "alto"}
+ ]
+}
