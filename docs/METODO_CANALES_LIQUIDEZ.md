@@ -1387,3 +1387,21 @@ entrada, resto a 2R; si una vela toca stop y objetivo, cuenta el stop.
   +1,20R, +1,36R y +1,39R (los dos de BTC eran el mismo movimiento).
 * Contra la tendencia (largos en trampas): 11 cerradas, 5 ganadoras, −3,10R → el filtro de tendencia evitó pérdidas.
 * Barrido + líder (aprox. por hora): corto vie 13 69.548 → +1,38R.
+
+## ¿Qué días hay liquidaciones? (17 nov 2026, BTC 1H Hyperliquid, 23 abr – 17 nov, hora Colombia)
+
+Lectura de Juan: "rango hasta el jueves; las liquidaciones vienen jueves o viernes, o al inicio de semana".
+
+| día | rango diario medio | días con rango > 5 % | horas con rango > 1,5 % | vela 8–9 am |
+|---|---|---|---|---|
+| lunes | 3,12 % | 3 de 30 | 21 | 0,93 % |
+| martes | **2,90 %** | **1 de 29** | 20 | 0,84 % |
+| miércoles | 3,59 % | 5 de 29 | 36 | 0,95 % |
+| jueves | **3,75 %** | **6 de 30** | 35 | 1,04 % |
+| viernes | 3,22 % | 5 de 30 | **38** | **1,21 %** |
+| sábado | 1,83 % | 1 de 30 | 14 | 0,29 % |
+| domingo | 2,45 % | 1 de 30 | 18 | 0,36 % |
+
+El martes es el día más tranquilo entre semana; miércoles, jueves y viernes concentran los días y horas de
+movimiento fuerte (barridos y liquidaciones). Binance, semana 8–14 nov: largos liquidados jueves $106M, viernes
+$75M, domingo $92M, martes $45M, lunes $14M, miércoles $9M.
