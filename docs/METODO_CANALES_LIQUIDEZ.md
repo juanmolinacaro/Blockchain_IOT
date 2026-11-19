@@ -1405,3 +1405,16 @@ Lectura de Juan: "rango hasta el jueves; las liquidaciones vienen jueves o viern
 El martes es el día más tranquilo entre semana; miércoles, jueves y viernes concentran los días y horas de
 movimiento fuerte (barridos y liquidaciones). Binance, semana 8–14 nov: largos liquidados jueves $106M, viernes
 $75M, domingo $92M, martes $45M, lunes $14M, miércoles $9M.
+
+## Canal después de una caída: ¿por dónde rompe? (19 nov 2026, `estudios/canal_tras_caida.py`)
+
+Lectura de Juan: "en las caídas de estos meses el precio hizo canales alcistas y reventaba hacia abajo; ahora veo
+un canal bajista". BTC 4H (Hyperliquid, ago 2024 – nov 2026), ventanas de 5 días que empiezan ≥ 8 % bajo el
+máximo de los 10 días anteriores; primer cierre fuera de ±2 desviaciones en los 5 días siguientes.
+
+* Canal **alcista** tras caída (bandera bajista): 16 casos, **rompe abajo 12** (75 %) — confirma a Juan; pero 5 días
+  después de romper abajo el precio estaba +1,5 % de media (la ruptura suele ser el último barrido).
+* Canal **bajista** tras caída: 20 casos, **rompe arriba 12** (60 %), pero 5 días después −2,8 % de media: la
+  ruptura al alza suele ser **falsa** (ene 2026 −13,8 %, nov 2025 −8,6 %, mar 2025 −6,1 %). Rompe abajo 8: −3,3 %.
+* Uso: en un canal bajista tras una caída no se compra la ruptura al alza; si rompe arriba y vuelve dentro, es el
+  corto (como K6). Pocos casos y ventanas parecidas entre sí: es una pista, no una regla.
