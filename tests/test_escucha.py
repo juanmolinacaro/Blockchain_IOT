@@ -381,3 +381,32 @@ def test_sweep_leader_goes_to_paper_only(monkeypatch, tmp_path):
     assert st.paper and st.paper[-1].setup == "barrido+líder" and st.paper[-1].side == "short" and not st.paper[-1].filtro
     assert "barrido+líder" in (tmp_path / "papel.jsonl").read_text()
     assert not (tmp_path / "ev.jsonl").exists()                  # no suena en el móvil
+
+
+def test_leader_change_classifies_adds_and_takes():
+    import copytrading.escucha as esc
+    assert esc.leader_change(-118, -150, 64_000)[0] == "AGREGA corto"               # +32 BTC ≈ $2M
+    assert esc.leader_change(-394, -343, 62_600)[0].startswith("COBRA")
+    assert esc.leader_change(-100, -105, 62_000) is None                            # $310k: ruido
+    assert esc.leader_change(-50, 20, 62_000)[0] == "CAMBIA a largo"
+    assert esc.leader_change(-30, 0, 62_000)[0] == "CIERRA TODO"
+    assert esc.leader_change(-60, -69, 62_000)[0] == "AGREGA corto"                 # 15 % y $558k
+
+
+def test_leader_position_alert(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    import copytrading.escucha as esc
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.leader = "0xfc667adba8d4837586078f4fdcdc29804337ca06"
+    st.price.update({"BTC": 62_000, "ETH": 1_750})
+    st.zones["BTC"] = ([SimpleNamespace(center=60_702, usd=1)], [SimpleNamespace(center=63_019, usd=1)])
+    pos = {"v": -90.0}
+    src = SimpleNamespace(_info=lambda q: {"assetPositions": [{"position": {"coin": "BTC", "szi": str(pos["v"]), "entryPx": "64392"}}]})
+    esc.check_leader_position(st, src)                       # referencia
+    assert not (tmp_path / "ev.jsonl").exists()
+    pos["v"] = -129.0
+    esc.check_leader_position(st, src)
+    txt = (tmp_path / "ev.jsonl").read_text()
+    assert "El Paciente AGREGA corto" in txt and '"cambio_usd": -2418000' in txt

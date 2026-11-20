@@ -1428,3 +1428,8 @@ Posiciones reconstruidas con los pagos de funding (diarias desde oct 2025, por h
 4 de 19: **no hay un patrón constante** de "ir con la ganadora y cortar la perdedora"; la pareja no es donde gana
 (su historial: +$46,9M, en muchas monedas). El episodio del 12–19 nov sí fue así: corto BTC hasta $25M (+$1,64M)
 contra largo ETH hasta $10M (−$0,20M, reducido). Con datos diarios no se ve lo que hace dentro del día.
+* **Aviso de la posición de la líder (20 nov)**: con su posición por hora se vio la jugada: del 15 al 18 nov
+  AGREGÓ corto en los rebotes (64,1–65,3k; de 118 a 394 BTC), COBRÓ por tramos en los barridos de abajo
+  (63,8k → 61,5k; hasta 90 BTC) y VOLVIÓ a agregar en el rebote de la noche del 19 (61,5–62,3k; a 129 BTC).
+  A 4 h sus agregados solos predicen poco (5 de 8 bajaron, −0,1 a −0,9 %): lo útil son los niveles. La escucha
+  lee su posición cada 15 min y avisa 🐋 AGREGA / COBRA / CAMBIA si cambia ≥ $1M o ≥ 10 % (con ≥ $500k).

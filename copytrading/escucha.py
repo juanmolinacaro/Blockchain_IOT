@@ -73,7 +73,8 @@ class State:
         self.crowd_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}    # empuje neto del resto (público)/min
         self.leader_hist: dict[str, deque] = {c: deque(maxlen=60) for c in COINS}   # empuje neto de la cuenta líder/min
         self.leader: str = ""
-        self.sweeps: dict[str, dict] = {}                         # pools 100x barridos (semaforo.record_sweep)
+        self.sweeps: dict[str, dict] = {}
+        self.leader_pos: dict[str, dict[str, float]] = {}        # líder -> moneda -> posición de referencia                         # pools 100x barridos (semaforo.record_sweep)
         self.whale_pos: dict[str, deque] = {}                    # (hora, posición neta USD de las que ganan)
         self.watch: list[dict] = []                              # planes vigilados (vigilar.json)
         self.extremes: dict[str, list[float]] = {}              # [máximo, mínimo] del minuto: mechas (12 nov: el TP1
@@ -1060,6 +1061,7 @@ def refresh_zones(state: State, source) -> None:
         except Exception as exc:
             log.error("zonas %s: %s", coin, exc)
     refresh_whales(state, source)
+    check_leader_position(state, source)
     state.watch = load_watch()
     try:
         from . import calendario
@@ -1101,6 +1103,78 @@ def refresh_whales(state: State, source) -> None:
     for c in COINS:
         h = state.whale_pos.setdefault(c, deque(maxlen=25))       # 25 × 15 min ≈ 6 h
         h.append((now, tot[c]))
+
+
+LEADER_POS_MIN_USD = 1_000_000     # cambio de posición de la líder que avisa: ≥ $1M…
+LEADER_POS_MIN_FRAC = 0.10         # …o ≥ 10 % de su posición (con al menos $500k)
+LEADER_NAMES = {"0xfc667adba8d4837586078f4fdcdc29804337ca06": "El Paciente"}
+
+
+def leader_change(prev: float, now: float, px: float) -> tuple[str, float] | None:
+    """¿Cambió la posición de la líder lo suficiente? (prev y now en monedas; corto en negativo).
+    Devuelve (qué hizo, cambio en USD). 20 nov, con su posición por hora: AGREGA corto en los rebotes
+    (64,1–65,3k del 15 al 18 nov), COBRA en los barridos de abajo (63,8k → 61,5k) y vuelve a agregar en el
+    siguiente rebote (61,5–62,3k el 19 nov por la noche)."""
+    d_usd = (now - prev) * px
+    big = abs(d_usd) >= LEADER_POS_MIN_USD or (abs(d_usd) >= 500_000 and prev and abs(now - prev) / abs(prev) >= LEADER_POS_MIN_FRAC)
+    if not big:
+        return None
+    if prev * now < 0 or (prev == 0) != (now == 0):
+        side = "largo" if now > 0 else "corto" if now < 0 else "nada"
+        return (f"CAMBIA a {side}" if now else "CIERRA TODO"), d_usd
+    side = "corto" if (now or prev) < 0 else "largo"
+    return (f"AGREGA {side}" if abs(now) > abs(prev) else f"COBRA (cierra parte del {side})"), d_usd
+
+
+def check_leader_position(state: State, source) -> None:
+    """🐋 Cada 15 min: si la líder agrega o cierra parte de su posición en BTC o ETH. Dónde vende o compra =
+    nuestra zona; dónde cobra = final del tramo (asegurar). Se guarda para medirlo."""
+    if not state.leader:
+        return
+    try:
+        st = source._info({"type": "clearinghouseState", "user": state.leader}) or {}
+    except Exception:
+        return
+    pos = {c: 0.0 for c in COINS}
+    entry = {}
+    for ap in st.get("assetPositions", []):
+        p = ap.get("position", {})
+        if p.get("coin") in pos:
+            pos[p["coin"]] = float(p.get("szi") or 0)
+            entry[p["coin"]] = float(p.get("entryPx") or 0)
+    ref = state.leader_pos.setdefault(state.leader, {})
+    name = LEADER_NAMES.get(state.leader, state.leader[:6])
+    for coin in COINS:
+        px = state.price.get(coin)
+        if not px:
+            continue
+        if coin not in ref:                         # primera lectura: solo referencia
+            ref[coin] = pos[coin]
+            continue
+        ch = leader_change(ref[coin], pos[coin], px)
+        if not ch:
+            continue
+        what, d_usd = ch
+        prev = ref[coin]
+        ref[coin] = pos[coin]
+        z = state.zones.get(coin)
+        pools = ""
+        if z:
+            below = [l.center for l in z[0] if l.center < px]
+            above = [x.center for x in z[1] if x.center > px]
+            pools = (f"\nPools: abajo {max(below):,.0f}" if below else "\nPools: abajo —") + \
+                    (f" · arriba {min(above):,.0f}" if above else " · arriba —")
+        conf = confirmation(state, coin)
+        hint = ("Vende el rebote: zona de corto si barre arriba y vuelve." if what.startswith("AGREGA corto") else
+                "Cobra en la liquidez: posible final del tramo, asegurar." if what.startswith("COBRA") else
+                "Compra: zona de largo solo si la tendencia acompaña." if what.startswith("AGREGA largo") else
+                "Cambio de lado: atención, puede venir giro.")
+        alert(state, f"lider-pos-{coin}-{what.split()[0]}",
+              f"🐋 {coin}: {name} {what} (${abs(d_usd) / 1e6:.1f}M)",
+              f"Posición {prev:+,.1f} → {pos[coin]:+,.1f} {coin} (entrada media {entry.get(coin, 0):,.0f}) a {px:,.0f}. "
+              f"{hint}{pools}\n{conf['texto']}",
+              {"moneda": coin, "precio": px, "lider": state.leader, "antes": prev, "ahora": pos[coin],
+               "cambio_usd": round(d_usd), "accion": what, "votos": conf["votos"]})
 
 
 async def run(minutes: float | None = None) -> None:

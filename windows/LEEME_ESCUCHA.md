@@ -69,6 +69,10 @@ de la mecha). Se mide unas semanas antes de decidir si llega al móvil.
 * **🐋 La cuenta líder COMPRA / VENDE agresivo**: la cuenta que gana con más eficiencia (hoy 0xfc66)
   empujó más de $1M en una hora. Medido: la dirección se cumplió a 4 horas en 10 de 12 casos (no en la
   hora siguiente). No es entrada por sí sola: mira la zona y el semáforo.
+* **🐋 El Paciente AGREGA corto / COBRA / CAMBIA de lado** (desde el 20 nov): cada 15 min se lee la posición de la
+  cuenta líder en BTC y ETH; avisa si cambia más de $1M (o más del 10 %). Dónde **agrega** = dónde vende el rebote
+  (nuestra zona de corto si barre y vuelve); dónde **cobra** = final del tramo (asegurar). Trae los pools más cercanos y
+  la confirmación, y se guarda para medirlo.
 * **☕ Mapa de la mañana** (lunes a viernes 7:45) y **📅 En 30 min: …** antes de cada noticia grande de
   EE. UU. (empleo, inflación, la Fed): pools a cada lado, qué lado está más cargado, la confirmación y
   las noticias del día. Plan: no entrar antes de la noticia; esperar el barrido.
