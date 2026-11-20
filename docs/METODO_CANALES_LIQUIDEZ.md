@@ -1433,3 +1433,7 @@ contra largo ETH hasta $10M (−$0,20M, reducido). Con datos diarios no se ve lo
   (63,8k → 61,5k; hasta 90 BTC) y VOLVIÓ a agregar en el rebote de la noche del 19 (61,5–62,3k; a 129 BTC).
   A 4 h sus agregados solos predicen poco (5 de 8 bajaron, −0,1 a −0,9 %): lo útil son los niveles. La escucha
   lee su posición cada 15 min y avisa 🐋 AGREGA / COBRA / CAMBIA si cambia ≥ $1M o ≥ 10 % (con ≥ $500k).
+* **¿Opera en los pools? (20 nov)** Horas en que la líder cambió ≥ 10 BTC su corto (11–19 nov) y si el precio tocó
+  un pool del mapa (calculado 3 h antes) en las 3 h previas: **COBRA en un pool 10 de 17 (59 %)** frente al 35 % de
+  todas las horas → cobra en la liquidez. **AGREGA en un pool solo 3 de 14 (21 %)**: vende en los rebotes antes de
+  llegar a los cortos (64,1–64,7k, ~2 % bajo el pool), no en el barrido.
