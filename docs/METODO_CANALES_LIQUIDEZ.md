@@ -1458,3 +1458,14 @@ Regla: con menos de ~30 casos un porcentaje no es fiable; lo nuevo se mide en pa
   ≥ $0,5 por $10.000, mes ≥ +$500k, ≥ $1.000M movidos en el mes, cuenta ≥ $1M; orden por eficiencia del mes. Hoy pasan
   8; dos con cortos enormes en BTC: 0x7fda (−894 BTC, mes +$40M, historial +$178M) y 0xfc27 (−1.016 BTC, mes +$32,6M).
   Entran en observación el 4 dic.
+
+## Viernes 20 nov: cayó directo, sin trampa alcista
+
+Lectura de Juan: "estábamos seguros que iba hacia abajo; no hubo trampa alcista, cayó directo a los 59".
+Dirección correcta; la entrada esperada (barrido de los cortos 62.705 y vuelta) no llegó: el rebote de 9:15 se
+quedó en 62.077 (1 % antes del pool) y de 10:00 a 11:00 cayó a 58.725, barriendo 60.702 y 59.502. La líder sí vendió
+ese rebote (de 92 a 106 BTC corto, entrada media 61.513), como en lo medido (agrega ~1–2 % antes del pool). El
+semáforo solo dio trampas en largo (bloqueadas). Las candidatas siguieron cobrando (0x7fda 799 → 700 BTC,
+0xfc27 831 → 776). Nuevo registro en la cuenta de papel (no suena): **"líder agrega"** — cuando la líder agrega a
+favor de la tendencia, entrada a mercado y stop fuera del pool del otro lado (+0,2 %). Hoy: corto ~61.800, stop
+62.830 → 59.000 ≈ +2,7R. Un caso; se mide junto a "barrido + líder" y la entrada de siempre.

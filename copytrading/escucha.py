@@ -1175,6 +1175,41 @@ def check_leader_position(state: State, source) -> None:
               f"{hint}{pools}\n{conf['texto']}",
               {"moneda": coin, "precio": px, "lider": state.leader, "antes": prev, "ahora": pos[coin],
                "cambio_usd": round(d_usd), "accion": what, "votos": conf["votos"]})
+        record_leader_add(state, coin, what, px)
+
+
+def record_leader_add(state: State, coin: str, what: str, px: float) -> None:
+    """Registro (no suena): vender el rebote cuando la líder AGREGA a favor de la tendencia, con el stop fuera del
+    pool del otro lado (regla de Juan). 20 nov: el precio no llegó al pool de 62.705 (máx 62.077 a las 9:15), la
+    líder agregó corto en ese rebote (de 92 a 106 BTC, entrada media 61.513) y BTC cayó a 58.725 en 2 horas."""
+    from . import semaforo
+    trend = state.trend.get(coin, "")
+    short = what.startswith("AGREGA corto")
+    if not (short and trend == "BAJISTA") and not (what.startswith("AGREGA largo") and trend == "ALCISTA"):
+        return
+    z = state.zones.get(coin)
+    if not z:
+        return
+    if short:
+        above = [x.center for x in z[1] if x.center > px]
+        if not above:
+            return
+        stop, pool = min(above) * 1.002, min(above)
+    else:
+        below = [x.center for x in z[0] if x.center < px]
+        if not below:
+            return
+        stop, pool = max(below) * 0.998, max(below)
+    if getattr(state, "paper", None) is None:
+        state.paper = semaforo.load()
+    sig = semaforo.Signal("líder agrega", "", "short" if short else "long", px, stop,
+                          note=f"la líder {what} a {px:,.0f}; stop fuera del pool {pool:,.0f}")
+    conf = confirmation(state, coin)
+    if semaforo.open_signal(state.paper, sig, coin, int(time.time() * 1000), False, conf["votos"]):
+        try:
+            semaforo.save(state.paper)
+        except OSError:
+            pass
 
 
 async def run(minutes: float | None = None) -> None:

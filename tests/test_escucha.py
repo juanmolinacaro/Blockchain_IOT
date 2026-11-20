@@ -410,3 +410,21 @@ def test_leader_position_alert(monkeypatch, tmp_path):
     esc.check_leader_position(st, src)
     txt = (tmp_path / "ev.jsonl").read_text()
     assert "El Paciente AGREGA corto" in txt and '"cambio_usd": -2418000' in txt
+
+
+def test_leader_add_goes_to_paper_with_stop_beyond_pool(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    import copytrading.escucha as esc
+    import copytrading.semaforo as sm
+    monkeypatch.setattr(esc, "EVENTS", tmp_path / "ev.jsonl")
+    monkeypatch.setattr(sm.save, "__defaults__", (tmp_path / "papel.jsonl",))
+    monkeypatch.setattr(sm.load, "__defaults__", (tmp_path / "papel.jsonl",))
+    monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    st = esc.State({})
+    st.trend["BTC"] = "BAJISTA"
+    st.zones["BTC"] = ([SimpleNamespace(center=60_702, usd=1)], [SimpleNamespace(center=62_705, usd=1)])
+    esc.record_leader_add(st, "BTC", "AGREGA corto", 61_800)
+    p = st.paper[-1]
+    assert p.setup == "líder agrega" and p.side == "short" and round(p.stop) == round(62_705 * 1.002) and not p.filtro
+    esc.record_leader_add(st, "BTC", "AGREGA largo", 61_800)            # contra la tendencia: no
+    assert len(st.paper) == 1
