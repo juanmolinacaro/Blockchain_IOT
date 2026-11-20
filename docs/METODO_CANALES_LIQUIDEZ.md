@@ -1469,3 +1469,16 @@ semáforo solo dio trampas en largo (bloqueadas). Las candidatas siguieron cobra
 0xfc27 831 → 776). Nuevo registro en la cuenta de papel (no suena): **"líder agrega"** — cuando la líder agrega a
 favor de la tendencia, entrada a mercado y stop fuera del pool del otro lado (+0,2 %). Hoy: corto ~61.800, stop
 62.830 → 59.000 ≈ +2,7R. Un caso; se mide junto a "barrido + líder" y la entrada de siempre.
+
+## Miedo y codicia para spot (20 nov 2026, `estudios/miedo_codicia.py`)
+
+Idea de Juan: "en miedo extremo comprar, en codicia vender (spot)". Índice de alternative.me con BTC diario
+(ago 2020 – nov 2026). Hoy: **12 (miedo extremo)** con BTC 59.000.
+* Tras miedo extremo (≤ 20, 26 rachas): a 90 días mediana −9 % (subió 12 de 25); antes de subir bajó otro −18 % de
+  mediana (peor −53 %). Tras ≤ 12 (14 rachas): a 30/90 días +5 % / +10 % de mediana, pero en 2022 siguió hasta −55 %.
+* En el rango de 2026 sí funcionó: ≤ 12 en feb (62,9k), jun (64,1k) y 25 jun (59,8k) → +29 %, +21 %, +41 % a 90 días;
+  en mar (70,5k) −11 %.
+* Todo o nada con el índice pierde contra comprar y mantener (×1,3–2,0 frente a ×5,0): vender en codicia (≥ 75) sale
+  demasiado pronto en las subidas. Comprar cada semana (DCA) da ×1,54; cargarlo hacia el miedo, ×1,54–1,57 (igual).
+* Uso: el miedo extremo marca zona de compra para spot por partes (no todo de una), sobre todo cerca del suelo de un
+  rango; no marca el piso exacto. Vender por partes en codicia, no todo.
