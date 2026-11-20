@@ -602,6 +602,19 @@ def cmd_rendimiento(cfg: Config, args) -> None:
         save(rows, winners=winners)
 
 
+def cmd_candidatas(cfg: Config, args) -> None:
+    from .candidatas import add_subaccounts, report, save, select
+    from .rendimiento import cohort
+
+    src = HyperliquidSource(cfg.network)
+    addresses, _ = cohort()
+    rows = select(src.leaderboard(), set(addresses), args.n)
+    add_subaccounts(src, rows)
+    print("\n".join(report(rows)))
+    if not args.no_guardar:
+        save(rows)
+
+
 def cmd_avisos(cfg: Config, args) -> None:
     from .avisos import load_events, measure, report, typical_move
 
@@ -736,6 +749,10 @@ def main(argv: list[str] | None = None) -> None:
     rn.add_argument("--desde", help="inicio del estudio AAAA-MM-DD (por defecto, el de la cohorte)")
     rn.add_argument("--no-guardar", action="store_true", help="no añadir la consulta a data/hft_rendimiento.jsonl")
 
+    cd = sub.add_parser("candidatas", help="cuentas nuevas para la cohorte: las que más ganan por $ movido (ranking)")
+    cd.add_argument("-n", type=int, default=25)
+    cd.add_argument("--no-guardar", action="store_true", help="no escribir data/candidatas.json")
+
     av = sub.add_parser("avisos", help="¿aciertan los avisos de la escucha? precio 15 y 60 min después")
     av.add_argument("--archivo", default="data/hft_eventos.jsonl")
 
@@ -788,7 +805,7 @@ def main(argv: list[str] | None = None) -> None:
      "liquidity": cmd_liquidity, "metodo": cmd_metodo,
      "monitor": cmd_monitor, "diario": cmd_diario, "pools": cmd_pools,
      "aviso-prueba": cmd_aviso_prueba, "billeteras": cmd_billeteras, "ballena": cmd_ballena, "hft": cmd_hft, "memoria": cmd_memoria,
-     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "avisos": cmd_avisos, "episodios": cmd_episodios, "papel": cmd_papel, "pesos": cmd_pesos}[args.cmd](cfg, args)
+     "trampas": cmd_trampas, "causa": cmd_causa, "rendimiento": cmd_rendimiento, "candidatas": cmd_candidatas, "avisos": cmd_avisos, "episodios": cmd_episodios, "papel": cmd_papel, "pesos": cmd_pesos}[args.cmd](cfg, args)
 
 
 if __name__ == "__main__":

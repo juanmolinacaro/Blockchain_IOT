@@ -1446,3 +1446,15 @@ Regla: con menos de ~30 casos un porcentaje no es fiable; lo nuevo se mide en pa
 * ~20 dic (4 semanas): avisos 🐋 de posición de la líder y si cobra en los pools.
 * ~febrero 2027 (3 meses): qué entrada usar (esperar el barrido o vender por partes como la líder) y qué avisos se quedan.
   Medir por fase (bajista, rango, alcista).
+
+## Subcuentas y candidatas para la revisión del mes (20 nov 2026)
+
+* **Corrección**: muchas cuentas de la cohorte son "madre" con subcuentas (hasta 80). El portafolio de la dirección
+  solo cuenta lo suyo; el ranking de Hyperliquid suma el grupo. 0xf5d8: sola −$0,3M en el mes, el grupo **+$44,5M**;
+  0x87f9: sola −$7,6M, el grupo **+$45,9M** (historial +$100M); 0x3999: sola −$264M por los traspasos, el grupo +$15,8M.
+  El veredicto ahora usa también el grupo ("se queda (gana con sus subcuentas)"): se quedan 18, observación 1, salen 11.
+  Para seguir su dirección habría que escuchar también las subcuentas que operan.
+* **Candidatas** (`python -m copytrading candidatas` → `data/candidatas.json`): del ranking, historial ≥ $5M con
+  ≥ $0,5 por $10.000, mes ≥ +$500k, ≥ $1.000M movidos en el mes, cuenta ≥ $1M; orden por eficiencia del mes. Hoy pasan
+  8; dos con cortos enormes en BTC: 0x7fda (−894 BTC, mes +$40M, historial +$178M) y 0xfc27 (−1.016 BTC, mes +$32,6M).
+  Entran en observación el 4 dic.

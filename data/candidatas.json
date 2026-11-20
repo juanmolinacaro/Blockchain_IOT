@@ -1,0 +1,100 @@
+{
+ "fecha": "2026-11-20 04:44",
+ "criterios": {
+  "historial_min": 5000000,
+  "mes_min": 500000,
+  "vol_mes_min": 1000000000,
+  "eficiencia_historial_min": 0.5,
+  "valor_min": 1000000
+ },
+ "candidatas": [
+  {
+   "cuenta": "0x024294c53a69c1e6b39810b3fac87385752fffa1",
+   "valor": 29669815,
+   "mes": 29511444,
+   "historial": 32672892,
+   "semana": 11994423,
+   "vol_mes": 1360613240,
+   "ef_mes": 216.9,
+   "ef_historial": 103.89,
+   "subcuentas": 1
+  },
+  {
+   "cuenta": "0x7fdafde5cfb5465924316eced2d3715494c517d1",
+   "valor": 29911473,
+   "mes": 40093127,
+   "historial": 178510608,
+   "semana": 9369306,
+   "vol_mes": 2194151408,
+   "ef_mes": 182.73,
+   "ef_historial": 78.52,
+   "subcuentas": 5
+  },
+  {
+   "cuenta": "0xfc27136e42af1732ddc9ce2605ea9bff1b959d9d",
+   "valor": 38189414,
+   "mes": 32571120,
+   "historial": 38462916,
+   "semana": 11342917,
+   "vol_mes": 2170577820,
+   "ef_mes": 150.06,
+   "ef_historial": 26.82,
+   "subcuentas": 1
+  },
+  {
+   "cuenta": "0x49e96e255ba418d08e66c35b588e2f2f3766e1d0",
+   "valor": 33010509,
+   "mes": 16585516,
+   "historial": 23277029,
+   "semana": 3677412,
+   "vol_mes": 1889551360,
+   "ef_mes": 87.77,
+   "ef_historial": 23.75,
+   "subcuentas": 5
+  },
+  {
+   "cuenta": "0xb07856ebcb6b37967eaf7c4b4e64dcce28c6de15",
+   "valor": 8332292,
+   "mes": 4869395,
+   "historial": 7515777,
+   "semana": 1278545,
+   "vol_mes": 1970254925,
+   "ef_mes": 24.71,
+   "ef_historial": 13.31,
+   "subcuentas": 1
+  },
+  {
+   "cuenta": "0x023a3d058020fb76cca98f01b3c48c8938a22355",
+   "valor": 15832950,
+   "mes": 4523241,
+   "historial": 58782257,
+   "semana": -754698,
+   "vol_mes": 1978379906,
+   "ef_mes": 22.86,
+   "ef_historial": 2.39,
+   "subcuentas": 5
+  },
+  {
+   "cuenta": "0xf58b673c1633ccef0ac58263cdc95ed80f817fc7",
+   "valor": 3451578,
+   "mes": 1934651,
+   "historial": 5792454,
+   "semana": 72875,
+   "vol_mes": 1242658069,
+   "ef_mes": 15.57,
+   "ef_historial": 2.34,
+   "subcuentas": 11
+  },
+  {
+   "cuenta": "0x6355f7cf36b24044cd5b089a845113327d0ee58e",
+   "valor": 40102931,
+   "mes": 4021444,
+   "historial": 12165906,
+   "semana": 988167,
+   "vol_mes": 3074869292,
+   "ef_mes": 13.08,
+   "ef_historial": 8.89,
+   "subcuentas": 8
+  }
+ ]
+}

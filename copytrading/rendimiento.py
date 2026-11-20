@@ -58,6 +58,8 @@ class Rendimiento:
     historico: float
     pico: float = 0.0         # lo mejor que llegó a ganar desde que entró al estudio
     volumen_historico: float = 0.0   # todo lo que ha movido desde que existe la cuenta
+    grupo_mes: float | None = None        # ranking de Hyperliquid: la cuenta Y sus subcuentas (20 nov: 0xf5d8 queda
+    grupo_historico: float | None = None  # en cero sola, pero su grupo de 20 subcuentas gana +$44,5M en el mes)
 
     @property
     def por_10k(self) -> float | None:
@@ -75,7 +77,14 @@ class Rendimiento:
         return self.historico >= HIST_MIN_USD and e is not None and e >= HIST_MIN_PER_10K
 
     @property
+    def gana_con_subcuentas(self) -> bool:
+        """Pierde o queda en cero sola, pero su grupo (subcuentas incluidas) gana en el mes y en su historial."""
+        return (self.grupo_mes or 0) > 0 and (self.grupo_historico or 0) >= HIST_MIN_USD
+
+    @property
     def pierde_historico(self) -> bool:
+        if self.grupo_historico is not None and self.grupo_historico >= HIST_MIN_USD:
+            return False                     # 0x3999: −$264M sola por los traspasos a sus subcuentas; el grupo, +$15,8M
         return self.historico <= -HIST_MIN_USD
 
     def veredicto(self, big_volume: float = BIG_VOLUME) -> str:
@@ -85,6 +94,8 @@ class Rendimiento:
             return "en observación (gana ahora, pierde en su historial)" if self.pierde_historico else "se queda"
         if self.gana_historico:
             return "se queda (mala racha: gana en su historial)"
+        if self.gana_con_subcuentas:
+            return "se queda (gana con sus subcuentas)"
         if self.volumen_mes >= big_volume:
             return "sale (mueve dinero y pierde)"
         return "sale (pierde)"
@@ -182,15 +193,28 @@ def last_winners(path: Path = HISTORY) -> set[str]:
     return out
 
 
+def board_index(source) -> dict[str, object]:
+    """Ranking de Hyperliquid por dirección (incluye lo de las subcuentas). Vacío si falla."""
+    try:
+        return {e.address.lower(): e for e in source.leaderboard()}
+    except Exception:
+        return {}
+
+
 def scan(source, addresses: list[str], desde: str, pause_s: float = 0.2) -> list[Rendimiento]:
     start = datetime.strptime(desde, "%Y-%m-%d").replace(tzinfo=COT) if desde else datetime.now(COT) - timedelta(days=7)
     start_ms = int(start.timestamp() * 1000)
     out = []
+    board = board_index(source)
     for a in addresses:
         try:
-            out.append(from_portfolio(a, source._info({"type": "portfolio", "user": a}), start_ms))
+            r = from_portfolio(a, source._info({"type": "portfolio", "user": a}), start_ms)
         except Exception:
             continue
+        e = board.get(a.lower())
+        if e is not None:
+            r.grupo_mes, r.grupo_historico = e.pnl.get("month"), e.pnl.get("allTime")
+        out.append(r)
         time.sleep(pause_s)
     return sorted(out, key=lambda r: r.estudio, reverse=True)
 
@@ -219,10 +243,10 @@ def report(rows: list[Rendimiento], desde: str, labels: dict[str, str] | None = 
     winners = winners or set()
     lines = [f"Cuentas en estudio desde {desde or '?'}: ¿ganan o solo mueven dinero?", "",
              f"{'cuenta':8}  {'tipo':18}  {'estudio':>9}  {'semana':>9}  {'30 días':>9}  {'vol. 30 d':>9}  "
-             f"{'por $10k':>8}  {'pico':>9}  {'historial':>9}  {'h/$10k':>6}  alerta  veredicto"]
+             f"{'por $10k':>8}  {'pico':>9}  {'historial':>9}  {'h/$10k':>6}  {'grupo mes':>9}  {'grupo hist':>10}  alerta  veredicto"]
     for r in rows:
         lines.append(f"{r.cuenta[:6]}…  {labels.get(r.cuenta, ''):18}  {_usd(r.estudio):>9}  {_usd(r.semana):>9}  "
-                     f"{_usd(r.mes):>9}  {r.volumen_mes / 1e6:8.0f}M  {'—' if r.por_10k is None else f'{r.por_10k:+.1f}':>8}  {_usd(r.pico):>9}  {_usd(r.historico):>9}  {'—' if r.por_10k_historico is None else f'{r.por_10k_historico:+.1f}':>6}  {'💰 sí ' if r.cuenta in winners else '  no  '}  {r.veredicto()}")
+                     f"{_usd(r.mes):>9}  {r.volumen_mes / 1e6:8.0f}M  {'—' if r.por_10k is None else f'{r.por_10k:+.1f}':>8}  {_usd(r.pico):>9}  {_usd(r.historico):>9}  {'—' if r.por_10k_historico is None else f'{r.por_10k_historico:+.1f}':>6}  {'—' if r.grupo_mes is None else _usd(r.grupo_mes):>9}  {'—' if r.grupo_historico is None else _usd(r.grupo_historico):>10}  {'💰 sí ' if r.cuenta in winners else '  no  '}  {r.veredicto()}")
     keep = [r for r in rows if r.veredicto().startswith("se queda")]
     out = [r for r in rows if r.veredicto().startswith("sale")]
     obs = [r for r in rows if r.veredicto().startswith("en observación")]
