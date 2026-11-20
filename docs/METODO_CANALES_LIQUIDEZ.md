@@ -1418,3 +1418,13 @@ máximo de los 10 días anteriores; primer cierre fuera de ±2 desviaciones en l
   ruptura al alza suele ser **falsa** (ene 2026 −13,8 %, nov 2025 −8,6 %, mar 2025 −6,1 %). Rompe abajo 8: −3,3 %.
 * Uso: en un canal bajista tras una caída no se compra la ruptura al alza; si rompe arriba y vuelve dentro, es el
   corto (como K6). Pocos casos y ventanas parecidas entre sí: es una pista, no una regla.
+
+## El Paciente en pareja BTC/ETH (20 nov 2026, `estudios/paciente_pareja.py`)
+
+Pregunta de Juan: "¿abre long y short, se va a favor de la que gana y cierra la otra con pequeñas pérdidas?".
+Posiciones reconstruidas con los pagos de funding (diarias desde oct 2025, por hora las últimas ~2 semanas).
+19 episodios con BTC y ETH en lados opuestos (cada pata > $300k, ≥ 1 día): total **+$0,59M** (patas ganadoras
++$3,51M, perdedoras −$2,92M). La pata más grande fue la ganadora en 9 de 19 y la perdedora terminó reducida en
+4 de 19: **no hay un patrón constante** de "ir con la ganadora y cortar la perdedora"; la pareja no es donde gana
+(su historial: +$46,9M, en muchas monedas). El episodio del 12–19 nov sí fue así: corto BTC hasta $25M (+$1,64M)
+contra largo ETH hasta $10M (−$0,20M, reducido). Con datos diarios no se ve lo que hace dentro del día.
