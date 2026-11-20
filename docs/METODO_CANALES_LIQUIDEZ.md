@@ -1437,3 +1437,12 @@ contra largo ETH hasta $10M (−$0,20M, reducido). Con datos diarios no se ve lo
   un pool del mapa (calculado 3 h antes) en las 3 h previas: **COBRA en un pool 10 de 17 (59 %)** frente al 35 % de
   todas las horas → cobra en la liquidez. **AGREGA en un pool solo 3 de 14 (21 %)**: vende en los rebotes antes de
   llegar a los cortos (64,1–64,7k, ~2 % bajo el pool), no en el barrido.
+
+## Calendario de revisiones (acordado con Juan, 20 nov 2026)
+
+Regla: con menos de ~30 casos un porcentaje no es fiable; lo nuevo se mide en papel y se opera con el método de siempre.
+* Cada domingo: revisión rápida con los datos del PC (que todo funcione); sin cambiar reglas salvo algo roto.
+* Domingo 23 nov: primera revisión de la cuenta de papel del semáforo.
+* ~20 dic (4 semanas): avisos 🐋 de posición de la líder y si cobra en los pools.
+* ~febrero 2027 (3 meses): qué entrada usar (esperar el barrido o vender por partes como la líder) y qué avisos se quedan.
+  Medir por fase (bajista, rango, alcista).
