@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Instala la escucha 24/7 en un servidor Linux (Ubuntu/Debian; probado para Oracle Cloud "Always Free").
+# Instala la escucha 24/7 en un servidor Linux (Ubuntu/Debian; pensado para Oracle Cloud "Always Free").
 # Uso (en el servidor):  curl -fsSL https://raw.githubusercontent.com/juanmolinacaro/Blockchain_IOT/claude/onchain-replication-strategy-8naui6/nube/instalar.sh | sudo bash
 # Se puede volver a correr sin problema: no borra la carpeta data.
 set -euo pipefail
