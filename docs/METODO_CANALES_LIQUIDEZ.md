@@ -1548,3 +1548,16 @@ Pedido de Juan. Mapa reproducido como lo calcula la escucha, cada 4 h, BTC y ETH
   datos publicados). Uso que recomiendan: stops fuera de los pools y entradas en torno a las zonas de flujo forzado.
   Su API (Quant Pack, de pago) da historial: hasta 2.000 velas por consulta (~7 días en 5m, 5 años en 1D), lo que
   permitiría medir sus pools con el mismo método que los nuestros.
+
+## La Ruta del Precio (mapa de TradingDifferent), primera medición (26 nov 2026)
+
+Capturas de su perfil en X mandadas por Juan; solo lecturas hechas ANTES del movimiento, BTC y ETH (8–24 nov), 19
+zonas, en `data/lecturas_td.jsonl` (fechas estimadas con el "Nd" de X y el reloj del gráfico: ±algunas horas).
+* Tocadas en 24 h: **26 %** (5 de 19) frente a 12 % de un nivel cualquiera a la misma distancia (17 % con la
+  volatilidad de las últimas 3 semanas, que fue muy alta). En 72 h: 8 de 19.
+* Al tocarlas: 6 de 7 **siguieron de largo** (una dudosa): "combustible, no destino", como dicen ellos.
+* Aciertos: 74.500 (8 nov), 73.328 (9 nov), ETH 1.698 (19 nov), núcleo 57.288 (19 nov → 20 nov), cortos 64.101
+  (22 nov → salto del 23), ETH 1.735, 60.810. Fallos: cortos 77.025/77.043 (9 nov), 65.839/66.697 ("¿65K?", 23 nov),
+  65.908, 62.542, ETH 1.825/1.868 en 72 h; 51.292 y 57.067 (swing) fuera del plazo (57.067 llegó a los 5 días).
+* Muy pocos casos y elegidos de un perfil que publica sobre todo los aciertos: **pista positiva, no prueba**. Seguir
+  anotando cada lectura nueva el mismo día.
