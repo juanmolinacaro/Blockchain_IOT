@@ -33,6 +33,7 @@ PAPER = Path("data/papel.jsonl")
 FEE = 0.0009
 LIMIT_BARS_MS = 6 * 3_600_000
 MAX_HOLD_MS = 48 * 3_600_000
+COOLDOWN_MS = 2 * 3_600_000
 
 
 @dataclass
@@ -243,6 +244,11 @@ def open_signal(items: list[Paper], s: Signal, coin: str, now_ms: int, filtro: b
     """Registra la señal (una por setup, moneda y lado mientras haya otra viva)."""
     if any(p.setup == s.setup and p.coin == coin and p.side == s.side and p.status in ("pendiente", "abierta")
            for p in items):
+        return None
+    # 26 nov: tras un stop, nada del mismo setup, moneda y lado durante 2 h (el 21 nov "barrido + líder" abrió 3 cortos
+    # en 10 minutos en el mismo barrido y los 3 tocaron stop: era una sola idea contada tres veces)
+    if any(p.setup == s.setup and p.coin == coin and p.side == s.side and p.status == "cerrada"
+           and p.exit_reason == "stop" and 0 <= now_ms - p.closed < COOLDOWN_MS for p in items):
         return None
     p = Paper(f"{s.setup}-{coin}-{s.side}-{now_ms}", s.setup, coin, s.side, s.entry, s.stop, now_ms, filtro,
               votos, s.note, status="pendiente" if s.limit else "abierta", opened=0 if s.limit else now_ms)

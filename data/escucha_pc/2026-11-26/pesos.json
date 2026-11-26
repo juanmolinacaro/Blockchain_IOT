@@ -1,0 +1,159 @@
+{
+ "fecha": "2026-11-25 20:00",
+ "horizonte_min": 240,
+ "regimenes": {
+  "todos": {
+   "público": {
+    "peso": 0.12,
+    "acierto": 0.53,
+    "n": 1525
+   },
+   "mayoría": {
+    "peso": 0.48,
+    "acierto": 0.621,
+    "n": 1567
+   },
+   "liquidaciones": {
+    "peso": 0.32,
+    "acierto": 0.581,
+    "n": 234
+   },
+   "interés abierto": {
+    "peso": 0.2,
+    "acierto": 0.55,
+    "n": 371
+   },
+   "tendencia": {
+    "peso": 0.49,
+    "acierto": 0.622,
+    "n": 135
+   },
+   "imán": {
+    "peso": 0.14,
+    "acierto": 0.536,
+    "n": 69
+   },
+   "ballenas": {
+    "peso": 0.12,
+    "acierto": 0.531,
+    "n": 128
+   },
+   "líder": {
+    "peso": 1.0,
+    "acierto": 0.346,
+    "n": 26
+   }
+  },
+  "rango": {
+   "público": {
+    "peso": 0.0,
+    "acierto": 0.485,
+    "n": 99
+   },
+   "mayoría": {
+    "peso": 1.65,
+    "acierto": 0.913,
+    "n": 127
+   },
+   "liquidaciones": {
+    "peso": 1.0,
+    "acierto": 0.5,
+    "n": 2
+   },
+   "interés abierto": {
+    "peso": 1.0,
+    "acierto": 0.889,
+    "n": 27
+   },
+   "tendencia": {
+    "peso": 1.0,
+    "acierto": 1.0,
+    "n": 8
+   },
+   "ballenas": {
+    "peso": 1.0,
+    "acierto": 0.833,
+    "n": 6
+   },
+   "imán": {
+    "peso": 1.0,
+    "acierto": 0.5,
+    "n": 2
+   }
+  },
+  "bajista": {
+   "público": {
+    "peso": 0.03,
+    "acierto": 0.508,
+    "n": 729
+   },
+   "liquidaciones": {
+    "peso": 0.48,
+    "acierto": 0.619,
+    "n": 147
+   },
+   "mayoría": {
+    "peso": 0.52,
+    "acierto": 0.63,
+    "n": 644
+   },
+   "interés abierto": {
+    "peso": 0.0,
+    "acierto": 0.49,
+    "n": 149
+   },
+   "tendencia": {
+    "peso": 0.32,
+    "acierto": 0.58,
+    "n": 81
+   },
+   "ballenas": {
+    "peso": 0.0,
+    "acierto": 0.481,
+    "n": 79
+   },
+   "imán": {
+    "peso": 0.0,
+    "acierto": 0.432,
+    "n": 37
+   },
+   "líder": {
+    "peso": 1.0,
+    "acierto": 0.381,
+    "n": 21
+   }
+  },
+  "alcista": {
+   "mayoría": {
+    "peso": 1.0,
+    "acierto": 1.0,
+    "n": 7
+   },
+   "público": {
+    "peso": 1.0,
+    "acierto": 0.25,
+    "n": 12
+   },
+   "interés abierto": {
+    "peso": 1.0,
+    "acierto": 1.0,
+    "n": 2
+   },
+   "tendencia": {
+    "peso": 1.0,
+    "acierto": 1.0,
+    "n": 7
+   },
+   "ballenas": {
+    "peso": 1.0,
+    "acierto": 1.0,
+    "n": 7
+   },
+   "imán": {
+    "peso": 1.0,
+    "acierto": 1.0,
+    "n": 7
+   }
+  }
+ }
+}

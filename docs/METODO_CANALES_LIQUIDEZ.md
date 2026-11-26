@@ -1496,3 +1496,13 @@ Idea de Juan: "en miedo extremo comprar, en codicia vender (spot)". Índice de a
 * **Semáforo con filtro**: compresión BTC corto mié 18 8:00 → TP2; trampa ETH corto jue 19 7:00 → TP1 y stop en la
   entrada; trampa ETH corto jue 19 10:00 → TP2; trampas BTC y ETH corto mié 25 20:00 abiertas (BTC 60.557, stop 61.705).
   R exactos en `papel.jsonl` (falta el archivo).
+* **Cuenta de papel (12–25 nov, `papel.jsonl`)**: semáforo con filtro 3 cerradas +2,20R (compresión BTC +1,44R; trampa
+  ETH −0,35R y +1,11R), 2 abiertas. Trampas contra la tendencia: 16 cerradas, −9,50R (el filtro las bloqueó). "Líder
+  agrega": 9 cerradas, 6 ganadoras, +0,93R. "Barrido + líder": 7 cerradas, −2,55R (3 cortos en 10 min en el mismo
+  barrido del 21 nov, todos a stop → desde hoy 2 h sin repetir setup/moneda/lado tras un stop). Stops muy cortos
+  (0,1 %) hacen que la comisión se coma la operación (trampa ETH: "stop en la entrada" = −0,35R).
+* **Pesos del PC (25 nov)**: con más datos bajan casi todos; bajista: mayoría 63 % (0,52), liquidaciones 62 % (0,48),
+  tendencia 58 % (0,32), ballenas 48 %, imán 43 %, interés abierto 49 % (0); **líder 35 % (26 casos)**: aún neutro por
+  tener menos de 30, pasará a 0 solo.
+* **Nasdaq (4–25 nov)**: 39 movimientos fuertes, 24 con datos de la bolsa: a la vez 75 %, solo cripto 17 %, la bolsa
+  primero 8 %.

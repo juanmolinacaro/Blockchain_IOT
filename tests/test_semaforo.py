@@ -89,3 +89,13 @@ def test_sweep_wick_keeps_growing():
     sm.record_sweep(sw, ([], [C(center=69_812)]), 70_000, 69_700, 0)
     sm.record_sweep(sw, ([], []), 70_214, 69_900, 5 * 60_000)
     assert sw["short"][1] == 70_214
+
+
+def test_no_reentry_right_after_a_stop():
+    items = []
+    s = sm.Signal("barrido+líder", "", "short", 59_172.0, 59_617.0)
+    p = sm.open_signal(items, s, "BTC", 0, False, {})
+    assert sm.update(p, 59_700, 59_100, 60_000) == "stop"
+    assert sm.open_signal(items, sm.Signal("barrido+líder", "", "short", 59_411.0, 59_730.0), "BTC", 120_000, False, {}) is None
+    assert sm.open_signal(items, sm.Signal("barrido+líder", "", "short", 59_411.0, 59_730.0), "BTC",
+                          60_000 + sm.COOLDOWN_MS + 1, False, {}) is not None
