@@ -1565,3 +1565,6 @@ zonas, en `data/lecturas_td.jsonl` (fechas estimadas con el "Nd" de X y el reloj
   eran de las 11:52 **pm** del 25 nov: con eso el reloj UTC de cada gráfico coincide con el "Nd" de X (se corrigieron 3
   fechas). Total: **23 zonas, tocadas en 24 h 30 % frente a 13 %** de un nivel cualquiera a la misma distancia; al
   tocarlas, 8 de 9 siguieron de largo. Excepción: el video "Estado Bitcoin" (gráfico 8:25, publicado 1:14 pm).
+* +1 lectura (3 nov 12:22: bloque de largos 72.000–76.270, núcleo 74.768): 76.270 tocado a las 8 h (bajó a 75.690 y
+  luego rebotó +6,4 %); 74.768 no. Las demás capturas del 2–5 nov eran de "ayer pasó" (no cuentan) o sin hora.
+  Total: **25 zonas, tocadas en 24 h 32 % frente a 13 %**.
