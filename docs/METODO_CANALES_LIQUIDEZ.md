@@ -1568,3 +1568,6 @@ zonas, en `data/lecturas_td.jsonl` (fechas estimadas con el "Nd" de X y el reloj
 * +1 lectura (3 nov 12:22: bloque de largos 72.000–76.270, núcleo 74.768): 76.270 tocado a las 8 h (bajó a 75.690 y
   luego rebotó +6,4 %); 74.768 no. Las demás capturas del 2–5 nov eran de "ayer pasó" (no cuentan) o sin hora.
   Total: **25 zonas, tocadas en 24 h 32 % frente a 13 %**.
+* Los niveles de **swing** (mapas 1D/4H de 3x–25x) se miden aparte, con plazo de 30 días: 57.067 (15 nov) llegó a los
+  5,4 días; 51.292 (21 nov) y los cortos del mapa diario del 25 nov (liquidez grande desde **80.000**, "lo más gordo"
+  desde **88.000**, según Juan y La Ruta) siguen sin tocar. Corto plazo: 23 zonas, tocadas en 24 h 35 % frente a 15 %.

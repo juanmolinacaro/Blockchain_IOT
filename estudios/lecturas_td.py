@@ -36,6 +36,7 @@ def main() -> None:
           for c in {r["moneda"] for r in rows}}
     tot = hit24 = 0
     base = []
+    swing = []
     for r in rows:
         c = cs[r["moneda"]]
         t0 = int(datetime.strptime(r["fecha"], "%Y-%m-%d %H:%M").replace(tzinfo=COT).timestamp() * 1000)
@@ -45,6 +46,12 @@ def main() -> None:
         for z in r["zonas"]:
             up = z["lado"] == "cortos"
             lvl = z["nivel"]
+            if r.get("plazo") == "swing":                 # niveles de swing (mapas 1D/4H de bajo apalancamiento): 30 días
+                j = next((k for k in range(i, min(len(c), i + 720)) if (c[k].h >= lvl if up else c[k].l <= lvl)), None)
+                swing.append(j is not None)
+                print(f"{r['fecha']} {r['moneda']} {z['lado']:7} {lvl:>9,.0f} ({abs(lvl / r['precio'] - 1):.1%}) [swing]: "
+                      f"{'tocada a los ' + str(round((j - i) / 24, 1)) + ' días' if j is not None else 'sin tocar (' + str(round((len(c) - i) / 24, 1)) + ' días)'}")
+                continue
             j = next((k for k in range(i, min(len(c), i + 72)) if (c[k].h >= lvl if up else c[k].l <= lvl)), None)
             reac = "—"
             if j is not None:
@@ -70,6 +77,8 @@ def main() -> None:
             print(f"{r['fecha']} {r['moneda']} {z['lado']:7} {lvl:>9,.0f} ({d:.1%}): "
                   f"{'tocada a las ' + str(j - i) + ' h' if j is not None else 'no tocada en ' + str(min(72, len(c) - i)) + ' h'} · {reac} · "
                   f"base 24 h {base[-1]:.0%}")
+    if swing:
+        print(f"\nSwing (1D/4H, hasta 30 días): {sum(swing)} de {len(swing)} tocadas")
     if tot:
         print(f"\n{tot} zonas · tocadas en 24 h {hit24 / tot:.0%} · nivel cualquiera a la misma distancia {sum(base) / tot:.0%}")
 
