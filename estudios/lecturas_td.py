@@ -55,6 +55,9 @@ def main() -> None:
                     if b or rb:
                         reac = "dudoso" if b and rb else "sigue" if b else "rebota"
                         break
+            if j is None and i + 24 > len(c):          # todavía no pasan 24 h: no cuenta aún
+                print(f"{r['fecha']} {r['moneda']} {z['lado']:7} {lvl:>9,.0f}: pendiente (menos de 24 h de datos)")
+                continue
             d = abs(lvl / r["precio"] - 1)
             n = h = 0
             for k in range(0, len(c) - 24, 3):
@@ -65,7 +68,7 @@ def main() -> None:
             tot += 1
             hit24 += j is not None and j - i < 24
             print(f"{r['fecha']} {r['moneda']} {z['lado']:7} {lvl:>9,.0f} ({d:.1%}): "
-                  f"{'tocada a las ' + str(j - i) + ' h' if j is not None else 'no tocada en 72 h'} · {reac} · "
+                  f"{'tocada a las ' + str(j - i) + ' h' if j is not None else 'no tocada en ' + str(min(72, len(c) - i)) + ' h'} · {reac} · "
                   f"base 24 h {base[-1]:.0%}")
     if tot:
         print(f"\n{tot} zonas · tocadas en 24 h {hit24 / tot:.0%} · nivel cualquiera a la misma distancia {sum(base) / tot:.0%}")

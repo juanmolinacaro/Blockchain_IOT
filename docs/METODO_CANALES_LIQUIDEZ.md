@@ -1561,3 +1561,6 @@ zonas, en `data/lecturas_td.jsonl` (fechas estimadas con el "Nd" de X y el reloj
   65.908, 62.542, ETH 1.825/1.868 en 72 h; 51.292 y 57.067 (swing) fuera del plazo (57.067 llegó a los 5 días).
 * Muy pocos casos y elegidos de un perfil que publica sobre todo los aciertos: **pista positiva, no prueba**. Seguir
   anotando cada lectura nueva el mismo día.
+* 26 nov: +2 lecturas (ETH 1.533,76 / 1.879,32 del 25 nov; BTC 58.199,9 / 60.672,9 del 25 nov). **Ojo con las horas**:
+  sus gráficos se hacen horas antes de publicar (el "Estado Bitcoin" tiene el gráfico de las 8:25 y salió a la 1:14 pm),
+  así que medir con la hora del gráfico puede inflar sus aciertos. Hace falta la hora exacta de la publicación.
