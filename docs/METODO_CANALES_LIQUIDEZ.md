@@ -1512,3 +1512,17 @@ Idea de Juan: "en miedo extremo comprar, en codicia vender (spot)". Índice de a
   alerta. Las demás sin cambios (0x4e23 −$13,7M, 0x87f9 −$11,5M sola).
 * **Pesos recalculados aquí con `hft_flujo.csv` (iguales a los del PC)**. Cambio: con 15–29 casos, un voto que acierta
   la mitad o menos ya no vota (el líder iba 35 % con 26 casos y seguía con peso 1).
+
+## ¿Funciona el mapa de liquidez 100x? (26 nov 2026, `estudios/mapa_liquidez.py`)
+
+Pedido de Juan. Mapa reproducido como lo calcula la escucha, cada 4 h, BTC y ETH 1H (~208 días): 9.568 pools.
+* **¿Se tocan?** 31 % en 24 h, frente a **32 %** de cualquier nivel a la misma distancia. Por distancia: 0–1 % 71 % (base
+  69 %), 1–2 % 40 % (43 %), 2–3 % 26 % (25 %), 3–5 % 13 % (13 %). **El pool no atrae al precio más que el azar**: que
+  "llegue al nivel marcado" pasa igual con cualquier nivel a esa distancia.
+* **Imán**: el primer pool tocado es el del lado más cargado en 55 % de los momentos (59 % si un lado tiene 1,5× más):
+  ventaja pequeña.
+* **Al tocarlo (4 h, ±0,5 %)**: rebota 40 %, sigue 52 %; un nivel cualquiera: rebota 39 %, sigue 49 %. No es nivel de
+  giro por sí solo; a favor de la tendencia apenas mejor (rebota 42 %).
+* Lectura: el mapa sirve como **referencia** (dónde poner stops fuera, objetivos), no como señal. La ventaja del método
+  está en la tendencia, la mayoría apalancada y la gestión. Ojo: es el mapa **estimado** con velas; las liquidaciones
+  REALES de ballenas no tienen historial y no se pudieron medir.
