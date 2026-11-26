@@ -15,7 +15,7 @@ from pathlib import Path
 
 ZIP_URL = ("https://github.com/juanmolinacaro/Blockchain_IOT/archive/refs/heads/"
            "claude/onchain-replication-strategy-8naui6.zip")
-UPDATABLE = ("copytrading/", "windows/", "requirements.txt", "requirements-escucha.txt")
+UPDATABLE = ("copytrading/", "windows/", "nube/", "requirements.txt", "requirements-escucha.txt")
 SKIP = ("windows/escuchar_hft.bat",)        # el .bat está en uso mientras corre: no se reemplaza aquí
 
 

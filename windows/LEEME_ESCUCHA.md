@@ -4,6 +4,8 @@ Programa pequeño que se queda escuchando todas las operaciones de BTC y ETH en 
 lo que hacen los robots (cazadores y creadores de mercado) y te avisa al celular por ntfy. No usa
 Claude mientras corre.
 
+> **Desde el 26 nov se puede correr en la nube gratis** (sin tener el portátil encendido): ver `nube/LEEME_NUBE.md`.
+
 ## Instalación (una sola vez)
 
 1. **Python**: descárgalo de https://www.python.org/downloads/ e instálalo.
