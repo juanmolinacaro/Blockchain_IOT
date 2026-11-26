@@ -1510,3 +1510,5 @@ Idea de Juan: "en miedo extremo comprar, en codicia vender (spot)". Índice de a
   +$2,7M el 23 (−$9,3M en dos días: agregó cortos en el piso de 55k y el rebote a 61k lo obligó a cerrar); 25 nov
   +$4,8M. Perdió más de la mitad de su pico → salió de la alerta. El Cambista estable (+$9,1M → +$11,7M), único en
   alerta. Las demás sin cambios (0x4e23 −$13,7M, 0x87f9 −$11,5M sola).
+* **Pesos recalculados aquí con `hft_flujo.csv` (iguales a los del PC)**. Cambio: con 15–29 casos, un voto que acierta
+  la mitad o menos ya no vota (el líder iba 35 % con 26 casos y seguía con peso 1).

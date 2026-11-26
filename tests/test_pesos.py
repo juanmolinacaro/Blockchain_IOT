@@ -31,3 +31,10 @@ def test_regime_weights_fall_back_to_all(tmp_path):
     w = load(p)
     assert for_regime(w, "bajista") == {"mayoría": 1.37, "público": 0.2}     # público: pocos casos en bajista
     assert for_regime(w, "alcista") == {"mayoría": 0.75, "público": 0.2}
+
+
+def test_bad_vote_with_few_cases_stops_voting():
+    from copytrading.pesos import weight
+    assert weight(0.35, 26) == 0.0          # va mal con 26 casos: ya no vota
+    assert weight(0.70, 26) == 1.0          # va bien pero pocos casos: neutro
+    assert weight(0.30, 10) == 1.0          # muy pocos casos: neutro

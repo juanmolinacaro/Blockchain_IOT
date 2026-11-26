@@ -42,9 +42,13 @@ def regime(change_72h: float) -> str:
     return "rango"
 
 
+EARLY_N = 15                   # con 15–29 casos, un voto que acierta la mitad o menos ya no vota (26 nov: el líder iba
+                               # 35 % con 26 casos y seguía con peso 1 por no llegar a 30)
+
+
 def weight(acc: float, n: int) -> float:
     if n < MIN_N:
-        return DEFAULT
+        return 0.0 if n >= EARLY_N and acc <= 0.5 else DEFAULT
     return round(max(0.0, min(2.0, (acc - 0.5) / 0.25)), 2)
 
 
@@ -202,5 +206,6 @@ def report(weights: dict) -> list[str]:
     lines = [f"{'voto':18} {'acierto a 4 h':>14} {'casos':>6} {'peso':>5}"]
     for k, v in sorted(weights.items(), key=lambda kv: -kv[1]["peso"]):
         lines.append(f"{k:18} {v['acierto']:14.0%} {v['n']:6} {v['peso']:5.2f}"
-                     + ("  (sin datos suficientes: neutro)" if v["n"] < MIN_N else "  (no vota)" if v["peso"] == 0 else ""))
+                     + ("  (no vota: va mal aunque son pocos casos)" if v["n"] < MIN_N and v["peso"] == 0 else
+                        "  (sin datos suficientes: neutro)" if v["n"] < MIN_N else "  (no vota)" if v["peso"] == 0 else ""))
     return lines
