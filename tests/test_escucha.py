@@ -428,3 +428,18 @@ def test_leader_add_goes_to_paper_with_stop_beyond_pool(monkeypatch, tmp_path):
     assert p.setup == "líder agrega" and p.side == "short" and round(p.stop) == round(62_705 * 1.002) and not p.filtro
     esc.record_leader_add(st, "BTC", "AGREGA largo", 61_800)            # contra la tendencia: no
     assert len(st.paper) == 1
+
+
+def test_leader_excludes_market_makers(monkeypatch):
+    import copytrading.escucha as esc
+    import copytrading.rendimiento as rd
+    from copytrading.rendimiento import Rendimiento
+    rows = [Rendimiento("0xmm", 0, 0, 20e6, 9e6, 0, 14e9, 230e6, 9e6),          # creador: más eficiente este mes
+            Rendimiento("0xpac", 0, 0, 13e6, 3e6, 0, 6e9, 47e6, 7e6)]
+    monkeypatch.setattr(rd, "cohort", lambda *a: (["0xmm", "0xpac"], "2026-11-04"))
+    monkeypatch.setattr(rd, "scan", lambda *a, **k: rows)
+    monkeypatch.setattr(rd, "save", lambda *a, **k: None)
+    monkeypatch.setattr(rd, "last_winners", lambda *a: set())
+    st = esc.State({"0xmm": "creador de mercado", "0xpac": "sin confirmar"})
+    esc.refresh_winners(st)
+    assert st.leader == "0xpac"

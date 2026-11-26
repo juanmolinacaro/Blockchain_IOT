@@ -420,7 +420,10 @@ def refresh_winners(state: State) -> None:
     # 13 nov: las horas en que 0xfc66 empujó ≥ $1M acertaron la dirección a 4 h en 10 de 12 (+0,43 % de media);
     # el resto de cuentas seguidas, ~50 %.
     # 14 nov: además tiene que ganar en todo su historial (una buena racha de una cuenta perdedora no la hace líder).
-    cands = [r for r in rows if r.estudio > 0 and r.historico > 0 and r.volumen_mes >= 1e9 and r.por_10k is not None]
+    # 26 nov: sin creadores de mercado: el 23 nov la líder pasó a 0xecb6 (El Cambista) y sus "agrega/cobra" son
+    # inventario, no dirección; la líder cambiaba cada 6 h entre las dos y los avisos se mezclaban.
+    cands = [r for r in rows if r.estudio > 0 and r.historico > 0 and r.volumen_mes >= 1e9 and r.por_10k is not None
+             and state.kinds.get(r.cuenta, "") != "creador de mercado"]
     if cands:
         state.leader = max(cands, key=lambda r: r.por_10k).cuenta
     try:

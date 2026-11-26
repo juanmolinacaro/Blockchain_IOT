@@ -1482,3 +1482,17 @@ Idea de Juan: "en miedo extremo comprar, en codicia vender (spot)". Índice de a
   demasiado pronto en las subidas. Comprar cada semana (DCA) da ×1,54; cargarlo hacia el miedo, ×1,54–1,57 (igual).
 * Uso: el miedo extremo marca zona de compra para spot por partes (no todo de una), sobre todo cerca del suelo de un
   rango; no marca el piso exacto. Vender por partes en codicia, no todo.
+
+## Revisión 26 nov (datos del PC hasta el 25 nov)
+
+* La escucha estuvo apagada vie 14 16h–dom 16 17h, sáb 22 11h–dom 23 17h y dom 23 22h–mar 25 18h (PC suspendido).
+* **Empuje de la líder ≥ $1M/h**: 13 de 17 a 4 h hasta el 14 nov, **6 de 12 desde el 14** (total 19 de 29, 66 %). Sus
+  compras del 19 eran cierres de corto; el 20 vendió agresivo en el piso (56,3–56,7k).
+* **Avisos de posición (desde el 20 nov)**: El Paciente AGREGA corto → a 4 h a favor 10 de 23; COBRA → el precio siguió
+  bajando en 11 de 17 (no marca el final del tramo). Agregó cortos hasta el piso de 55.170 y luego los cerró en el
+  rebote (60,6–61,4k, 22–23 nov). El 25 nov pasó de −243 a +103 BTC y a las 2 h volvió a corto: cambia de lado seguido.
+* La líder cambió a 0xecb6 (El Cambista, creador de mercado) el 23 nov: sus cambios de posición son inventario.
+  Corregido: la líder ya no puede ser un creador de mercado.
+* **Semáforo con filtro**: compresión BTC corto mié 18 8:00 → TP2; trampa ETH corto jue 19 7:00 → TP1 y stop en la
+  entrada; trampa ETH corto jue 19 10:00 → TP2; trampas BTC y ETH corto mié 25 20:00 abiertas (BTC 60.557, stop 61.705).
+  R exactos en `papel.jsonl` (falta el archivo).
