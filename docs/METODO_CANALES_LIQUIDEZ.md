@@ -1534,3 +1534,7 @@ Pedido de Juan. Mapa reproducido como lo calcula la escucha, cada 4 h, BTC y ETH
   cuentas más grandes, franjas de 0,5 % a ±15 % con ≥ $500k). A medir en un mes.
 * **Lecturas con TradeDifferent**: se anotan en `data/lecturas_td.jsonl` (captura antes del movimiento) y se miden con
   `estudios/lecturas_td.py` frente a un nivel cualquiera a la misma distancia.
+* **Por apalancamiento (`estudios/mapa_por_apalancamiento.py`, idea de Juan: "los de 100x son los que más se
+  liquidan")**: 100x: distancia mediana 1,2 %, tocados en 24 h 49 % (cualquiera a esa distancia 50 %); 50x: 1,9 %, 33 %
+  (34 %); 25x: 3,6 %, 14 % (15 %). Juan tiene razón en que los de 100x se tocan mucho más, pero es porque están más
+  cerca: a la misma distancia ninguno supera al azar, y al tocarlos rebotan igual que cualquier nivel (36–39 %).
