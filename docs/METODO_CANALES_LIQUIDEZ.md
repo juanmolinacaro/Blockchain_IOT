@@ -1506,3 +1506,7 @@ Idea de Juan: "en miedo extremo comprar, en codicia vender (spot)". Índice de a
   tener menos de 30, pasará a 0 solo.
 * **Nasdaq (4–25 nov)**: 39 movimientos fuertes, 24 con datos de la bolsa: a la vez 75 %, solo cripto 17 %, la bolsa
   primero 8 %.
+* **Rendimiento (PC, 60 revisiones hasta el 25 nov)**: El Paciente llegó a +$12,1M en el estudio el 21 nov y bajó a
+  +$2,7M el 23 (−$9,3M en dos días: agregó cortos en el piso de 55k y el rebote a 61k lo obligó a cerrar); 25 nov
+  +$4,8M. Perdió más de la mitad de su pico → salió de la alerta. El Cambista estable (+$9,1M → +$11,7M), único en
+  alerta. Las demás sin cambios (0x4e23 −$13,7M, 0x87f9 −$11,5M sola).
