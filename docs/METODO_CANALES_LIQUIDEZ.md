@@ -1526,3 +1526,11 @@ Pedido de Juan. Mapa reproducido como lo calcula la escucha, cada 4 h, BTC y ETH
 * Lectura: el mapa sirve como **referencia** (dónde poner stops fuera, objetivos), no como señal. La ventaja del método
   está en la tendencia, la mayoría apalancada y la gestión. Ojo: es el mapa **estimado** con velas; las liquidaciones
   REALES de ballenas no tienen historial y no se pudieron medir.
+* **Franjas moradas ("liquidez largos/cortos", `estudios/mapa_morado.py`)**: 19.124 niveles (BTC y ETH 4H, ~830
+  días): tocadas en 3 días 27 % frente a 28 % de un nivel cualquiera; por distancia igual que el azar (0–2 % 69/68,
+  2–4 % 42/43, 4–6 % 27/27, 6–9 % 14/15). **Imán: 58 %** (62 % si un lado tiene 1,5× más). Al tocarla: rebota 36 %,
+  sigue 52 % (nivel cualquiera 36/48). Misma conclusión que la capa lila: referencia, no señal; el imán aporta algo.
+* **Liquidaciones reales de ballenas**: desde el 26 nov la escucha guarda cada hora `data/ballenas_liq.jsonl` (300
+  cuentas más grandes, franjas de 0,5 % a ±15 % con ≥ $500k). A medir en un mes.
+* **Lecturas con TradeDifferent**: se anotan en `data/lecturas_td.jsonl` (captura antes del movimiento) y se miden con
+  `estudios/lecturas_td.py` frente a un nivel cualquiera a la misma distancia.

@@ -321,6 +321,41 @@ def update_paper(state: State, coin: str) -> None:
             pass
 
 
+WHALE_LIQ = Path("data/ballenas_liq.jsonl")
+WHALE_TOP = 300
+
+
+def whale_liq_snapshot(points: list, prices: dict[str, float], range_pct: float = 0.15,
+                       band_pct: float = 0.005, min_usd: float = 500_000) -> dict:
+    """Liquidaciones REALES de las ballenas agrupadas en franjas de 0,5 % a ±15 % del precio: {moneda: [[desde,
+    hasta, largos USD, cortos USD, posiciones], ...]} (solo franjas con ≥ $500k)."""
+    from .liquidity import build_heatmap
+    out = {}
+    for coin, px in prices.items():
+        if not px:
+            continue
+        hm = build_heatmap(points, coin, px, range_pct=range_pct, band_pct=band_pct)
+        out[coin] = [[round(b.low), round(b.high), round(b.long_usd), round(b.short_usd), b.n]
+                     for b in hm.bands if b.total >= min_usd]
+    return out
+
+
+def log_whale_liquidations(state: State, source) -> None:
+    """Cada hora: guarda las liquidaciones reales de las 300 cuentas más grandes cerca del precio (26 nov, pedido de
+    Juan: el mapa estimado no atrae al precio más que el azar; estas sí son posiciones de verdad y no tienen
+    historial, así que se empiezan a guardar para medirlas en un mes)."""
+    from .liquidity import collect_liquidations, wallets_to_scan
+    try:
+        pts = collect_liquidations(source, wallets_to_scan(source, WHALE_TOP))
+        snap = whale_liq_snapshot(pts, {c: state.price.get(c, 0.0) for c in COINS})
+        WHALE_LIQ.parent.mkdir(parents=True, exist_ok=True)
+        with WHALE_LIQ.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"t": int(time.time() * 1000), "hora_col": datetime.now(COT).strftime("%Y-%m-%d %H:%M"),
+                                 "precio": {c: state.price.get(c) for c in COINS}, "franjas": snap}) + "\n")
+    except Exception as exc:
+        log.error("liquidaciones de ballenas: %s", exc)
+
+
 def check_semaforo(state: State, source) -> None:
     """Al cerrar cada hora: busca los setups del semáforo en BTC y ETH, aplica el filtro de confirmación y
     los registra en la cuenta de papel. Solo los que pasan el filtro llegan al móvil."""
@@ -1411,6 +1446,7 @@ async def run(minutes: float | None = None) -> None:
                             spawn(asyncio.to_thread(close_hour, state, hsnap))
                             spawn(asyncio.to_thread(check_breakouts, state, source))
                             spawn(asyncio.to_thread(check_semaforo, state, source))
+                            spawn(asyncio.to_thread(log_whale_liquidations, state, source))
                             for coin in COINS:
                                 check_plans(state, coin, hour_close=True)
                     if time.time() - last_zones > 15 * 60:

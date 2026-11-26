@@ -443,3 +443,15 @@ def test_leader_excludes_market_makers(monkeypatch):
     st = esc.State({"0xmm": "creador de mercado", "0xpac": "sin confirmar"})
     esc.refresh_winners(st)
     assert st.leader == "0xpac"
+
+
+def test_whale_liq_snapshot_groups_real_liquidations():
+    import copytrading.escucha as esc
+    from copytrading.liquidity import LiqPoint
+    pts = [LiqPoint("BTC", True, 56_451, 115), LiqPoint("BTC", True, 56_500, 20), LiqPoint("BTC", False, 72_497, 869),
+           LiqPoint("BTC", True, 30_000, 500), LiqPoint("ETH", True, 1_500, 10)]
+    snap = esc.whale_liq_snapshot(pts, {"BTC": 60_700.0, "ETH": 1_700.0})
+    btc = snap["BTC"]
+    assert any(lo <= 56_451 < hi and longs > 7e6 for lo, hi, longs, shorts, n in btc)
+    assert not any(lo <= 72_497 < hi for lo, hi, *_ in btc)            # fuera de ±15 %
+    assert snap["ETH"] == []                                            # menos de $500k

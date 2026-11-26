@@ -108,6 +108,8 @@ En la carpeta `data`:
 * `nasdaq_minuto.csv`: cada minuto, el futuro del Nasdaq 100 (de Yahoo Finanzas, cada 5 minutos con
   algo de retraso). Sirve para medir si las caídas de BTC vienen de la bolsa o si la noticia es la
   disculpa. Al arrancar debe salir **"Nasdaq datos ✓"**.
+* `ballenas_liq.jsonl` (desde el 26 nov): cada hora, dónde se liquidan de verdad las posiciones de las 300 cuentas
+  más grandes cerca del precio, para medir si el precio va a buscarlas.
 * `hft_cohorte.json`: las 30 cuentas que se estudian este mes (se revisan y descartan cada mes).
 
 Para mirar el CSV sin bloquearlo, **cópialo** (Ctrl+C, Ctrl+V) y abre la copia en Excel. Si abres el
