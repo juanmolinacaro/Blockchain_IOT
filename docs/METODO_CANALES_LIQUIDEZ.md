@@ -1538,3 +1538,13 @@ Pedido de Juan. Mapa reproducido como lo calcula la escucha, cada 4 h, BTC y ETH
   liquidan")**: 100x: distancia mediana 1,2 %, tocados en 24 h 49 % (cualquiera a esa distancia 50 %); 50x: 1,9 %, 33 %
   (34 %); 25x: 3,6 %, 14 % (15 %). Juan tiene razón en que los de 100x se tocan mucho más, pero es porque están más
   cerca: a la misma distancia ninguno supera al azar, y al tocarlos rebotan igual que cualquier nivel (36–39 %).
+* **Cómo calcula TradingDifferent sus pools** (leído en tradingdifferent.com/es, /es/faq y /es/quant, 26 nov): "son
+  algoritmos matemáticos… la información es extraída desde Binance, Bybit y Deribit" (y HyperLiquid en el Quant Pack);
+  "calcula, con diferentes probabilidades, dónde van a ser liquidados o ejecutados los Stop Loss de los traders
+  sobreapalancados". Cada nivel reparte el volumen en 4 niveles de apalancamiento (L1 conservador … L4 scalpers),
+  según el modo (scalping 5m/15m/1h o swing 4h/1D, hasta 100×). Es un modelo **estimado** (los exchanges no publican las
+  posiciones), como el nuestro, con más fuentes y stops incluidos. Dicen: "las zonas brillantes actúan como imanes";
+  "los Pools por sí mismos no garantizan ganancias"; estrategias "con una efectividad promedio mayor al 70 %" (sin
+  datos publicados). Uso que recomiendan: stops fuera de los pools y entradas en torno a las zonas de flujo forzado.
+  Su API (Quant Pack, de pago) da historial: hasta 2.000 velas por consulta (~7 días en 5m, 5 años en 1D), lo que
+  permitiría medir sus pools con el mismo método que los nuestros.
