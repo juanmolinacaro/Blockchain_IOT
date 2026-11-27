@@ -1,0 +1,11 @@
+{"t": 1793890350436, "tipo": "retiro-BTC-compras", "titulo": "🏦 BTC: los creadores de mercado retiran compras", "moneda": "BTC", "precio": 78645.0, "ahora": 0.0, "media": 9031498.320735333, "lado": "compras"}
+{"t": 1793890350799, "tipo": "retiro-BTC-ventas", "titulo": "🏦 BTC: los creadores de mercado retiran ventas", "moneda": "BTC", "precio": 78645.0, "ahora": 0.0, "media": 12600624.686191332, "lado": "ventas"}
+{"t": 1793891522629, "tipo": "retiro-ETH-ventas", "titulo": "🏦 ETH: los creadores de mercado retiran ventas", "moneda": "ETH", "precio": 2279.6, "ahora": 1032592.6800900002, "media": 4466395.894028277, "lado": "ventas"}
+{"t": 1793892780669, "tipo": "retiro-BTC-compras", "titulo": "🏦 BTC: los creadores de mercado retiran compras", "moneda": "BTC", "precio": 76578.0, "ahora": 0.0, "media": 10161238.836703446, "lado": "compras"}
+{"t": 1793892781021, "tipo": "retiro-BTC-ventas", "titulo": "🏦 BTC: los creadores de mercado retiran ventas", "moneda": "BTC", "precio": 76578.0, "ahora": 0.0, "media": 8884971.17044345, "lado": "ventas"}
+{"t": 1793892781896, "tipo": "retiro-ETH-compras", "titulo": "🏦 ETH: los creadores de mercado retiran compras", "moneda": "ETH", "precio": 2279.7, "ahora": 0.0, "media": 2919141.437745517, "lado": "compras"}
+{"t": 1793893862065, "tipo": "retiro-ETH-ventas", "titulo": "🏦 ETH: los creadores de mercado retiran ventas", "moneda": "ETH", "precio": 2255.8, "ahora": 1105996.80613, "media": 3945401.8070031037, "lado": "ventas"}
+{"t": 1793894460881, "tipo": "empuje-BTC-VENDEN", "titulo": "🤖 BTC: los cazadores VENDEN agresivo", "moneda": "BTC", "precio": 76011.0, "flujo_5m": -1053552.3544899991, "z": -3.4567695813440413}
+{"t": 1793894640593, "tipo": "retiro-BTC-compras", "titulo": "🏦 BTC: los creadores de mercado retiran compras", "moneda": "BTC", "precio": 76049.0, "ahora": 0.0, "media": 6027413.125654828, "lado": "compras"}
+{"t": 1793894640949, "tipo": "retiro-BTC-ventas", "titulo": "🏦 BTC: los creadores de mercado retiran ventas", "moneda": "BTC", "precio": 76049.0, "ahora": 0.0, "media": 5152629.311855863, "lado": "ventas"}
+{"t": 1793894641840, "tipo": "retiro-ETH-compras", "titulo": "🏦 ETH: los creadores de mercado retiran compras", "moneda": "ETH", "precio": 2250.3, "ahora": 0.0, "media": 1363091.4126703448, "lado": "compras"}

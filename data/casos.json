@@ -1,0 +1,68 @@
+[
+ {
+  "moneda": "BTC",
+  "fecha": "2026-11-05",
+  "titulo": "trampa alcista en la línea de tendencia con tendencia bajista (lectura de Juan)",
+  "patrones": [
+   "tendencia_bajista",
+   "trampa_alcista"
+  ],
+  "resultado": "rompió la línea a 81.177, volvió dentro y cayó −6 % hasta 76.087 en 2 días; el 5 nov perdió la EMA 200 diaria. El público compró la caída (cuentas largas de 1,38 a 2,37 en Binance)"
+ },
+ {
+  "moneda": "BTC",
+  "fecha": "2026-11-03",
+  "titulo": "barrido del bloque de largos y de la ballena de $40M en 75.800",
+  "patrones": [
+   "tendencia_bajista",
+   "iman_abajo",
+   "trampa_bajista"
+  ],
+  "resultado": "barrió hasta 75.687, la ballena vendió $27M en pérdida y el precio rebotó +7,3 % hasta 81.177 en 14 h (rebote contra tendencia, luego trampa)"
+ },
+ {
+  "moneda": "BTC",
+  "fecha": "2026-11-02",
+  "titulo": "falsa ruptura del máximo del fin de semana en la apertura del CME",
+  "patrones": [
+   "tendencia_bajista",
+   "trampa_alcista"
+  ],
+  "resultado": "rompió 78.238 con cierre apenas fuera, volvió dentro y bajó a 76.342 en 24 h (EMA 200 diaria aguantó)"
+ },
+ {
+  "moneda": "ETH",
+  "fecha": "2026-11-04",
+  "titulo": "movimiento fuerte bajista (anotado solo)",
+  "patrones": [
+   "movimiento_fuerte",
+   "recupero_ema200",
+   "tendencia_bajista"
+  ],
+  "resultado": "cayó 7,7 % en 24 h (de 2.424 a 2.237; extremo 2.205)"
+ },
+ {
+  "moneda": "SOL",
+  "fecha": "2026-11-04",
+  "titulo": "movimiento fuerte bajista (anotado solo)",
+  "patrones": [
+   "tendencia_bajista",
+   "trampa_alcista",
+   "trampa_bajista"
+  ],
+  "resultado": "cayó 6,6 % en 24 h (de 96,0 a 89,0; extremo 88,0)"
+ },
+ {
+  "moneda": "BTC",
+  "fecha": "2026-11-06",
+  "pendiente": true,
+  "titulo": "lectura de Juan: perdió la EMA 200 diaria → va a buscar la EMA semanal/mensual en ~70.000",
+  "patrones": [
+   "tendencia_bajista",
+   "perdio_ema200",
+   "movimiento_fuerte"
+  ],
+  "resultado": "pendiente: cierre diario 5 nov en 76.078 bajo la EMA 200 diaria (~76.770); rango tras la caída 75.189–77.036. Niveles: núcleo del bloque 74.711, liquidación de El Promediador 73.479, EMA 200 semanal 69.187, EMA mensual de Juan 60.172 (TradingView) | 6 nov 10:05: barrió los largos de 75.055 y la parte alta del bloque (mínimo 74.842, a ~130 del núcleo 74.711) con el dato de empleo de EE. UU. (8:30) y la apertura de Nueva York; rebote a 75.840 en 10 min. Fue primero a la liquidez más cercana (~1 %), no a la más grande (cortos ~77.145, ~1,6 %). | dom 8 nov 16:45–16:55 (5 min antes de reabrir el CME y los futuros de la bolsa): barrida de 75.700 a 73.457 en 15 min (núcleo 74.550 y casi la zona de 73.0xx), rebote a 75.500 hacia las 18:15. Sin bolsa abierta: movimiento solo cripto. No tocó la liquidación de El Promediador (71.888).",
+  "lectura_de": "Juan"
+ }
+]

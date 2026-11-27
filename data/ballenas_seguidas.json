@@ -1,0 +1,57 @@
+[
+ {
+  "address": "0xf08193e61aedd3139bcb0c95c773e3c65de9e39e",
+  "alias": "El Promediador",
+  "nota": "Solo seguimiento (no es señal para operar). Solo largos, promedia a la baja (BTC, ETH, HYPE) y vende en pérdidas cuando el margen aprieta. Era la 'ballena de $40M' (BTC ~75.800) y la de $33M (ETH ~2.150): la misma cuenta con margen cruzado. 3 nov 2026: vendió $74,6M de BTC con -$4,4M a 76.489 (01:07) y $27,4M con -$0,5M a 75.852 (22:09).",
+  "desde": "2026-11-04"
+ },
+ {
+  "address": "0xb83de012dba672c76a7dbbbf3e459cb59d7d6e36",
+  "alias": "El Gran Corto",
+  "grupo": "ganadoras a favor de la tendencia (semana 4 nov)",
+  "nota": "Solo seguimiento (no es señal para operar). Cuenta de ~$205M, corta en casi todo el mercado: 1.939 BTC (~$151M), 36.834 ETH (~$88M), SOL, HYPE, ZEC, XRP... Semana al 4 nov: +$11,0M con poco volumen ($0,21B).",
+  "desde": "2026-11-05"
+ },
+ {
+  "address": "0x7fdafde5cfb5465924316eced2d3715494c517d1",
+  "alias": "Bobby",
+  "grupo": "ganadoras a favor de la tendencia (semana 4 nov)",
+  "nota": "Solo seguimiento (no es señal para operar). 'BobbyBigSize' en el ranking. Cuenta ~$46M. Corta en ETH, SOL, HYPE, ZEC y altcoins; largo pequeño en BTC como cobertura. Semana al 4 nov: +$12,0M.",
+  "desde": "2026-11-05"
+ },
+ {
+  "address": "0xb695651daa495f59dd2725c6fe98322d8b51a92d",
+  "alias": "El Francotirador",
+  "grupo": "ganadoras a favor de la tendencia (semana 4 nov)",
+  "nota": "Solo seguimiento (no es señal para operar). Cuenta ~$32M, muy poco volumen ($0,03B): corta 781 BTC (~$62M) y 14.796 ETH (~$38M). Semana al 4 nov: +$5,8M.",
+  "desde": "2026-11-05"
+ },
+ {
+  "address": "0xfc27136e42af1732ddc9ce2605ea9bff1b959d9d",
+  "alias": "El Martillo",
+  "grupo": "ganadoras a favor de la tendencia (semana 4 nov)",
+  "nota": "Solo seguimiento (no es señal para operar). Cuenta ~$40M: corta 893 BTC (~$71M), ETH, SOL, XRP. Semana al 4 nov: +$5,1M.",
+  "desde": "2026-11-05"
+ },
+ {
+  "address": "0xebe126adabe1a8f08d3ce53b45e7cc994ca14070",
+  "alias": "Cuervo",
+  "grupo": "ganadoras a favor de la tendencia (semana 4 nov)",
+  "nota": "Solo seguimiento (no es señal para operar). Cuenta ~$22M: corta 138 BTC (~$12M); también opera petróleo. Semana al 4 nov: +$4,6M.",
+  "desde": "2026-11-05"
+ },
+ {
+  "address": "0xfc667adba8d4837586078f4fdcdc29804337ca06",
+  "alias": "El Paciente",
+  "grupo": "cuenta líder (radar de la cohorte)",
+  "nota": "La mejor de la cohorte: ~$90M, +$49,6M en su historia, ~$37–42 ganados por cada $10.000 movidos. Opera por robot y casi siempre con órdenes en el libro (83 %); cuando empuja agresivo ≥ $1M en una hora acertó la dirección a 4 h en 10 de 12 casos (4–12 nov). Se la sigue: no es señal contraria.",
+  "desde": "2026-11-13"
+ },
+ {
+  "address": "0xecb63caa47c7c4e77f60f1ce858cf28dc2b82b00",
+  "alias": "El Cambista",
+  "grupo": "creador de mercado (radar de la cohorte)",
+  "nota": "Creador de mercado: gana con el diferencial y el volumen ($13.800M en 30 días, +$21M). Cambia de lado a menudo por inventario y coberturas (largo BTC / corto ETH): su posición NO es señal de dirección; sí lo es cuando carga o retira su liquidez.",
+  "desde": "2026-11-13"
+ }
+]

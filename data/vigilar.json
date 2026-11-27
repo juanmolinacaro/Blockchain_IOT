@@ -1,0 +1,20 @@
+{
+ "nota": "Planes que la escucha vigila en tiempo real (la escucha lee este archivo de GitHub cada 15 min). Precios de Hyperliquid.",
+ "planes": [
+  {
+   "plan": "K6",
+   "moneda": "BTC",
+   "lado": "short",
+   "zona": [
+    65900,
+    66800
+   ],
+   "barrido": 66578,
+   "gatillo": 66000,
+   "stop": 67300,
+   "tp1": 64700,
+   "caduca": "2026-11-20 12:00",
+   "nota": "Lectura de Juan (17 nov, palabras suyas): \"mañana puede que haya una falsa ruptura en dirección al alza; para el jueves, con la noticia, liquidar a todos los alcistas\". Plan: si barre los cortos 66.081/66.578 y una vela de 1H cierra de vuelta bajo 66.000 → corto. Stop 67.300 (sobre la mecha y el 67k). TP1 1R 64.700 (mitad y stop a la entrada); resto hacia los largos 63.177 / 62.705. A favor: tendencia bajista, El Paciente corto 279 BTC, El Cambista corto 319 BTC; miércoles–viernes son los días de más movimiento. Caduca el viernes a mediodía (regla del viernes)."
+  }
+ ]
+}

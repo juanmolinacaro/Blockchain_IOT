@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+config.toml
+.env
+estudios/btc_d.json
